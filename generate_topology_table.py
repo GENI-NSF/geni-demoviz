@@ -30,6 +30,7 @@ import sys
 import time
 from gcf.omnilib.util.dossl import _do_ssl
 from gcf.omnilib.frameworks.framework_base import Framework_Base
+from xml.dom.minidom import *
 
 # Program to take a slice and generate a database table with, for each AM,
 # ID  NAME  SIZE LONGITUDE LATITUDE COLOR
@@ -57,6 +58,7 @@ class MAClientFramework(Framework_Base):
         self.fwtype = "MA Ciient"
         self.opts = opts
 
+# Parse options provided by user
 def parseOptions():
     argv = sys.argv[1:]
     parser = optparse.OptionParser()
@@ -98,6 +100,7 @@ def parseOptions():
 
     return opts
 
+# Main class for generating data tables representing state of GENI slice
 class SliceTopologyGenerator:
 
     def __init__(self, opts):
@@ -123,6 +126,9 @@ class SliceTopologyGenerator:
         self._status_by_am = {}
         self._manifest_by_am = {}
 
+        self._unique_agg_urns = []
+        self._unique_agg_urns_with_coordinates = [];
+
         db_url = "postgresql://%s:%s@%s/%s" % (self._dbuser, self._dbpass, 
                                                self._dbhost, self._dbname)
         self._db_engine = create_engine(db_url)
@@ -139,11 +145,13 @@ class SliceTopologyGenerator:
                                            self._key, self._cert,
                                            allow_none=True, verbose=False)
             
+    # Read the aggreate data map JSON file
     def get_agg_map(self):
         agg_map_file = self._agg_map_file
         agg_map_data = open(agg_map_file, 'r').read();
         self._agg_map = json.loads(agg_map_data)
             
+    # Get a slice credential for given user for given slice
     def get_slice_credentials(self):
         client = self.get_client(self._sa_url)
         fcn = eval('client.get_credentials')
@@ -153,6 +161,7 @@ class SliceTopologyGenerator:
                                 fcn,  self._slice_urn, [], {})
         return result['value']
         
+    # Get sliver info for given slice from CH SA
     def get_sliver_info_for_slice(self):
         client = self.get_client(self._sa_url)
         fcn = eval('client.lookup_sliver_info')
@@ -163,6 +172,15 @@ class SliceTopologyGenerator:
                                 self._creds, options)
         self._sliver_info = result['value']
 
+        # Set up unique list of AM urn's
+        for sliver_urn, sliver_details in self._sliver_info.iteritems():
+            agg_urn = sliver_details['SLIVER_INFO_AGGREGATE_URN']
+            if agg_urn not in self._unique_agg_urns:
+                self._unique_agg_urns.append(agg_urn);
+                if self.lookup_coordinates(agg_urn) != None:
+                    self._unique_agg_urns_with_coordinates.append(agg_urn)
+
+    # Get list of all aggreates from CH SR
     def get_aggregate_info(self):
         client = self.get_client(self._sr_url)
         fcn = eval('client.lookup_aggregates')
@@ -171,6 +189,8 @@ class SliceTopologyGenerator:
         (result, msg) = _do_ssl(self._framework, suppress_errors, reason, fcn,  {})
         self._aggregate_info = result['value']
 
+    # Find coordinates (lat/long) for given aggreate
+    # May return None if lat/long not available in AM advertisement
     def lookup_coordinates(self, agg_urn):
         for feature in self._agg_map['features']:
             properties = feature['properties']
@@ -179,18 +199,22 @@ class SliceTopologyGenerator:
                 return geometry['coordinates']
         return None
 
+    # Find the aggregate info for given am_urn
     def get_agg_info_for_urn(self, am_urn):
         for agg_info in self._aggregate_info:
             if agg_info['SERVICE_URN'] == am_urn:
                 return agg_info
         return None
 
+    # Get sliver status for all AM's containing slivers in slice
     def get_all_sliver_status(self):
         for sliver_urn, sliver_details in self._sliver_info.iteritems():
             agg_urn = sliver_details['SLIVER_INFO_AGGREGATE_URN']
             agg_status = self.get_sliver_status(agg_urn)
             self._status_by_am[agg_urn] = agg_status
 
+
+    # Get sliver status for particular AM (V2)
     def get_sliver_status(self, am_urn):
         am_info = self.get_agg_info_for_urn(am_urn)
         am_url = am_info['SERVICE_URL']
@@ -203,12 +227,14 @@ class SliceTopologyGenerator:
         status = result['value']
         return status
 
+    # Get manifest for all AM's containing slivers in slice
     def get_all_manifests(self):
         for sliver_urn, sliver_details in self._sliver_info.iteritems():
             agg_urn = sliver_details['SLIVER_INFO_AGGREGATE_URN']
             agg_manifest = self.get_manifest(agg_urn)
             self._manifest_by_am[agg_urn] = agg_manifest
 
+    # Get manifest for specific AM (V2)
     def get_manifest(self, am_urn):
         am_info = self.get_agg_info_for_urn(am_urn)
         am_url = am_info['SERVICE_URL']
@@ -224,10 +250,13 @@ class SliceTopologyGenerator:
         status = result['value']
         return status
 
+    # Pull status from status cache by AM urn
     def lookup_status(self, am_urn):
         agg_status = self._status_by_am[am_urn]
         return agg_status
 
+    # Turn a status (ready, failed, etc) into a color 
+    # for drawing on the map
     def convert_status_to_color(self, status):
         status_lower = status.lower()
         if (status_lower == 'ready'):
@@ -237,17 +266,84 @@ class SliceTopologyGenerator:
         else:
             return 'gray';
 
+    # Count nnumber of nodes in manifest
+    def get_aggregate_size(self, agg_urn):
+        num_nodes = self._manifest_by_am[agg_urn].count('<node');
+        return num_nodes
+
+    # Generate cross-aggregate links
+    # Two cases: 
+    #    Stitched: Find links on with same client ID on different am's which have 
+    #        one another's component_managers
+    #    SharedVLAN : TBD
+    def generate_links(self):
+        stitched_links = []
+        links_by_am = {}
+        for agg_urn in self._unique_agg_urns_with_coordinates:
+            manifest = self._manifest_by_am[agg_urn]
+            manifest_doc = parseString(manifest)
+            manifest_root = manifest_doc.getElementsByTagName('rspec')[0]
+            am_links = []
+            for child in manifest_root.childNodes:
+                if child.nodeType == Node.ELEMENT_NODE and \
+                        child.nodeName == 'link':
+                    am_links.append(child)
+            links_by_am[agg_urn] = am_links
+
+        # For each am, for each link, get the client ID and list of component_managers
+        # If that component manager has a link of same name and a component_manager of this link
+        # Save this as a stitched link
+        for i in range(len(self._unique_agg_urns_with_coordinates)):
+            agg_urn = self._unique_agg_urns_with_coordinates[i]
+            am_links = links_by_am[agg_urn]
+            for am_link in am_links:
+                client_id = am_link.getAttribute('client_id')
+                component_manager_elts = am_link.getElementsByTagName('component_manager')
+                for cm_elt in component_manager_elts:
+                    cm_name = cm_elt.getAttribute('name')
+                    if cm_name not in links_by_am: continue
+                    if cm_name == agg_urn: continue
+                    # Only look forward in list of aggreates to avoid adding A<=>B and B<=>A
+                    if self._unique_agg_urns_with_coordinates.index(cm_name) < i: continue
+                    cm_link_elts = links_by_am[cm_name]
+                    for cm_link_elt in cm_link_elts:
+                        cm_link_client_id = cm_link_elt.getAttribute('client_id')
+                        if cm_link_client_id != client_id: continue
+                        if self.link_matches(cm_link_elt, cm_name, agg_urn):
+                            stitched_link = {'am1' : agg_urn, 'am2' : cm_name, 'link_id' : client_id }
+                            stitched_links.append(stitched_link)
+
+        import pdb; pdb.set_trace()
+
+        for stitched_link in stitched_links:
+            link_id = stitched_link['link_id']
+            am1_urn = stitched_link['am1']
+            am2_urn = stitched_link['am2']
+            am1_coords = self.lookup_coordinates(am1_urn)
+            am2_coords = self.lookup_coordinates(am2_urn)
+            print "   LINK %s <-> %s (%s) [%.2f, %.2f] [%.2f, %.2f]" % \
+                (am1_urn, am2_urn, link_id, 
+                 float(am1_coords[0]), float(am1_coords[1]), 
+                 float(am2_coords[0]), float(am2_coords[1]))
+
+    # See if a given link has a component_manager with given AM URN
+    def link_matches(self, link_elt, link_agg_urn, search_agg_urn):
+        found = False
+        component_manager_elts = link_elt.getElementsByTagName('component_manager')
+        import pdb; pdb.set_trace()
+        for cm_elt in component_manager_elts:
+            cm_name = cm_elt.getAttribute('name')
+            if cm_name == search_agg_urn:
+                found = True
+                break
+        return found
+
+    # Go through all the gathered data and save information per aggregate:
+    # name, size, lat/long, color
     def update_topology_table(self):
 
         insert_statements = []
-        agg_urns = set();
-        for sliver_urn, sliver_details in self._sliver_info.iteritems():
-            agg_urn = sliver_details['SLIVER_INFO_AGGREGATE_URN']
-
-            # There may be many slivers from a single aggregate: 
-            # Only compute once
-            if agg_urn in agg_urns: continue;
-            agg_urns.add(agg_urn)
+        for agg_urn in self._unique_agg_urns:
 
             agg_info = self.get_agg_info_for_urn(agg_urn)
             agg_url = agg_info['SERVICE_URL']
@@ -256,7 +352,7 @@ class SliceTopologyGenerator:
             sliver_status = self.lookup_status(agg_urn)
             agg_status = sliver_status['geni_status']
             agg_status_color = self.convert_status_to_color(agg_status)
-            agg_size = len(sliver_status['geni_resources'])
+            agg_size = self.get_aggregate_size(agg_urn)
             if agg_coords:
                 longitude = float(agg_coords[0])
                 latitude = float(agg_coords[1])
@@ -295,6 +391,32 @@ class SliceTopologyGenerator:
             raise 
         conn.close()
 
+    # Top level routine for re-reading all data and updating database tables
+    def run(self):
+
+        # Read in the aggregate map data
+        self.get_agg_map()
+
+        # Read in all aggregate info
+        self.get_aggregate_info()
+
+        # Read in sliver info for sliver_urn
+        self.get_sliver_info_for_slice()
+
+        # Read in sliver status for all aggregates for slice
+        self.get_all_sliver_status()
+
+        # Read in manifestsfor all aggregates for slice
+        self.get_all_manifests()
+        
+        # Read the status for each aggregate for which there are slivers
+        # And dump to database
+        self.update_topology_table()
+
+        # Generate cross-aggreate links
+        self.generate_links()
+
+
 
 def main():
     opts = parseOptions()
@@ -305,25 +427,9 @@ def main():
 
         print "%s: Invoking SliceTopologyGenerator for %s" % (time.asctime(), gen._slice_urn)
 
-        # Read in the aggregate map data
-        gen.get_agg_map()
+        gen.run()
 
-        # Read in all aggregate info
-        gen.get_aggregate_info()
-
-        # Read in sliver info for sliver_urn
-        gen.get_sliver_info_for_slice()
-
-        # Read in sliver status for all aggregates for slice
-        gen.get_all_sliver_status()
-
-        # Read in manifestsfor all aggregates for slice
-        gen.get_all_manifests()
-        
-        # Read the status for each aggregate for which there are slivers
-        # And dump to database
-        gen.update_topology_table()
-
+        # If we're not iterating, get out. Otherwise sleep and restart
         if opts.frequency <= 0: break
         time.sleep(float(opts.frequency))
         
