@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+2#!/usr/bin/env python
 #----------------------------------------------------------------------         
 # Copyright (c) 2013-2015 Raytheon BBN Technologies                             
 #                                                                               
@@ -120,7 +120,8 @@ class SliceTopologyGenerator:
         self._agg_map = None
         self._sliver_info = None
         self._aggregate_info = None
-        self._sliver_status = {}
+        self._status_by_am = {}
+        self._manifest_by_am = {}
 
         db_url = "postgresql://%s:%s@%s/%s" % (self._dbuser, self._dbpass, 
                                                self._dbhost, self._dbname)
@@ -188,7 +189,7 @@ class SliceTopologyGenerator:
         for sliver_urn, sliver_details in self._sliver_info.iteritems():
             agg_urn = sliver_details['SLIVER_INFO_AGGREGATE_URN']
             agg_status = self.get_sliver_status(agg_urn)
-            self._sliver_status[agg_urn] = agg_status
+            self._status_by_am[agg_urn] = agg_status
 
     def get_sliver_status(self, am_urn):
         am_info = self.get_agg_info_for_urn(am_urn)
@@ -202,9 +203,39 @@ class SliceTopologyGenerator:
         status = result['value']
         return status
 
+    def get_all_manifests(self):
+        for sliver_urn, sliver_details in self._sliver_info.iteritems():
+            agg_urn = sliver_details['SLIVER_INFO_AGGREGATE_URN']
+            agg_manifest = self.get_manifest(agg_urn)
+            self._manifest_by_am[agg_urn] = agg_manifest
+
+    def get_manifest(self, am_urn):
+        am_info = self.get_agg_info_for_urn(am_urn)
+        am_url = am_info['SERVICE_URL']
+        client = self.get_client(am_url)
+        fcn = eval('client.ListResources')
+        suppress_errors = None
+        reason = "Testing"
+        options = {'geni_slice_urn' : self._slice_urn,
+                   'geni_rspec_version' : {'version' : '3', 'type' : 'GENI'},
+                   'geni_compressed' : False}
+        (result, msg) = _do_ssl(self._framework, suppress_errors, reason, 
+                                fcn,  self._creds, options)
+        status = result['value']
+        return status
+
     def lookup_status(self, am_urn):
-        agg_status = self._sliver_status[am_urn]
+        agg_status = self._status_by_am[am_urn]
         return agg_status
+
+    def convert_status_to_color(self, status):
+        status_lower = status.lower()
+        if (status_lower == 'ready'):
+            return 'green'
+        elif (status_lower == 'failed'):
+            return 'red'
+        else:
+            return 'gray';
 
     def update_topology_table(self):
 
@@ -224,18 +255,20 @@ class SliceTopologyGenerator:
             agg_coords = self.lookup_coordinates(agg_urn)
             sliver_status = self.lookup_status(agg_urn)
             agg_status = sliver_status['geni_status']
+            agg_status_color = self.convert_status_to_color(agg_status)
             agg_size = len(sliver_status['geni_resources'])
             if agg_coords:
                 longitude = float(agg_coords[0])
                 latitude = float(agg_coords[1])
-                print agg_urn, agg_url, agg_name, longitude, latitude, \
-                    agg_status, agg_size
+                print "   %s [%.2f %.2f] %s %d" % \
+                    (agg_name, longitude, latitude, \
+                    agg_status, agg_size)
                 insert_template = "insert into %s (name, size, " + \
                     "longitude, latitude, color) " + \
                 "values ('%s', %d, %.2f, %.2f, '%s')"
                 insert_stmt =  insert_template % \
                     (self._db_table, agg_name, agg_size, \
-                    longitude, latitude, agg_status)
+                    longitude, latitude, agg_status_color)
                 insert_statements.append(insert_stmt)
 
 
@@ -248,7 +281,8 @@ class SliceTopologyGenerator:
         try:
             conn.execute(create_statement);
         except:
-            print "%s already exists" % self._db_table
+#            print "%s already exists" % self._db_table
+            pass
 
         trans = conn.begin() # Open transaction
         try:
@@ -269,7 +303,7 @@ def main():
 
     while(True):
 
-        print "Invoking SliceTopologyGenerator for %s" % gen._slice_urn
+        print "%s: Invoking SliceTopologyGenerator for %s" % (time.asctime(), gen._slice_urn)
 
         # Read in the aggregate map data
         gen.get_agg_map()
@@ -283,12 +317,15 @@ def main():
         # Read in sliver status for all aggregates for slice
         gen.get_all_sliver_status()
 
+        # Read in manifestsfor all aggregates for slice
+        gen.get_all_manifests()
+        
         # Read the status for each aggregate for which there are slivers
         # And dump to database
         gen.update_topology_table()
 
         if opts.frequency <= 0: break
-        time.sleep(opts.frequency)
+        time.sleep(float(opts.frequency))
         
     
 
