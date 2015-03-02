@@ -1,4 +1,4 @@
-2#!/usr/bin/env python
+#!/usr/bin/env python
 #----------------------------------------------------------------------         
 # Copyright (c) 2013-2015 Raytheon BBN Technologies                             
 #                                                                               
@@ -32,13 +32,18 @@ from gcf.omnilib.util.dossl import _do_ssl
 from gcf.omnilib.frameworks.framework_base import Framework_Base
 from xml.dom.minidom import *
 
-# Program to take a slice and generate a database table with, for each AM,
-# ID  NAME  SIZE LONGITUDE LATITUDE COLOR
+# Program to take a slice and generate a two database tables
+#
+# A NODES table with, for each AM, in the slice
+# ID  SITE_ID NAME  ZOOM_LEVEL STATUS
 # where 
+#   SITE_ID is the index into the sites table
 #   NAME is the name of the AM
-#   SIZE is the number of nodes at that AM
-#   LONGITUDE/LATITUDE are the long/lat of the AM
-#   COLOR is the ready status (ready=GREEN, failed=RED, otherwise=GREY)
+#   ZOOM_LEVEL is ***
+#   STATUS is up, down, error, unknown
+#
+# A Links table with, for each link
+# ID, FROM_ID, FROM_IF_NAME, TO_ID, TO_IF_NAME, STATUS, LINK_ID
 
 
 # Essentially we're mixing these sources of data:
@@ -62,8 +67,8 @@ class MAClientFramework(Framework_Base):
 def parseOptions():
     argv = sys.argv[1:]
     parser = optparse.OptionParser()
-    parser.add_option("--agg_map_file", 
-                      help="Location of current.json aggregate data file")
+    parser.add_option("--sites_table", 
+                      help="Table with all known sites")
     parser.add_option("--slice_urn",
                       help="URN of slice for which to build topology")
     parser.add_option("--ch",
@@ -83,8 +88,8 @@ def parseOptions():
 
     required_missing_fields = [];
 
-    if opts.agg_map_file == None:
-        required_missing_fields.append('agg_map_file')
+    if opts.sites_table == None:
+        required_missing_fields.append('sites_table')
     if opts.slice_urn == None:
         required_missing_fields.append('slice_urn')
     if opts.ch == None:
@@ -108,7 +113,9 @@ class SliceTopologyGenerator:
         self._key = opts.key
         self._cert = opts.cert
         self._slice_urn = opts.slice_urn
-        self._agg_map_file = opts.agg_map_file
+
+        self._sites_table = opts.sites_table
+        self._sites_info = {}
 
         self._dbuser = opts.dbuser
         self._dbpass =  opts.dbpass
@@ -127,14 +134,16 @@ class SliceTopologyGenerator:
         self._manifest_by_am = {}
 
         self._unique_agg_urns = []
-        self._unique_agg_urns_with_coordinates = [];
+        self._unique_agg_urns_with_site_info = [];
 
         db_url = "postgresql://%s:%s@%s/%s" % (self._dbuser, self._dbpass, 
                                                self._dbhost, self._dbname)
         self._db_engine = create_engine(db_url)
 
         # Make a unique table name based on project/slice
-        self._db_table = self._slice_urn.split(':')[-1].replace('+slice+', '_')
+        table_base = self._slice_urn.split(':')[-1].replace('+slice+', '_')
+        self._node_table = table_base + "_node"
+        self._link_table = table_base + "_link"
 
         chapi_creds = self.get_slice_credentials()
         sfa_cred = chapi_creds[0]['geni_value']
@@ -145,11 +154,15 @@ class SliceTopologyGenerator:
                                            self._key, self._cert,
                                            allow_none=True, verbose=False)
             
-    # Read the aggreate data map JSON file
-    def get_agg_map(self):
-        agg_map_file = self._agg_map_file
-        agg_map_data = open(agg_map_file, 'r').read();
-        self._agg_map = json.loads(agg_map_data)
+    # Read the aggreate site info
+    def get_site_info(self):
+        select_stmt = "select id, am_urn, am_name, longitude, latitude from %s" % self._sites_table
+        result = self._db_engine.execute(select_stmt)
+        for row in result:
+            am_id = row['id']
+            am_urn = row['am_urn']
+            am_name = row['am_name']
+            self._sites_info[am_urn] = {'id' : am_id, 'name' :  am_name}
             
     # Get a slice credential for given user for given slice
     def get_slice_credentials(self):
@@ -177,8 +190,8 @@ class SliceTopologyGenerator:
             agg_urn = sliver_details['SLIVER_INFO_AGGREGATE_URN']
             if agg_urn not in self._unique_agg_urns:
                 self._unique_agg_urns.append(agg_urn);
-                if self.lookup_coordinates(agg_urn) != None:
-                    self._unique_agg_urns_with_coordinates.append(agg_urn)
+                if agg_urn in self._sites_info:
+                    self._unique_agg_urns_with_site_info.append(agg_urn)
 
     # Get list of all aggreates from CH SR
     def get_aggregate_info(self):
@@ -189,15 +202,6 @@ class SliceTopologyGenerator:
         (result, msg) = _do_ssl(self._framework, suppress_errors, reason, fcn,  {})
         self._aggregate_info = result['value']
 
-    # Find coordinates (lat/long) for given aggreate
-    # May return None if lat/long not available in AM advertisement
-    def lookup_coordinates(self, agg_urn):
-        for feature in self._agg_map['features']:
-            properties = feature['properties']
-            if properties['am_id'] == agg_urn:
-                geometry = feature['geometry']
-                return geometry['coordinates']
-        return None
 
     # Find the aggregate info for given am_urn
     def get_agg_info_for_urn(self, am_urn):
@@ -255,16 +259,28 @@ class SliceTopologyGenerator:
         agg_status = self._status_by_am[am_urn]
         return agg_status
 
-    # Turn a status (ready, failed, etc) into a color 
+    # Turn am status (ready, failed, etc) into 
+    # standard status (up, down, unknown, error)
     # for drawing on the map
-    def convert_status_to_color(self, status):
+    def convert_am_status_to_status(self, status):
         status_lower = status.lower()
         if (status_lower == 'ready'):
-            return 'green'
+            return 'up'
         elif (status_lower == 'failed'):
-            return 'red'
+            return 'error'
         else:
-            return 'gray';
+            return 'unknown';
+
+    def combine_status(self, status1, status2):
+        if status1 == "unknown" or status2 == "unknown":
+            return "unknown"
+        elif status1 == "error" or status2 == "error":
+            return "error"
+        elif status1 == "up" and status2 == "up":
+            return "up"
+        else:
+            return "down"
+
 
     # Count nnumber of nodes in manifest
     def get_aggregate_size(self, agg_urn):
@@ -279,7 +295,7 @@ class SliceTopologyGenerator:
     def generate_links(self):
         stitched_links = []
         links_by_am = {}
-        for agg_urn in self._unique_agg_urns_with_coordinates:
+        for agg_urn in self._unique_agg_urns_with_site_info:
             manifest = self._manifest_by_am[agg_urn]
             manifest_doc = parseString(manifest)
             manifest_root = manifest_doc.getElementsByTagName('rspec')[0]
@@ -293,44 +309,105 @@ class SliceTopologyGenerator:
         # For each am, for each link, get the client ID and list of component_managers
         # If that component manager has a link of same name and a component_manager of this link
         # Save this as a stitched link
-        for i in range(len(self._unique_agg_urns_with_coordinates)):
-            agg_urn = self._unique_agg_urns_with_coordinates[i]
+        for i in range(len(self._unique_agg_urns_with_site_info)):
+            agg_urn = self._unique_agg_urns_with_site_info[i]
             am_links = links_by_am[agg_urn]
             for am_link in am_links:
                 client_id = am_link.getAttribute('client_id')
                 component_manager_elts = am_link.getElementsByTagName('component_manager')
+                interface1 = self.lookup_interface(am_link)
+                am_status1 = self.get_sliver_status_for_client_id(agg_urn, client_id)
+                status1 = self.convert_am_status_to_status(am_status1)
                 for cm_elt in component_manager_elts:
                     cm_name = cm_elt.getAttribute('name')
                     if cm_name not in links_by_am: continue
                     if cm_name == agg_urn: continue
                     # Only look forward in list of aggreates to avoid adding A<=>B and B<=>A
-                    if self._unique_agg_urns_with_coordinates.index(cm_name) < i: continue
+                    if self._unique_agg_urns_with_site_info.index(cm_name) < i: continue
                     cm_link_elts = links_by_am[cm_name]
                     for cm_link_elt in cm_link_elts:
                         cm_link_client_id = cm_link_elt.getAttribute('client_id')
                         if cm_link_client_id != client_id: continue
                         if self.link_matches(cm_link_elt, cm_name, agg_urn):
-                            stitched_link = {'am1' : agg_urn, 'am2' : cm_name, 'link_id' : client_id }
+                            interface2 = self.lookup_interface(cm_link_elt)
+                            am_status2 = self.get_sliver_status_for_client_id(cm_name, client_id)
+                            status2 = self.convert_am_status_to_status(am_status2)
+                            status = self.combine_status(status1, status2)
+                            print "STATUS1 = %s STATUS2 = %s COMBO = %s" % (status1, status2, status)
+                            stitched_link = {'am1' : agg_urn, 'am2' : cm_name, 'link_id' : client_id ,
+                                             'interface1' : interface1, 'interface2' : interface2, 
+                                             'status' : status}
                             stitched_links.append(stitched_link)
 
-        import pdb; pdb.set_trace()
+        conn = self._db_engine.connect()
+        create_template = "create table %s (id serial primary key, " +\
+            "from_id integer, from_if_name varchar, to_id integer, " + \
+            "to_if_name varchar, status varchar, link_id varchar)";
+        create_statement = create_template % self._link_table
+        try:
+            conn.execute(create_statement);
+        except:
+#            print "%s already exists" % self._link_table
+            pass
 
+
+        insert_stmts = []
         for stitched_link in stitched_links:
             link_id = stitched_link['link_id']
             am1_urn = stitched_link['am1']
             am2_urn = stitched_link['am2']
-            am1_coords = self.lookup_coordinates(am1_urn)
-            am2_coords = self.lookup_coordinates(am2_urn)
-            print "   LINK %s <-> %s (%s) [%.2f, %.2f] [%.2f, %.2f]" % \
-                (am1_urn, am2_urn, link_id, 
-                 float(am1_coords[0]), float(am1_coords[1]), 
-                 float(am2_coords[0]), float(am2_coords[1]))
+            am1_info = self._sites_info[am1_urn]
+            am2_info = self._sites_info[am2_urn]
+            am1_site_id = self._sites_info[am1_urn]['id']
+            am2_site_id = self._sites_info[am2_urn]['id']
+            am1_if = stitched_link['interface1']
+            am2_if = stitched_link['interface2']
+            link_status = stitched_link['status']
+            print "   LINK %s <-> %s (%s) %d %d"  % \
+                (am1_urn, am2_urn, link_id, am1_site_id, am2_site_id)
+            insert_template = "insert into %s (from_id, from_if_name, " + \
+                "to_id, to_if_name, status, link_id) values " +\
+                "(%d, '%s', %d, '%s', '%s', '%s')"
+
+            insert_stmt = insert_template % (self._link_table, am1_site_id, am1_if, \
+                                                 am2_site_id, am2_if, link_status, link_id)
+            insert_stmts.append(insert_stmt)
+
+        trans = conn.begin() # Open transaction
+        try:
+            conn.execute("delete from %s" % self._link_table)
+            for insert_stmt in insert_stmts:
+                conn.execute(insert_stmt)
+            trans.commit()
+        except:
+            trans.rollback() # Rollback transaction
+            raise
+
+        conn.close()
+
+    # Find the sliver_status for given am for given client_id
+    def get_sliver_status_for_client_id(self, agg_urn, client_id):
+        status = "unknown"
+        for sliver_status in self._status_by_am[agg_urn]['geni_resources']:
+            if sliver_status['geni_client_id'] == client_id:
+                status = sliver_status['geni_status']
+                break;
+        return status
+
+    # Find the name of the interface on the link that has a sliver associated with it
+    def lookup_interface(self, link_elt):
+        interface_name = ""
+        refs = link_elt.getElementsByTagName('interface_ref')
+        for ref in refs:
+            if ref.hasAttribute('sliver_id'):
+                interface_name = ref.getAttribute('client_id')
+                break
+        return interface_name
 
     # See if a given link has a component_manager with given AM URN
     def link_matches(self, link_elt, link_agg_urn, search_agg_urn):
         found = False
         component_manager_elts = link_elt.getElementsByTagName('component_manager')
-        import pdb; pdb.set_trace()
         for cm_elt in component_manager_elts:
             cm_name = cm_elt.getAttribute('name')
             if cm_name == search_agg_urn:
@@ -339,7 +416,7 @@ class SliceTopologyGenerator:
         return found
 
     # Go through all the gathered data and save information per aggregate:
-    # name, size, lat/long, color
+    # site_id, name, size, status
     def update_topology_table(self):
 
         insert_statements = []
@@ -348,41 +425,36 @@ class SliceTopologyGenerator:
             agg_info = self.get_agg_info_for_urn(agg_urn)
             agg_url = agg_info['SERVICE_URL']
             agg_name = agg_info['SERVICE_NAME']
-            agg_coords = self.lookup_coordinates(agg_urn)
             sliver_status = self.lookup_status(agg_urn)
             agg_status = sliver_status['geni_status']
-            agg_status_color = self.convert_status_to_color(agg_status)
+            status = self.convert_am_status_to_status(agg_status)
             agg_size = self.get_aggregate_size(agg_urn)
-            if agg_coords:
-                longitude = float(agg_coords[0])
-                latitude = float(agg_coords[1])
-                print "   %s [%.2f %.2f] %s %d" % \
-                    (agg_name, longitude, latitude, \
-                    agg_status, agg_size)
-                insert_template = "insert into %s (name, size, " + \
-                    "longitude, latitude, color) " + \
-                "values ('%s', %d, %.2f, %.2f, '%s')"
+            if agg_urn in self._sites_info:
+                site_info = self._sites_info[agg_urn]
+                site_id = site_info['id']
+                print "   %d %s %s %d" % \
+                    (site_id, agg_name, agg_status, agg_size)
+                insert_template = "insert into %s (site_id, name, status) " + \
+                "values (%d, '%s', '%s')"
                 insert_stmt =  insert_template % \
-                    (self._db_table, agg_name, agg_size, \
-                    longitude, latitude, agg_status_color)
+                    (self._node_table, site_id, agg_name, status)
                 insert_statements.append(insert_stmt)
 
 
         # Create a database based on the slice_urn (if not already exists)
         conn = self._db_engine.connect()
         create_template = "create table %s (id serial primary key, " + \
-            "name varchar, size integer, longitude float, latitude float, " + \
-            "color varchar)"
-        create_statement =  create_template % self._db_table
+            "site_id integer, name varchar, zoom_level integer default 0, status varchar)";
+        create_statement =  create_template % self._node_table
         try:
             conn.execute(create_statement);
         except:
-#            print "%s already exists" % self._db_table
+#            print "%s already exists" % self._node_table
             pass
 
         trans = conn.begin() # Open transaction
         try:
-            conn.execute("delete from %s" % self._db_table)
+            conn.execute("delete from %s" % self._node_table)
             for insert_stmt in insert_statements:
                 conn.execute(insert_stmt)
             trans.commit() # Close transaction
@@ -394,8 +466,8 @@ class SliceTopologyGenerator:
     # Top level routine for re-reading all data and updating database tables
     def run(self):
 
-        # Read in the aggregate map data
-        self.get_agg_map()
+        # Read in the aggregate site info
+        self.get_site_info()
 
         # Read in all aggregate info
         self.get_aggregate_info()
