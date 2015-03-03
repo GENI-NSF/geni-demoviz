@@ -81,6 +81,8 @@ def parseOptions():
     parser.add_option("--dbhost", help="host of database", default="localhost")
     parser.add_option("--dbuser", help="Database user", default="oml2")
     parser.add_option("--dbpass", help="Database password", default="0mlisg00d4u")
+    parser.add_option("--dbport", help="Database port", default="5432")
+    parser.add_option("--interface_name", help="Name of physical interface on links", default="eth1")
     parser.add_option("--frequency", help="Refresh frequency (<=0 means no refresh", default=0);
 
 
@@ -121,6 +123,9 @@ class SliceTopologyGenerator:
         self._dbpass =  opts.dbpass
         self._dbhost = opts.dbhost
         self._dbname = opts.dbname
+        self._dbport = opts.dbport
+
+        self._interface_name = opts.interface_name
 
         self._config = {'cert' : opts.cert, 'key' : opts.key}
         self._framework = MAClientFramework(self._config, {})
@@ -136,14 +141,16 @@ class SliceTopologyGenerator:
         self._unique_agg_urns = []
         self._unique_agg_urns_with_site_info = [];
 
-        db_url = "postgresql://%s:%s@%s/%s" % (self._dbuser, self._dbpass, 
-                                               self._dbhost, self._dbname)
+        db_url = "postgresql://%s:%s@%s:%s/%s" % (self._dbuser, self._dbpass, 
+                                               self._dbhost, self._dbport, self._dbname)
         self._db_engine = create_engine(db_url)
 
         # Make a unique table name based on project/slice
         table_base = self._slice_urn.split(':')[-1].replace('+slice+', '_')
         self._node_table = table_base + "_node"
         self._link_table = table_base + "_link"
+
+        self._node_site_id_map = {}
 
         chapi_creds = self.get_slice_credentials()
         sfa_cred = chapi_creds[0]['geni_value']
@@ -282,10 +289,16 @@ class SliceTopologyGenerator:
             return "down"
 
 
-    # Count nnumber of nodes in manifest
-    def get_aggregate_size(self, agg_urn):
-        num_nodes = self._manifest_by_am[agg_urn].count('<node');
-        return num_nodes
+    # Get list of client_id's on nodes manifest
+    def get_aggregate_client_ids(self, agg_urn):
+        manifest = self._manifest_by_am[agg_urn]
+        manifest_doc = parseString(manifest)
+        nodes = manifest_doc.getElementsByTagName('node')
+        client_ids = []
+        for node in nodes:
+            client_id = node.getAttribute('client_id')
+            client_ids.append(client_id)
+        return client_ids
 
     # Generate cross-aggregate links
     # Two cases: 
@@ -359,18 +372,20 @@ class SliceTopologyGenerator:
             am1_info = self._sites_info[am1_urn]
             am2_info = self._sites_info[am2_urn]
             am1_site_id = self._sites_info[am1_urn]['id']
+            am1_node_id = self._node_site_id_map[am1_site_id]
             am2_site_id = self._sites_info[am2_urn]['id']
+            am2_node_id = self._node_site_id_map[am2_site_id]
             am1_if = stitched_link['interface1']
             am2_if = stitched_link['interface2']
             link_status = stitched_link['status']
             print "   LINK %s <-> %s (%s) %d %d"  % \
-                (am1_urn, am2_urn, link_id, am1_site_id, am2_site_id)
+                (am1_urn, am2_urn, link_id, am1_node_id, am2_node_id)
             insert_template = "insert into %s (from_id, from_if_name, " + \
                 "to_id, to_if_name, status, link_id) values " +\
                 "(%d, '%s', %d, '%s', '%s', '%s')"
 
-            insert_stmt = insert_template % (self._link_table, am1_site_id, am1_if, \
-                                                 am2_site_id, am2_if, link_status, link_id)
+            insert_stmt = insert_template % (self._link_table, am1_node_id, am1_if, \
+                                                 am2_node_id, am2_if, link_status, link_id)
             insert_stmts.append(insert_stmt)
 
         trans = conn.begin() # Open transaction
@@ -396,13 +411,14 @@ class SliceTopologyGenerator:
 
     # Find the name of the interface on the link that has a sliver associated with it
     def lookup_interface(self, link_elt):
-        interface_name = ""
-        refs = link_elt.getElementsByTagName('interface_ref')
-        for ref in refs:
-            if ref.hasAttribute('sliver_id'):
-                interface_name = ref.getAttribute('client_id')
-                break
-        return interface_name
+        return self._interface_name
+#        interface_name = ""
+#        refs = link_elt.getElementsByTagName('interface_ref')
+#        for ref in refs:
+#            if ref.hasAttribute('sliver_id'):
+#                interface_name = ref.getAttribute('client_id')
+#                break
+#        return interface_name
 
     # See if a given link has a component_manager with given AM URN
     def link_matches(self, link_elt, link_agg_urn, search_agg_urn):
@@ -417,7 +433,7 @@ class SliceTopologyGenerator:
 
     # Go through all the gathered data and save information per aggregate:
     # site_id, name, size, status
-    def update_topology_table(self):
+    def generate_nodes(self):
 
         insert_statements = []
         for agg_urn in self._unique_agg_urns:
@@ -428,23 +444,24 @@ class SliceTopologyGenerator:
             sliver_status = self.lookup_status(agg_urn)
             agg_status = sliver_status['geni_status']
             status = self.convert_am_status_to_status(agg_status)
-            agg_size = self.get_aggregate_size(agg_urn)
+            client_ids = self.get_aggregate_client_ids(agg_urn)
             if agg_urn in self._sites_info:
                 site_info = self._sites_info[agg_urn]
                 site_id = site_info['id']
-                print "   %d %s %s %d" % \
-                    (site_id, agg_name, agg_status, agg_size)
-                insert_template = "insert into %s (site_id, name, status) " + \
-                "values (%d, '%s', '%s')"
-                insert_stmt =  insert_template % \
-                    (self._node_table, site_id, agg_name, status)
-                insert_statements.append(insert_stmt)
+                for client_id in client_ids:
+                    print "   %d %s %s %s" % \
+                        (site_id, agg_name, client_id, agg_status)
+                    insert_template = "insert into %s (site_id, name, client_id, status) " + \
+                        "values (%d, '%s', '%s', '%s')"
+                    insert_stmt =  insert_template % \
+                        (self._node_table, site_id, agg_name, client_id, status)
+                    insert_statements.append(insert_stmt)
 
 
         # Create a database based on the slice_urn (if not already exists)
         conn = self._db_engine.connect()
         create_template = "create table %s (id serial primary key, " + \
-            "site_id integer, name varchar, zoom_level integer default 0, status varchar)";
+            "site_id integer, name varchar, client_id varchar, zoom_level integer default 0, status varchar)";
         create_statement =  create_template % self._node_table
         try:
             conn.execute(create_statement);
@@ -463,29 +480,47 @@ class SliceTopologyGenerator:
             raise 
         conn.close()
 
+        # Establish connection of node_id (in node table) with site_id (in site table)
+        query_template = "select id, site_id from %s";
+        result = self._db_engine.execute(query_template % self._node_table)
+        for row in result:
+            node_id = row['id']
+            site_id = row['site_id']
+            self._node_site_id_map[site_id] = node_id;
+        
+
     # Top level routine for re-reading all data and updating database tables
     def run(self):
 
+        print "%s: Invoking SliceTopologyGenerator for %s" % (time.asctime(), self._slice_urn)
+
         # Read in the aggregate site info
+        print "%s: Loading site info" % (time.asctime())
         self.get_site_info()
 
         # Read in all aggregate info
+        print "%s: Loading aggregate info for slice %s " % (time.asctime(), self._slice_urn)
         self.get_aggregate_info()
 
         # Read in sliver info for sliver_urn
+        print "%s: Loading sliver info for slice %s " % (time.asctime(), self._slice_urn)
         self.get_sliver_info_for_slice()
 
         # Read in sliver status for all aggregates for slice
+        print "%s: Loading sliver status info for slice %s " % (time.asctime(), self._slice_urn)
         self.get_all_sliver_status()
 
         # Read in manifestsfor all aggregates for slice
+        print "%s: Loading manifest info for slice %s " % (time.asctime(), self._slice_urn)
         self.get_all_manifests()
         
         # Read the status for each aggregate for which there are slivers
         # And dump to database
-        self.update_topology_table()
+        print "%s: Generating nodes table for slice %s" % (time.asctime(), self._slice_urn)
+        self.generate_nodes()
 
         # Generate cross-aggreate links
+        print "%s: Generating links table for slice %s" % (time.asctime(), self._slice_urn)
         self.generate_links()
 
 
@@ -496,8 +531,6 @@ def main():
     gen = SliceTopologyGenerator(opts)
 
     while(True):
-
-        print "%s: Invoking SliceTopologyGenerator for %s" % (time.asctime(), gen._slice_urn)
 
         gen.run()
 
