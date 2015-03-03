@@ -167,3 +167,20 @@ Bringing up LabWiki from server
 There is a table called _senders with all the --oml-id's. We need to make these unique for
 each VM (so we can separate memory/cpu/net from one machine to another.
 
+-----
+
+3-3-2015 TTD:
+
+- Optional table_base [DONE]
+- Optional clear_tables [DONE]
+- Optional make OEDL file
+	 MAP
+	 LINE GRAPHS  FOR ALL SENDERS (_senders)
+	      CPU
+	      MEMORY
+	      NETWORKa
+
+- Loop on status until terminal
+
+
+		

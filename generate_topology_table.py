@@ -82,11 +82,16 @@ def parseOptions():
     parser.add_option("--dbuser", help="Database user", default="oml2")
     parser.add_option("--dbpass", help="Database password", default="0mlisg00d4u")
     parser.add_option("--dbport", help="Database port", default="5432")
+    parser.add_option("--table_base", help="Basename of node and link tables (usually based on slice_urn)", default=None)
+    parser.add_option("--clear_tables", help="Clear output tables before writing to them", action='store_true', dest='clear_tables')
+    parser.add_option("--no_clear_tables", help="Clear output tables before writing to them", action='store_false', dest='clear_tables')
     parser.add_option("--interface_name", help="Name of physical interface on links", default="eth1")
     parser.add_option("--frequency", help="Refresh frequency (<=0 means no refresh", default=0);
 
-
     [opts, args] = parser.parse_args(argv)
+
+    # Default for clear tables (if not explicitly set), set to true
+    if opts.clear_tables == None: opts.clear_tables = True
 
     required_missing_fields = [];
 
@@ -119,6 +124,8 @@ class SliceTopologyGenerator:
         self._sites_table = opts.sites_table
         self._sites_info = {}
 
+        self._clear_tables = opts.clear_tables
+
         self._dbuser = opts.dbuser
         self._dbpass =  opts.dbpass
         self._dbhost = opts.dbhost
@@ -145,8 +152,10 @@ class SliceTopologyGenerator:
                                                self._dbhost, self._dbport, self._dbname)
         self._db_engine = create_engine(db_url)
 
-        # Make a unique table name based on project/slice
-        table_base = self._slice_urn.split(':')[-1].replace('+slice+', '_')
+        # Make a unique table name based on project/slice, unless specified
+        table_base = opts.table_base
+        if table_base == None:
+            table_base = self._slice_urn.split(':')[-1].replace('+slice+', '_')
         self._node_table = table_base + "_node"
         self._link_table = table_base + "_link"
 
@@ -390,7 +399,8 @@ class SliceTopologyGenerator:
 
         trans = conn.begin() # Open transaction
         try:
-            conn.execute("delete from %s" % self._link_table)
+            if self._clear_tables:
+                conn.execute("delete from %s" % self._link_table)
             for insert_stmt in insert_stmts:
                 conn.execute(insert_stmt)
             trans.commit()
@@ -471,7 +481,8 @@ class SliceTopologyGenerator:
 
         trans = conn.begin() # Open transaction
         try:
-            conn.execute("delete from %s" % self._node_table)
+            if self._clear_tables:
+                conn.execute("delete from %s" % self._node_table)
             for insert_stmt in insert_statements:
                 conn.execute(insert_stmt)
             trans.commit() # Close transaction
