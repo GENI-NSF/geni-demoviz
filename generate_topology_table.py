@@ -88,6 +88,8 @@ class SliceTopologyGenerator:
         self._dbname = opts.dbname
         self._dbport = opts.dbport
 
+        self._frequency = float(opts.frequency)
+
         self._interface_name = opts.interface_name
 
         self._config = {'cert' : opts.cert, 'key' : opts.key}
@@ -160,6 +162,18 @@ class SliceTopologyGenerator:
                           action='store_false', dest='clear_tables')
         parser.add_option("--interface_name", help="Name of physical interface on links", 
                           default="eth1")
+        parser.add_option("--cpu", help="Whether to draw CPU charts",
+                          action="store_true", dest="cpu_chart")
+        parser.add_option("--no_cpu", help="Whether to draw CPU charts",
+                          action="store_false", dest="cpu_chart")
+        parser.add_option("--memory", help="Whether to draw MEMORY charts",
+                          action="store_true", dest="memory_chart")
+        parser.add_option("--no_memory", help="Whether to draw MEMORY charts",
+                          action="store_false", dest="memory_chart")
+        parser.add_option("--network", help="Whether to draw NETWORK charts",
+                          action="store_true", dest="network_chart")
+        parser.add_option("--no_network", help="Whether to draw NETWORK charts",
+                          action="store_false", dest="network_chart")
         parser.add_option("--frequency", help="Refresh frequency (<=0 means no refresh", 
                           default=0)
 
@@ -168,6 +182,12 @@ class SliceTopologyGenerator:
     def check_options(self, opts):
         # Default for clear tables (if not explicitly set), set to true
         if opts.clear_tables == None: opts.clear_tables = True
+
+        # If unspecified, generate all chart types
+        import pdb; pdb.set_trace()
+        if opts.cpu_chart == None: opts.cpu_chart = True;
+        if opts.memory_chart == None: opts.memory_chart = True;
+        if opts.network_chart == None: opts.network_chart = True;
 
         required_missing_fields = [];
 
@@ -420,7 +440,7 @@ class SliceTopologyGenerator:
                             node2 = self.lookup_node_for_interface(agg_urn, interface2)
                             status2 = 'unknown'
                             status = self.combine_status(status1, status2)
-                            print "STATUS1 = %s STATUS2 = %s COMBO = %s" % (status1, status2, status)
+#                            print "STATUS1 = %s STATUS2 = %s COMBO = %s" % (status1, status2, status)
                             stitched_link = {'am1' : agg_urn, 'am2' : cm_name, 'link_id' : client_id ,
                                              'node1' : node1, 'node2' : node2, 
                                              'interface1' : interface1, 'interface2' : interface2, 
@@ -611,21 +631,27 @@ class SliceTopologyGenerator:
                                      self._link_table, self._node_table, self._node_table)
         script_file.write(map_script)
 
-        cpu_template = open('cpu.md.template', 'r').read()
-        sender_id = 1;
-        cpu_script = cpu_template % (sender_id)
-        cpu_script = cpu_script.replace('***PERCENT***', '%')
-        script_file.write(cpu_script)
+        sender_id = 1; # *** LOOP OVER THESE
 
-        memory_template = open('memory.md.template', 'r').read()
-        memory_script = memory_template % (sender_id)
-        memory_script = memory_script.replace('***PERCENT***', '%')
-        script_file.write(memory_script)
+        import pdb; pdb.set_trace()
 
-        network_template = open('network.md.template', 'r').read()
-        network_script = network_template % (sender_id)
-        network_script = network_script.replace('***PERCENT***', '%')
-        script_file.write(network_script)
+        if self._opts.cpu_chart:
+            cpu_template = open('cpu.md.template', 'r').read()
+            cpu_script = cpu_template % (sender_id)
+            cpu_script = cpu_script.replace('***PERCENT***', '%')
+            script_file.write(cpu_script)
+
+        if self._opts.memory_chart:
+            memory_template = open('memory.md.template', 'r').read()
+            memory_script = memory_template % (sender_id)
+            memory_script = memory_script.replace('***PERCENT***', '%')
+            script_file.write(memory_script)
+
+        if self._opts.network_chart:
+            network_template = open('network.md.template', 'r').read()
+            network_script = network_template % (sender_id)
+            network_script = network_script.replace('***PERCENT***', '%')
+            script_file.write(network_script)
 
         script_file.close()
 
@@ -659,6 +685,16 @@ class SliceTopologyGenerator:
                 "update %s set status = '%s' where id = %d" % \
                 (self._link_table, link_status, id)
             self._db_engine.execute(link_update_status_statement)
+
+    # Are all statuses in a terminal (failed, ready) state?
+    def all_statuses_terminal(self):
+        all_terminal = True
+        for agg_urn, agg_status in self._status_by_am.iteritems():
+            status = agg_status['geni_status']
+            if status not in ['ready', 'failed']:
+                all_terminal = False
+                break;
+        return all_terminal
 
 
     # Top level routine for re-reading all data and updating database tables
@@ -702,18 +738,23 @@ class SliceTopologyGenerator:
         self.update_links()
 
 
+        # Keep updating links until all aggreates are in terminal state
+        while True:
+            if self._frequency <= 0: 
+                break
+            if self.all_statuses_terminal():
+                break;
+            time.sleep(self._frequency)
+            print "%s: Loading sliver status info for slice %s " % (time.asctime(), self._slice_urn)
+            self.get_all_sliver_status()
+            self.update_nodes()
+            self.update_links()
+
+
 def main():
     gen = SliceTopologyGenerator()
 
-    while(True):
-
-        gen.run()
-
-        # If we're not iterating, get out. Otherwise sleep and restart
-        frequency =float(gen._opts.frequency)
-        if frequency <= 0: break
-        time.sleep(float(frequency))
-
+    gen.run()
 
 if __name__ == "__main__":
     sys.exit(main())
