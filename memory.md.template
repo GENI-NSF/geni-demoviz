@@ -16,7 +16,7 @@ widget:
           100 * c.actual_used / c.total as actual_used,
           100 * c.actual_free / c.total as actual_free
         FROM nmetrics_memory as c, _senders as s 
-        WHERE c.oml_sender_id = s.id
+        WHERE c.oml_sender_id = %d
       offset: -1000
       check_interval: 4
       url: postgres://oml2:0mlisg00d4u@155.99.144.110:5432/gec22
@@ -30,7 +30,7 @@ widget:
     x:
       legend: Time (sec)
     y:
-      legend: "%"
+      legend: "***PERCENT***"
       ticks:
         format: ".1f"
 }}}
