@@ -3,7 +3,7 @@ Memory Activity
 
 {{{
 widget:
-  type: data/ec/line_chart
+  type: data/line_chart3
   caption: Memory Utilization
   data_source:
     schema: [['oml_tuple_id', 'int'], ['sender'], ['ts', 'double'], ['used', 'double'], 

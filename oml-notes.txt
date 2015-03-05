@@ -184,3 +184,21 @@ each VM (so we can separate memory/cpu/net from one machine to another.
 
 
 		
+------
+
+Database is running out of connections. MIght be nmetrics_oml2 or may be Labwiki.
+
+sudo -u postgres psql # Get in as admin
+
+Kill hanging processes
+
+postgres=# select pg_terminate_backend(procpid) from pg_stat_activity where datname='gec22' and usename = 'oml2' and current_query like '%nmetrics%';
+ pg_terminate_backend 
+----------------------
+(0 rows)
+
+postgres=# select pg_terminate_backend(procpid) from pg_stat_activity where datname='gec22' and usename = 'oml2' and current_query = '<IDLE>';
+
+I wonder of paul ruth is not using the "-s N" option on the nmetrics-oml2 command.
+
+
