@@ -72,6 +72,19 @@ class SliceTopologyGenerator:
         opts = self.parse_options()
         self._opts = opts
 
+        self._dbuser = opts.dbuser
+        self._dbpass =  opts.dbpass
+        self._dbhost = opts.dbhost
+        self._dbname = opts.dbname
+        self._dbport = opts.dbport
+
+        db_url = "postgresql://%s:%s@%s:%s/%s" % (self._dbuser, self._dbpass, 
+                                               self._dbhost, self._dbport, self._dbname)
+        self._db_engine = create_engine(db_url)
+
+        # Maintain table mapping sender_id (oml_id) to sender_name
+        self._senders_info_by_id = {}
+        self._senders_info_by_name = {}
         self._ch = opts.ch
         self._key = opts.key
         self._cert = opts.cert
@@ -81,12 +94,6 @@ class SliceTopologyGenerator:
         self._sites_info = {}
 
         self._clear_tables = opts.clear_tables
-
-        self._dbuser = opts.dbuser
-        self._dbpass =  opts.dbpass
-        self._dbhost = opts.dbhost
-        self._dbname = opts.dbname
-        self._dbport = opts.dbport
 
         self._frequency = float(opts.frequency)
 
@@ -106,9 +113,8 @@ class SliceTopologyGenerator:
         self._unique_agg_urns = []
         self._unique_agg_urns_with_site_info = [];
 
-        db_url = "postgresql://%s:%s@%s:%s/%s" % (self._dbuser, self._dbpass, 
-                                               self._dbhost, self._dbport, self._dbname)
-        self._db_engine = create_engine(db_url)
+        self._senders = opts.senders
+        self._selected_senders = []
 
         # Make a unique table name based on project/slice, unless specified
         self._table_base = opts.table_base
@@ -176,6 +182,8 @@ class SliceTopologyGenerator:
                           action="store_false", dest="network_chart")
         parser.add_option("--frequency", help="Refresh frequency (<=0 means no refresh", 
                           default=0)
+        parser.add_option("--sender", help="Name of sender (oml-id) for which to generate charts",
+                          action="append", dest="senders")
 
     # Check that options are legitimate, fill in defaults, check for required
     # Override this method for superclasses
@@ -183,8 +191,10 @@ class SliceTopologyGenerator:
         # Default for clear tables (if not explicitly set), set to true
         if opts.clear_tables == None: opts.clear_tables = True
 
+        # If no senders, set value to empty list
+        if opts.senders == None: opts.senders = []
+
         # If unspecified, generate all chart types
-        import pdb; pdb.set_trace()
         if opts.cpu_chart == None: opts.cpu_chart = True;
         if opts.memory_chart == None: opts.memory_chart = True;
         if opts.network_chart == None: opts.network_chart = True;
@@ -212,6 +222,23 @@ class SliceTopologyGenerator:
         return self._framework.make_client(url, 
                                            self._key, self._cert,
                                            allow_none=True, verbose=False)
+
+    # Read the sender info
+    def get_sender_info(self):
+        senders_query = "select id, name from _senders";
+        result = self._db_engine.execute(senders_query)
+        for row in result:
+            sender_id = int(row['id'])
+            sender_name = str(row['name'])
+            self._senders_info_by_id[sender_id] = sender_name
+            self._senders_info_by_name[sender_name] = sender_id
+
+        # Associate the requested senders with IDs
+        # Look up the senders by ID and keep this list for later chart generation
+        for sender_name in self._senders:
+            sender_id = self._senders_info_by_name[sender_name]
+            self._selected_senders.append(sender_id)
+
             
     # Read the aggreate site info
     def get_site_info(self):
@@ -222,6 +249,8 @@ class SliceTopologyGenerator:
             am_urn = row['am_urn']
             am_name = row['am_name']
             self._sites_info[am_urn] = {'id' : am_id, 'name' :  am_name}
+
+
             
     # Get a slice credential for given user for given slice
     def get_slice_credentials(self):
@@ -631,27 +660,29 @@ class SliceTopologyGenerator:
                                      self._link_table, self._node_table, self._node_table)
         script_file.write(map_script)
 
-        sender_id = 1; # *** LOOP OVER THESE
+        if len(self._selected_senders) > 0:
+            sender_ids = "";
+            for i in range(len(self._selected_senders)):
+                if (i > 0): sender_ids = sender_ids + ", "
+                sender_ids = sender_ids + str(self._selected_senders[i])
 
-        import pdb; pdb.set_trace()
+            if self._opts.cpu_chart:
+                cpu_template = open('cpu.md.template', 'r').read()
+                cpu_script = cpu_template % (sender_ids)
+                cpu_script = cpu_script.replace('***PERCENT***', '%')
+                script_file.write(cpu_script)
+                
+            if self._opts.memory_chart:
+                memory_template = open('memory.md.template', 'r').read()
+                memory_script = memory_template % (sender_ids)
+                memory_script = memory_script.replace('***PERCENT***', '%')
+                script_file.write(memory_script)
 
-        if self._opts.cpu_chart:
-            cpu_template = open('cpu.md.template', 'r').read()
-            cpu_script = cpu_template % (sender_id)
-            cpu_script = cpu_script.replace('***PERCENT***', '%')
-            script_file.write(cpu_script)
-
-        if self._opts.memory_chart:
-            memory_template = open('memory.md.template', 'r').read()
-            memory_script = memory_template % (sender_id)
-            memory_script = memory_script.replace('***PERCENT***', '%')
-            script_file.write(memory_script)
-
-        if self._opts.network_chart:
-            network_template = open('network.md.template', 'r').read()
-            network_script = network_template % (sender_id)
-            network_script = network_script.replace('***PERCENT***', '%')
-            script_file.write(network_script)
+            if self._opts.network_chart:
+                network_template = open('network.md.template', 'r').read()
+                network_script = network_template % (sender_ids)
+                network_script = network_script.replace('***PERCENT***', '%')
+                script_file.write(network_script)
 
         script_file.close()
 
@@ -701,6 +732,9 @@ class SliceTopologyGenerator:
     def run(self):
 
         print "%s: Invoking SliceTopologyGenerator for %s" % (time.asctime(), self._slice_urn)
+
+        # Parse sender info
+        self.get_sender_info()
 
         # Generate aggreagte MD (map and graphs) script file
         print "%s: Generatoring %s.md script file" % (time.asctime(), self._table_base)

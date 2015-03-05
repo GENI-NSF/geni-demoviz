@@ -1,5 +1,4 @@
-
-Network
+Network Activity
 =============
 
 {{{
@@ -15,7 +14,7 @@ widget:
           c.rx_bytes, 
           c.tx_bytes
         FROM nmetrics_network as c, _senders as s 
-        WHERE c.oml_sender_id = %d
+        WHERE c.oml_sender_id in (%s)  and c.oml_sender_id = s.id
       offset: -1000
       check_interval: 4
       url: postgres://oml2:0mlisg00d4u@155.99.144.110:5432/gec22
