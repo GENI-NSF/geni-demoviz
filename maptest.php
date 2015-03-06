@@ -113,6 +113,52 @@ function drawMap(data)
     	 zoom: zoom,
     	 center: new google.maps.LatLng(center_lat, center_lon),
     	 mapTypeId: google.maps.MapTypeId.ROADMAP,
+         styles: [
+           {
+           featureType: "administrative",
+           elementType: "labels",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+           {
+           featureType: "administrative.neighborhood",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+           {
+           featureType: "landscape",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+                      {
+           featureType: "poi",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+                      {
+           featureType: "road",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+                      {
+           featureType: "transit",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+           {
+           featureType: "water",
+           elementType: "labels",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           }
+                  ]
 	 };
 
 	 var map = new google.maps.Map(document.getElementById('map-canvas'), 
