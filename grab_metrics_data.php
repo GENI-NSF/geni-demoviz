@@ -24,7 +24,7 @@
 
 include "db_utils.php";
 
-error_log("GET = " . print_r($_GET, true));
+// error_log("GET = " . print_r($_GET, true));
 
 $senders_clause = "";
 if(array_key_exists('senders', $_GET)) {

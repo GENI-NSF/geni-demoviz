@@ -22,6 +22,22 @@
 // IN THE WORK.                                                                 
 //----------------------------------------------------------------------        
 
+$center_lat = 38;
+$center_lon = -98;
+$zoom = 4;
+
+if(array_key_exists('center', $_GET)) {
+   $center = $_GET['center'];
+   $center_pieces = split(',', $center);
+//   error_log("CENTER = $center");
+//   error_log("CENTER = " . print_r($center_pieces, true));
+   $center_lat=floatval($center_pieces[0]);
+   $center_lon=floatval($center_pieces[1]);
+}
+
+if (array_key_exists('zoom', $_GET)) {
+   $zoom = intval($_GET['zoom']);
+}
 
 ?>
 <!DOCTYPE HTML>
@@ -35,6 +51,11 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 
 <script>
+
+    var center_lat = <?php echo $center_lat; ?>;
+    var center_lon = <?php echo $center_lon; ?>;
+    var zoom = <?php echo $zoom; ?>;
+
 
 	google.maps.event.addDomListener(window, 'load', initialize);
 
@@ -77,8 +98,8 @@ function drawMap(data)
 {
 
 	 var mapOptions = {
-    	 zoom: 4,
-    	 center: new google.maps.LatLng(38, -98),
+    	 zoom: zoom,
+    	 center: new google.maps.LatLng(center_lat, center_lon),
     	 mapTypeId: google.maps.MapTypeId.TERRAIN
 	 };
 

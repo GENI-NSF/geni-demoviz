@@ -85,15 +85,15 @@ $slice_urn = "urn:publicid:IDN+$ch+$project_name+slice+$slice_name";
 
 // Get aggregate info
 $agg_info = get_aggregate_info();
-error_log("AGGS = " . print_r($agg_info, true));
+//error_log("AGGS = " . print_r($agg_info, true));
 
 // Get node info
 $node_info = get_node_info($base_name);
-error_log("NODES = " . print_r($node_info, true));
+//error_log("NODES = " . print_r($node_info, true));
 
 // Get link info
 $link_info = get_link_info($base_name);
-error_log("LINKS = " . print_r($link_info, true));
+//error_log("LINKS = " . print_r($link_info, true));
 
 $data = array('sites' => $agg_info, 
       'nodes' => $node_info, 
