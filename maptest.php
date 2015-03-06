@@ -113,6 +113,12 @@ function drawMap(data)
     	 zoom: zoom,
     	 center: new google.maps.LatLng(center_lat, center_lon),
     	 mapTypeId: google.maps.MapTypeId.ROADMAP,
+         panControl: false,
+         zoomControl: true,
+         mapTypeControl: false,
+         scaleControl: false,
+         streetViewControl: false,
+         overviewMapControl: false,
          styles: [
            {
            featureType: "administrative",
