@@ -80,6 +80,7 @@ class SliceTopologyGenerator:
 
         db_url = "postgresql://%s:%s@%s:%s/%s" % (self._dbuser, self._dbpass, 
                                                self._dbhost, self._dbport, self._dbname)
+        import pdb; pdb.set_trace()
         self._db_engine = create_engine(db_url)
 
         # Maintain table mapping sender_id (oml_id) to sender_name

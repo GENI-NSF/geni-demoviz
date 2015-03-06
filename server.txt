@@ -1,0 +1,23 @@
+Notes on setting up a server
+
+apt-get install apache2 php5 php-pgsql postgresql  oml2-server
+
+For reference, the install steps are exactly as described here: http://mytestbed.net/projects/oml/wiki/Installation
+
+sudo sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/tools:/mytestbed:/stable/xUbuntu_12.04/ /' >> /etc/apt/sources.list.d/oml2.list”
+sudo apt-get update
+sudo apt-get install oml2 postgresql-9.1 postgresql-client-9.1
+sudo vi /etc/postgresql/9.1/main/postgresql.conf   (then enable the line: listen_addresses = ‘*')
+sudo /etc/init.d/postgresql restart
+sudo su postgres
+createuser -U postgres --pwprompt --no-superuser --createdb --no-createrole oml2  (then enter seleted password above)
+exit
+sudo vi /etc/default/oml2-server   (then enable the commented PSQL lines and replace with the user/password as above)
+sudo /etc/init.d/oml2-server restart
+
+Set max_connections to 256, change kernel.shmmem to 1G
+
+Uncomment the following in php.ini by removing the ";"
+
+;extension=php_pgsql.dll
+
