@@ -190,6 +190,23 @@ if (array_key_exists('metrics', $_GET)) {
       }
    }
 
+   // Fill in null entries by interpolating between adjacent points
+   function interpolateRows(rows) {
+     var num_rows = rows.length;
+     var num_cols = rows[0].length;
+     // Skip the first 'ts' column
+     for(var col = 1; col < num_cols; col++) {
+       for(var i = 0; i < num_rows; i++) {
+         if(rows[i][col] == null) {
+	    if (i > 0 && rows[i-1][col] != null)
+	        rows[i][col] = rows[i-1][col];
+	    else if (i < num_rows-1 && rows[i+1][col] != null)
+	        rows[i][col] = rows[i+1][col];
+         }
+       }
+     }
+   }
+
    // Draw the chart by grabbing the data, creating the table
    // adding the columns and then adding the rows
     function drawChart(metric_data)
@@ -211,6 +228,7 @@ if (array_key_exists('metrics', $_GET)) {
             addColumns(data_type, data, unique_sender);
       }
 
+      rows = [];
       for(var i = 0; i < metric_data.length; i++) {
          var metric = metric_data[i];
 	 var ts = parseFloat(metric.ts);
@@ -222,8 +240,10 @@ if (array_key_exists('metrics', $_GET)) {
 	     row.push(null); // Place holders for entries from the appropriate sender
          }
 	 fillRow(data_type, row, metric, sender_index);
-	 data.addRow(row);
+	 rows.push(row);
       }
+      interpolateRows(rows);
+      data.addRows(rows);
 
       var options = {
         chart: {
