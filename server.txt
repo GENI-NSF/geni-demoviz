@@ -21,3 +21,20 @@ Uncomment the following in php.ini by removing the ";"
 
 ;extension=php_pgsql.dll
 
+apt-get install python-sqlalchemy
+install gcf
+sudo apt-get install python-m2crypto python-dateutil \
+                     python-openssl libxmlsec1 xmlsec1 \
+                     libxmlsec1-openssl libxmlsec1-dev
+
+export PYTHONPATH=/users/mbrinn/gcf-2.8/src:$PYTHONPATH
+sudo apt-get install python-psycopg2
+
+create allsites table;
+
+sudo apt-get install php5-pgsql
+
+add to /etc/php5/apache2/php.ini
+extension=php_pgsql.dll
+
+

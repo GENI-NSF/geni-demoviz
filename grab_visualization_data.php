@@ -22,36 +22,7 @@
 // IN THE WORK.                                                                 
 //----------------------------------------------------------------------        
 
-function get_connection()
-{
-    $dbuser = "oml2";
-    $dbpass = "0mlisg00d4u";
-    $dbhost = "155.99.144.110";
-    $dbhost = "localhost";
-    $dbport = "5432";
-    $dbname = "gec22";
-    $dbconn = pg_connect("host=$dbhost user=$dbuser dbname=$dbname password=$dbpass");
-    return $dbconn;
-}
-
-function get_rows_for_query($query)
-{
-    $rows = array();
-    $dbconn = get_connection();
-    $result = pg_query($dbconn, $query);
-    if (!$result) {
-       error_log("Failure on query: $query");
-       error_log("RESULT = " . print_r($result, true));
-       exit;
-    }
-    while($row = pg_fetch_assoc($result)) {
-//      error_log("row = " . print_r($row, true));
-      $rows[] = $row;
-    }
-    pg_close($dbconn);
-    return $rows;
-
-}
+include "db_utils.php";
 
 function get_aggregate_info()
 {
