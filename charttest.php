@@ -30,6 +30,12 @@ if ($data_type != 'network' && $data_type != 'cpu' && $data_type != 'memory') {
    exit;
 }
 
+$senders = "1,2";
+if (array_key_exists('senders', $_GET)) {
+   $senders = $_GET['senders'];
+}
+error_log("SENDERS = " . $senders);
+
 
 ?>
 <!DOCTYPE HTML>
@@ -54,9 +60,10 @@ if ($data_type != 'network' && $data_type != 'cpu' && $data_type != 'memory') {
 <script>
 
     var data_type = "<?php echo $data_type; ?>";
+    var senders = "<?php echo $senders; ?>";
 
     function drawVisualization() {
-      $.getJSON('grab_metrics_data?data_type=' + data_type + '&senders=1,2',
+      $.getJSON('grab_metrics_data?data_type=' + data_type + '&senders=' + senders,
            function(data) { 
           drawChart(data); 
       });
