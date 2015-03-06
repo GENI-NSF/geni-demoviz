@@ -50,7 +50,7 @@ if (array_key_exists('zoom', $_GET)) {
 <head>
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 
@@ -112,7 +112,59 @@ function drawMap(data)
 	 var mapOptions = {
     	 zoom: zoom,
     	 center: new google.maps.LatLng(center_lat, center_lon),
-    	 mapTypeId: google.maps.MapTypeId.TERRAIN
+    	 mapTypeId: google.maps.MapTypeId.ROADMAP,
+         panControl: false,
+         zoomControl: true,
+         mapTypeControl: false,
+         scaleControl: false,
+         streetViewControl: false,
+         overviewMapControl: false,
+         styles: [
+           {
+           featureType: "administrative",
+           elementType: "labels",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+           {
+           featureType: "administrative.neighborhood",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+           {
+           featureType: "landscape",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+                      {
+           featureType: "poi",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+                      {
+           featureType: "road",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+                      {
+           featureType: "transit",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           },
+           {
+           featureType: "water",
+           elementType: "labels",
+           stylers: [
+           { visibility: "off" }
+                     ]
+           }
+                  ]
 	 };
 
 	 var map = new google.maps.Map(document.getElementById('map-canvas'), 
@@ -169,7 +221,10 @@ function drawMap(data)
 </script>
 </head>
 <body style="font-family: Arial;border: 0 none;">
+  <!--
   <div id="map-canvas" style="width: 800px; height: 600px;"></div>
+  -->
+  <div id="map-canvas" style="width: 100vw; height: 100vh;"></div>
 </body>
 </html>
 
