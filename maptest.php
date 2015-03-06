@@ -112,7 +112,7 @@ function drawMap(data)
 	 var mapOptions = {
     	 zoom: zoom,
     	 center: new google.maps.LatLng(center_lat, center_lon),
-    	 mapTypeId: google.maps.MapTypeId.TERRAIN
+    	 mapTypeId: google.maps.MapTypeId.ROADMAP,
 	 };
 
 	 var map = new google.maps.Map(document.getElementById('map-canvas'), 
@@ -169,7 +169,10 @@ function drawMap(data)
 </script>
 </head>
 <body style="font-family: Arial;border: 0 none;">
+  <!--
   <div id="map-canvas" style="width: 800px; height: 600px;"></div>
+  -->
+  <div id="map-canvas" style="width: 100vw; height: 100vh;"></div>
 </body>
 </html>
 
