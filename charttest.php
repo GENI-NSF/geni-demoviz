@@ -34,7 +34,12 @@ $senders = "1,2";
 if (array_key_exists('senders', $_GET)) {
    $senders = $_GET['senders'];
 }
-error_log("SENDERS = " . $senders);
+// error_log("SENDERS = " . $senders);
+
+$selected_metrics = "";
+if (array_key_exists('metrics', $_GET)) {
+   $selected_metrics = $_GET['metrics'];
+}
 
 
 ?>
@@ -61,6 +66,12 @@ error_log("SENDERS = " . $senders);
 
     var data_type = "<?php echo $data_type; ?>";
     var senders = "<?php echo $senders; ?>";
+    var selected_metrics = "<?php echo $selected_metrics; ?>";
+
+    // Is the given metric enabled?
+    function metric_enabled(metric) {
+       return selected_metrics == "" || selected_metrics.indexOf(metric) >= 0;
+    }
 
     function drawVisualization() {
       $.getJSON('grab_metrics_data?data_type=' + data_type + '&senders=' + senders,
@@ -72,49 +83,97 @@ error_log("SENDERS = " . $senders);
     function addColumns(data_type, data, unique_sender)
     {
          if (data_type == 'network') {
-            data.addColumn('number', 'RX-' + unique_sender);
-            data.addColumn('number', 'TX-' + unique_sender);
+	    if (metric_enabled('rx_bytes'))
+               data.addColumn('number', 'RX-' + unique_sender);
+	    if (metric_enabled('tx_bytes'))
+               data.addColumn('number', 'TX-' + unique_sender);
          } else if (data_type == 'cpu') {
-            data.addColumn('number', 'USER-' + unique_sender);
-            data.addColumn('number', 'SYS-' + unique_sender);
-            data.addColumn('number', 'IDLE-' + unique_sender);
+	    if (metric_enabled('user'))
+               data.addColumn('number', 'USER-' + unique_sender);
+	    if (metric_enabled('sys'))
+                data.addColumn('number', 'SYS-' + unique_sender);
+	    if (metric_enabled('idle'))
+                data.addColumn('number', 'IDLE-' + unique_sender);
          } else { // Memory
-            data.addColumn('number', 'USED-' + unique_sender);
-            data.addColumn('number', 'FREE-' + unique_sender);
-            data.addColumn('number', 'ACT_USED-' + unique_sender);
-            data.addColumn('number', 'ACT_FREE-' + unique_sender);
+	    if (metric_enabled('used'))
+                data.addColumn('number', 'USED-' + unique_sender);
+	    if (metric_enabled('free'))
+                data.addColumn('number', 'FREE-' + unique_sender);
+	    if (metric_enabled('actual_used'))
+                data.addColumn('number', 'ACT_USED-' + unique_sender);
+	    if (metric_enabled('actual_free'))
+                data.addColumn('number', 'ACT_FREE-' + unique_sender);
          }
    }
 
    function numDataColumns(data_type) {
-     if(data_type == 'network') return 2;
-     else if (data_type  == 'cpu') return 3;
-     else return 4; // Memory
+     var num_columns = 0;
+     if(data_type == 'network') {
+       if (metric_enabled('rx_bytes')) num_columns = num_columns + 1;
+       if (metric_enabled('tx_bytes')) num_columns = num_columns + 1;
+     } else if (data_type  == 'cpu') {
+       if (metric_enabled('user')) num_columns = num_columns + 1;
+       if (metric_enabled('sys')) num_columns = num_columns + 1;
+       if (metric_enabled('idle')) num_columns = num_columns + 1;
+    } else {
+      // Memory
+       if (metric_enabled('used')) num_columns = num_columns + 1;
+       if (metric_enabled('free')) num_columns = num_columns + 1;
+       if (metric_enabled('actual_used')) num_columns = num_columns + 1;
+       if (metric_enabled('actual_free')) num_columns = num_columns + 1;
+     }
+     return num_columns;
    }
 
    function fillRow(data_type, row, metric, sender_index) {
+     var num_columns = numDataColumns(data_type);
+     var metric_index = 1;
      if (data_type == 'network') {
 	 var rx_bytes = parseFloat(metric.rx_bytes);
 	 var tx_bytes = parseFloat(metric.tx_bytes);
-	 row[2*sender_index+1] = rx_bytes;
-	 row[2*sender_index+2] = rx_bytes;
+         if (metric_enabled('rx_bytes')) {
+	    row[num_columns*sender_index+metric_index] = rx_bytes;
+	    metric_index = metric_index + 1;
+         }
+         if (metric_enabled('tx_bytes')) {
+	    row[num_columns*sender_index+metric_index] = tx_bytes;
+         }
       } else if (data_type == 'cpu') {
          var user = parseFloat(metric.user);
          var sys = parseFloat(metric.sys);
          var idle = parseFloat(metric.idle);
-	 row[3*sender_index+1] = user;
-	 row[3*sender_index+2] = sys;
-	 row[3*sender_index+3] = idle;
+         if (metric_enabled('user')) {
+	    row[num_columns*sender_index+metric_index] = user;
+	    metric_index = metric_index + 1;
+         }
+         if (metric_enabled('sys')) {
+	    row[num_columns*sender_index+metric_index] = sys;
+	    metric_index = metric_index + 1;
+         }
+         if (metric_enabled('sys')) {
+	    row[num_columns*sender_index+metric_index] = idle;
+         }
       } else {
        // Memory
          var used = parseFloat(metric.used);
          var free = parseFloat(metric.free);
          var actual_used = parseFloat(metric.actual_used);
          var actual_free = parseFloat(metric.actual_free);
-	 row[4*sender_index+1] = used;
-	 row[4*sender_index+2] = free;
-	 row[4*sender_index+3] = actual_used;
-	 row[4*sender_index+4] = actual_free;
+         if (metric_enabled('used')) {
+	    row[num_columns*sender_index+metric_index] = used;
+	    metric_index = metric_index + 1;
+         }
+         if (metric_enabled('free')) {
+	    row[num_columns*sender_index+metric_index] = free;
+	    metric_index = metric_index + 1;
+         }
+         if (metric_enabled('actual_used')) {
+	    row[num_columns*sender_index+metric_index] = actual_used;
+	    metric_index = metric_index + 1;
+         }
+         if (metric_enabled('actual_free')) {
+	    row[num_columns*sender_index+metric_index] = actual_free;
+         }
       }
    }
 
