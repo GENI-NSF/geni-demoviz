@@ -22,6 +22,12 @@
 // IN THE WORK.                                                                 
 //----------------------------------------------------------------------        
 
+// Test script to show the plotting of measurements as line charts
+// Read from a database by an AJAX/PHP script invocation
+
+// Parse the $_GET arguments
+// We handle data type, senders, metrics
+
 $data_type = 'network';
 if (array_key_exists('data_type', $_GET))
    $data_type = $_GET['data_type'];
@@ -64,6 +70,7 @@ if (array_key_exists('metrics', $_GET)) {
 
 <script>
 
+    // Copy the PHP variables into JS environment
     var data_type = "<?php echo $data_type; ?>";
     var senders = "<?php echo $senders; ?>";
     var selected_metrics = "<?php echo $selected_metrics; ?>";
@@ -73,13 +80,17 @@ if (array_key_exists('metrics', $_GET)) {
        return selected_metrics == "" || selected_metrics.indexOf(metric) >= 0;
     }
 
+    // This is called once the Google chart stuff is loaded. We then grab the data and
+    // plot the char
     function drawVisualization() {
       $.getJSON('grab_metrics_data?data_type=' + data_type + '&senders=' + senders,
            function(data) { 
+	   // In the return from the $.getJSON call to grab_metrics_data we plot the data
           drawChart(data); 
       });
     };
 
+    // Add columns to the table based on which metrics are selected
     function addColumns(data_type, data, unique_sender)
     {
          if (data_type == 'network') {
@@ -106,6 +117,7 @@ if (array_key_exists('metrics', $_GET)) {
          }
    }
 
+   // How many columns are there for this data type? Depends on which are enabled
    function numDataColumns(data_type) {
      var num_columns = 0;
      if(data_type == 'network') {
@@ -125,6 +137,7 @@ if (array_key_exists('metrics', $_GET)) {
      return num_columns;
    }
 
+   // Fill in row of data for given type based on selected metrics
    function fillRow(data_type, row, metric, sender_index) {
      var num_columns = numDataColumns(data_type);
      var metric_index = 1;
@@ -177,6 +190,8 @@ if (array_key_exists('metrics', $_GET)) {
       }
    }
 
+   // Draw the chart by grabbing the data, creating the table
+   // adding the columns and then adding the rows
     function drawChart(metric_data)
     {
       var unique_senders = {}

@@ -22,6 +22,8 @@
 // IN THE WORK.                                                                 
 //----------------------------------------------------------------------        
 
+// Get a connection to the GEC22 visualizaiton database
+// Probably should read this out of a config file
 function get_connection()
 {
     $dbuser = "oml2";
@@ -34,6 +36,8 @@ function get_connection()
     return $dbconn;
 }
 
+// Grab all rows for a given query and return a list of 
+// associative arrays, one per row
 function get_rows_for_query($query)
 {
     $rows = array();

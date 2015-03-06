@@ -22,6 +22,9 @@
 // IN THE WORK.                                                                 
 //----------------------------------------------------------------------        
 
+// Simple test of Google charts to see if we can get AJAX/getJSON to work
+// with Google charts. Make a table of all the aggregates in 'allsites' table
+
 
 ?>
 <!DOCTYPE HTML>

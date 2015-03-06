@@ -20,7 +20,11 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,           
 // OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS           
 // IN THE WORK.                                                                 
-//----------------------------------------------------------------------        
+//---------------------------------------------------------------------- 
+
+// Make a google map showing the topology nodes, links       
+
+// Default lat/long center and zoom, which can be overriden with URL args
 
 $center_lat = 38;
 $center_lon = -98;
@@ -52,14 +56,17 @@ if (array_key_exists('zoom', $_GET)) {
 
 <script>
 
+    // Copy over the PHP variables to JS
     var center_lat = <?php echo $center_lat; ?>;
     var center_lon = <?php echo $center_lon; ?>;
     var zoom = <?php echo $zoom; ?>;
 
+    
+    // Load google maps and then call 'initialize'
+    google.maps.event.addDomListener(window, 'load', initialize);
 
-	google.maps.event.addDomListener(window, 'load', initialize);
 
-
+// Once google is loaded, grab the topology data and draw the map
 function initialize() {
       $.getJSON('grab_visualization_data.php?base_name=lwtesting_stitchtest',
          function(data) {
@@ -67,6 +74,7 @@ function initialize() {
         });
 }
 
+// Get site info by site_id
 function getSiteById(site_id, data)
 {
 	for(var i = 0; i < data.sites.length; i++) {
@@ -77,12 +85,14 @@ function getSiteById(site_id, data)
 	return null;
 }
 
+// Get coordinates object for given site_id
 function getCoordsForSiteId(site_id, data)
 {
 	var site = getSiteById(site_id, data);
         return new google.maps.LatLng(site.latitude, site.longitude);
 }
 
+// Get coordinates for a given node (from its site id)
 function getCoordsForNodeId(node_id, data)
 {
 	for(var i = 0; i < data.nodes.length; i++) {
@@ -94,6 +104,8 @@ function getCoordsForNodeId(node_id, data)
 	return null;
 }
 
+// Draw the map
+// Add nodes and links
 function drawMap(data)
 {
 

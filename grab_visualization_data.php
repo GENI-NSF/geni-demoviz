@@ -24,12 +24,20 @@
 
 include "db_utils.php";
 
+// Script to return information about a given topology indicated by 
+// a given table name. We look in 
+// allsites: all sites known to exist
+// <basename>_nodes: all nodes of the topology
+// <basename>_links: all links of the topology
+
+// Get information about all sites (aggregates typically)
 function get_aggregate_info()
 {
     $query = "select id, am_name, am_urn, longitude, latitude from allsites";
     return get_rows_for_query($query);
 }
 
+// Get information about nodes in this slice/experiment
 function get_node_info($table_base)
 {
     $table_name = $table_base . "_node";
@@ -37,6 +45,7 @@ function get_node_info($table_base)
     return get_rows_for_query($query);
 }
 
+// Get information about links in this slice/experiment
 function get_link_info($table_base)
 {
     $table_name = $table_base . "_link";
@@ -53,6 +62,7 @@ $slice_name = NULL;
 $project_name = NULL;
 $base_name = NULL;
 
+// We can specify our request by project/slice or base_name
 if(array_key_exists('slice_name', $_GET)) {
   $slice_name = $_GET['slice_name'];
 }
@@ -95,6 +105,8 @@ $node_info = get_node_info($base_name);
 $link_info = get_link_info($base_name);
 //error_log("LINKS = " . print_r($link_info, true));
 
+// Top level code: Get the sites/nodes/links data
+// and return as JSON
 $data = array('sites' => $agg_info, 
       'nodes' => $node_info, 
       'links' => $link_info);

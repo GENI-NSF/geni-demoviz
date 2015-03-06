@@ -24,8 +24,16 @@
 
 include "db_utils.php";
 
+// A script to read metrics data (memory, cpu, network)
+// from the nmetrics_<data_type> tables
+
+// *** TO DO: Make the timespan clause a variable ***
+
 // error_log("GET = " . print_r($_GET, true));
 
+// A sender is a unique identifier of who is sending the data
+// Typically it is one per node
+// So we can select only data for certain senders optionally
 $senders_clause = "";
 if(array_key_exists('senders', $_GET)) {
    $senders = $_GET['senders'];
@@ -38,17 +46,20 @@ if(array_key_exists('data_type', $_GET)) {
   $data_type = $_GET['data_type'];
 }
 
+// Check if this is one of the recognized data types
 if($data_type != 'cpu' && $data_type != 'memory' && $data_type != 'network') {
       error_log("Unrecognized data type: " . $data_type);
       exit;
 }
 
+// Get CPU data from the database
 function get_cpu_data()
 {
    return get_metrics_data('100*c.user/c.total as user, 100*c.sys/c.total as sys, 100*c.idle/c.total as idle', 
    'nmetrics_cpu');
 }
 
+// Get Memory data from the database
 function get_memory_data()
 {
    return get_metrics_data('100*c.used/c.total as used, 100*c.free/c.total as free, ' . 
@@ -56,11 +67,13 @@ function get_memory_data()
    'nmetrics_memory');
 }
 
+// Get network data from the database
 function get_network_data()
 {
    return get_metrics_data('c.rx_bytes, c.tx_bytes', 'nmetrics_network');
 }
 
+// A timespan clause causes us to only get the most recent data (N seconds)
 function get_timespan_clause($tablename)
 {
     global $senders_clause;
@@ -69,6 +82,8 @@ function get_timespan_clause($tablename)
     return "(oml_ts_client + 120) > (select max(oml_ts_client) from $tablename $qualifier)";
 }
 
+// Get all the data for the given query 
+// (which data, fields from which table with which timespan)
 function get_metrics_data($fields, $tablename)
 {
    global $senders_clause;
@@ -82,6 +97,7 @@ function get_metrics_data($fields, $tablename)
 
 $data = array();
 
+// Top level code: grab the right data and return as JSON
 if ($data_type == 'cpu')
    $data= get_cpu_data();
 else if ($data_type == 'memory')
