@@ -255,12 +255,13 @@ if (array_key_exists('metrics', $_GET)) {
       var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
       chart.draw(data, options);
 
+      // Refresh every 5 seconds
+      setTimeout(drawVisualization, 5000);
+
     }
 
     google.load('visualization', '1');
     google.setOnLoadCallback(drawVisualization);
-    // Refresh every 5 seconds
-     setInterval(drawVisualization, 5000);
 
 
 </script>
