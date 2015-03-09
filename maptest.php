@@ -25,12 +25,10 @@
 // Make a google map showing the topology nodes, links       
 
 // Default lat/long center and zoom, which can be overriden with URL args
-// Also base_name
 
 $center_lat = 38;
 $center_lon = -98;
 $zoom = 4;
-$base_name = 'lwtesting_stitch_test';
 
 if(array_key_exists('center', $_GET)) {
    $center = $_GET['center'];
@@ -43,10 +41,6 @@ if(array_key_exists('center', $_GET)) {
 
 if (array_key_exists('zoom', $_GET)) {
    $zoom = intval($_GET['zoom']);
-}
-
-if (array_key_exists('base_name', $_GET)) {
-   $base_name = $_GET['base_name'];
 }
 
 ?>
@@ -66,7 +60,7 @@ if (array_key_exists('base_name', $_GET)) {
     var center_lat = <?php echo $center_lat; ?>;
     var center_lon = <?php echo $center_lon; ?>;
     var zoom = <?php echo $zoom; ?>;
-    var base_name = "<?php echo $base_name; ?>";
+
     
     // Load google maps and then call 'initialize'
     google.maps.event.addDomListener(window, 'load', initialize);
@@ -74,7 +68,7 @@ if (array_key_exists('base_name', $_GET)) {
 
 // Once google is loaded, grab the topology data and draw the map
 function initialize() {
-      $.getJSON('grab_visualization_data.php?base_name=' + base_name,
+      $.getJSON('grab_visualization_data.php?base_name=lwtesting_stitchtest',
          function(data) {
 	    drawMap(data);
         });
