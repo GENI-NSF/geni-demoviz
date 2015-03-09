@@ -48,7 +48,8 @@ if (array_key_exists('data_type1', $_GET))
 if ($data_type1 != 'network' && $data_type1 != 'cpu' && $data_type1 != 'none' &&
     $data_type1 != 'memory' && $data_type1 != 'generic') {
    error_log("Unknown data type1: $data_type1");
-   exit;
+   $data_type1 = 'none';
+     //   exit;
 }
 
 $senders1 = "1,2";
@@ -75,7 +76,8 @@ if (array_key_exists('data_type2', $_GET))
 if ($data_type2 != 'network' && $data_type2 != 'cpu' && $data_type2 != 'none' &&
     $data_type2 != 'memory' && $data_type2 != 'generic') {
    error_log("Unknown data type2: $data_type2");
-   exit;
+   $data_type2 = 'none';
+   //   exit;
 }
 
 $senders2 = "1,2";
@@ -102,7 +104,8 @@ if (array_key_exists('data_type3', $_GET))
 if ($data_type3 != 'network' && $data_type3 != 'cpu' && $data_type3 != 'none' &&
     $data_type3 != 'memory' && $data_type3 != 'generic') {
    error_log("Unknown data type3: $data_type3");
-   exit;
+   $data_type3 = 'none';
+   //   exit;
 }
 
 $senders3 = "1,2";
@@ -129,7 +132,8 @@ if (array_key_exists('data_type4', $_GET))
 if ($data_type4 != 'network' && $data_type4 != 'cpu' && $data_type4 != 'none' &&
     $data_type4 != 'memory' && $data_type4 != 'generic') {
    error_log("Unknown data type4: $data_type4");
-   exit;
+   $data_type4 = 'none';
+   //   exit;
 }
 
 $senders4 = "1,2";
@@ -156,7 +160,8 @@ if (array_key_exists('data_type5', $_GET))
 if ($data_type5 != 'network' && $data_type5 != 'cpu' && $data_type5 != 'none' &&
     $data_type5 != 'memory' && $data_type5 != 'generic') {
    error_log("Unknown data type5: $data_type5");
-   exit;
+   //   exit;
+   $data_type5 = 'none';
 }
 
 $senders5 = "1,2";
@@ -292,12 +297,12 @@ if (array_key_exists('tablename5', $_GET)) {
     </style>
   </head>
   <body>
-    <h1><center>Demo Visualization</center></h1>
+<!--    <h1><center>Demo Visualization</center></h1> -->
     <table height="90%">
       <tr height="30%" align="center">
-	<td colspan="2" rowspan="2" style="text-alight:center">  <div id="map-canvas"></div>
+	<td colspan="2" rowspan="2" style="text-align:center">  <div id="map-canvas"></div>
 	</td>
-	<td width="30%"  style="text-alight:center"> <div id="chart_div_right1">
+	<td width="30%"  style="text-align:center"> <div id="chart_div_right1">
 	<?php
 	error_log("data_type1: $data_type1");
 	if ($data_type1 != 'none') {
@@ -314,7 +319,7 @@ EOF;
 ?>
 	</div></td>
       <tr height="30%" align="center">
-	<td  style="text-alight:center"> <div id="chart_div_right2">
+	<td  style="text-align:center"> <div id="chart_div_right2">
 	<?php
 	if ($data_type2 != 'none') {
 	  print <<< EOF
@@ -330,7 +335,7 @@ EOF;
 ?>
 	</div></td>
       <tr height="30%">
-	<td  style="text-alight:center"> <div id="chart_div_bottom3">
+	<td  style="text-align:center"> <div id="chart_div_bottom3">
 	<?php
 	if ($data_type3 != 'none') {
 	  print <<< EOF
@@ -341,11 +346,11 @@ EOF;
 	</script>
 EOF;
 	} else {
-	  echo "&nbsp;";
+	  echo "<table style='height:100%; width:100%;border:none;'><tr><td>&nbsp;</td></tr></table>";
 	}
 ?>
        </div></td>
-	<td  style="text-alight:center"> <div id="chart_div_bottom4">
+	<td  style="text-align:center"> <div id="chart_div_bottom4">
 	<?php
 	if ($data_type4 != 'none') {
 	  print <<< EOF
@@ -360,7 +365,7 @@ EOF;
 	}
 ?>
 </div></td>
-	<td  style="text-alight:center"> <div id="chart_div_bottom5">
+	<td  style="text-align:center"> <div id="chart_div_bottom5">
 	<?php
 	if ($data_type5 != 'none') {
 	  print <<< EOF
