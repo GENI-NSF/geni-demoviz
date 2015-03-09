@@ -13,6 +13,7 @@ function initialize() {
     // Let the map show up, then paint the experiment data
     // momentarily (200 millis).
     setTimeout(makeGrabFunction(map, base_name), 200);
+    setInterval(makeGrabFunction(map, base_name), 10 * 1000);
 }
 
 function makeGrabFunction(map, base_name) {
@@ -122,6 +123,22 @@ function initMap(zoom, center_lat, center_lon)
 }
 
 function displayData(map, data) {
+    map.geniMarkers || (map.geniMarkers = []);
+    map.geniPaths || (map.geniPaths = []);
+    var i;
+    var deleted = false;
+
+    // Remove all previous markers and paths from map
+    $.each(map.geniMarkers, function(i, marker) { marker.setMap(null);
+                                                  deleted = true; });
+    map.geniMarkers = [];
+    $.each(map.geniPaths, function(i, path) { path.setMap(null);
+                                              deleted = true; });
+    map.geniPaths = [];
+
+    // Temporary for testing
+    if (deleted) { return; }
+
     // Draw Nodes, with radius proportional to number of nodes at site
     var site_counts = {};
     for(var i = 0; i < data.nodes.length; i++) {
@@ -147,7 +164,7 @@ function displayData(map, data) {
             radius: site_radius
         };
         //circle = new google.maps.Circle(siteOptions);
-        new google.maps.Marker({
+        var marker = new google.maps.Marker({
             position: site_coords,
             icon: {
                 path: google.maps.SymbolPath.CIRCLE,
@@ -156,6 +173,7 @@ function displayData(map, data) {
             },
             map: map
         });
+        map.geniMarkers.push(marker);
     }
 
     // Draw links 
@@ -175,5 +193,6 @@ function displayData(map, data) {
             strokeWeight : 2
         });
         path.setMap(map);
+        map.geniPaths.push(path);
     }
 }
