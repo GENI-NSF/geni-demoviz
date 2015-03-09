@@ -108,13 +108,10 @@ if (array_key_exists('tablename', $_GET)) {
 	       var num_senders = split_senders.length;
 	       var split_metrics = selected_metrics.split(',');
 	       var num_metrics = split_metrics.length;
-	       for(var i = 0; i < num_senders; i++) {
-	          sender = split_senders[i];
-		  for(var j = 0; j < num_metrics; j++) {
-		    var metric = split_metrics[j];
-		    data.addColumn('number', metric + "-" + sender);
-		  }
-               }
+	       for(var j = 0; j < num_metrics; j++) {
+	       	    var metric = split_metrics[j];
+		    data.addColumn('number', metric + "-" + unique_sender);
+	        }
          } else if (data_type == 'network') {
 	    if (metric_enabled('rx_bytes'))
                data.addColumn('number', 'RX-' + unique_sender);
