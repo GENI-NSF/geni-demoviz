@@ -4,9 +4,14 @@ google.maps.event.addDomListener(window, 'load', initialize);
 
 // Once google is loaded, grab the topology data and draw the map
 function initialize() {
-    $.getJSON('grab_visualization_data.php?base_name=lwtesting_stitchtest',
+    var url_params = getURLParameters();
+    var base_name = url_params.base_name || 'lwtesting_stitchtest';
+    var center_lat = Number(url_params.lat) || 38.0;
+    var center_lon = Number(url_params.lon) || -98.0;
+    var zoom = Number(url_params.zoom) || 4;
+    $.getJSON('grab_visualization_data.php?base_name=' + base_name,
               function(data) {
-                  drawMap(data);
+                  drawMap(data, zoom, center_lat, center_lon);
               });
 }
 
@@ -42,9 +47,8 @@ function getCoordsForNodeId(node_id, data)
 
 // Draw the map
 // Add nodes and links
-function drawMap(data)
+function drawMap(data, zoom, center_lat, center_lon)
 {
-
     var mapOptions = {
         zoom: zoom,
         center: new google.maps.LatLng(center_lat, center_lon),

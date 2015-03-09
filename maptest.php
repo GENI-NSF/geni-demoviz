@@ -54,17 +54,8 @@ if (array_key_exists('zoom', $_GET)) {
 <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+<script src="util.js"></script>
 <script src="map.js"></script>
-
-<script>
-
-    // Copy over the PHP variables to JS
-    var center_lat = <?php echo $center_lat; ?>;
-    var center_lon = <?php echo $center_lon; ?>;
-    var zoom = <?php echo $zoom; ?>;
-
-    
-</script>
 </head>
 <body>
   <div id="map-canvas"></div>
