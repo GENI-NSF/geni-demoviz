@@ -7,10 +7,10 @@ body {
 */
 
 /* Make the map canvas the size of the browser window */
-#map-canvas {
+/* #map-canvas {
     width: 100vw;
     height: 100vh;
-}
+} */
 
 /*
 #map-canvas {
