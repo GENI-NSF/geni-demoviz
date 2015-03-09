@@ -1,0 +1,83 @@
+insert into allsites (am_urn, am_name, longitude, latitude)
+       values ('', 'EMBL-European Biometrics Institude', 0.186, 52.08); -- 317
+insert into allsites (am_urn, am_name, longitude, latitude)
+       values ('', 'CANARIE', -75.69, 45.42); -- 318
+insert into allsites (am_urn, am_name, longitude, latitude)
+       values('', 'NIH', -77.10, 39.00); -- 319
+insert into allsites (am_urn, am_name, longitude, latitude)
+       values('', 'U. Chicago', -87.72, 41.71); -- 320
+insert into allsites (am_urn, am_name, longitude, latitude)
+       values('', 'StarLight', -87.61, 41.895); -- 321
+insert into allsites (am_urn, am_name, longitude, latitude)
+       values('', 'StarLight SDX', -87.61, 41.895); -- 322
+
+create table starlight_node (like lwtesting_stitchtest_node including defaults);
+create table starlight_link (like lwtesting_stitchtest_link including defaults);
+
+insert into starlight_node(site_id, name, client_id, zoom_level, status)
+    values (317, 'EMBL', 'node-embl', 0, 'up'); -- 7
+insert into starlight_node(site_id, name, client_id, zoom_level, status)
+    values (318, 'CANARIE', 'node-canarie', 0, 'up'); -- 8
+insert into starlight_node(site_id, name, client_id, zoom_level, status)
+    values (319, 'NIH', 'node-nih', 0, 'up'); -- 9
+insert into starlight_node(site_id, name, client_id, zoom_level, status)
+    values (320, 'U. Chicago', 'node-uchicago', 0, 'up'); -- 10
+insert into starlight_node(site_id, name, client_id, zoom_level, status)
+    values (321, 'StarLight', 'node-starlight', 0, 'up'); -- 11
+insert into starlight_node(site_id, name, client_id, zoom_level, status)
+    values (322, 'StarLight SDX', 'node-starlight-sdx', 0, 'up'); -- 12
+
+insert into starlight_link(from_id, from_if_name, to_id, to_if_name, status, link_id)
+       values (7, 'eth1', 12, 'eth1', 'up', 'embl-link');
+insert into starlight_link(from_id, from_if_name, to_id, to_if_name, status, link_id)
+       values (8, 'eth1', 12, 'eth1', 'up', 'canarie-link');
+insert into starlight_link(from_id, from_if_name, to_id, to_if_name, status, link_id)
+       values (9, 'eth1', 12, 'eth1', 'up', 'nih-link');
+insert into starlight_link(from_id, from_if_name, to_id, to_if_name, status, link_id)
+       values (10, 'eth1', 12, 'eth1', 'up', 'uchicagol-link');
+insert into starlight_link(from_id, from_if_name, to_id, to_if_name, status, link_id)
+       values (11, 'eth1', 12, 'eth1', 'up', 'starlight-link');
+
+
+
+create table starlight_metrics (id serial primary key, ts integer, thruput_mbps integer);
+
+insert into starlight_metrics (ts, thruput_mbps) values ( 1425682829,      5);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682829,      5);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682835,      5);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682840,      5);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682845,      6);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682850,      6);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682855,      6);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682861,      7);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682866,      7);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682871,      7);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682876,      8);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682882,      8);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682887,      8);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682892,      9);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682897,      9);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682902,      9);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682906,      10);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682912,      10);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682917,      10);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682922,      10);
+insert into starlight_metrics (ts, thruput_mbps) values (1425682927,      10);
+
+---- We need to add these metrics to 
+
+
+Scripts for Ali
+
+
+enable_link
+disable_link
+synchronize_metrics
+
+grab_generic_metrics_data.php?metrics=thruput_mbps&senders=canarie&tablename=starlight_metrics
+grab_generic_metrics_data&metrics=thruput_mbps&senders=canarie&tablename=starlight_metrics
+
+
+
+
+
