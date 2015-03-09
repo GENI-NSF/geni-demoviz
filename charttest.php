@@ -28,10 +28,11 @@
 // Parse the $_GET arguments
 // We handle data type, senders, metrics
 
-$data_type = 'network';
+$data_type = 'generic';
 if (array_key_exists('data_type', $_GET))
    $data_type = $_GET['data_type'];
-if ($data_type != 'network' && $data_type != 'cpu' && $data_type != 'memory') {
+if ($data_type != 'network' && $data_type != 'cpu' && 
+    $data_type != 'memory' && $data_type != 'generic') {
    error_log("Unknown data type: $data_type");
    exit;
 }
@@ -45,6 +46,11 @@ if (array_key_exists('senders', $_GET)) {
 $selected_metrics = "";
 if (array_key_exists('metrics', $_GET)) {
    $selected_metrics = $_GET['metrics'];
+}
+
+$tablename = '';
+if (array_key_exists('tablename', $_GET)) {
+   $tablename = $_GET['tablename'];
 }
 
 
@@ -71,6 +77,7 @@ if (array_key_exists('metrics', $_GET)) {
 <script>
 
     // Copy the PHP variables into JS environment
+    var tablename = "<?php echo $tablename; ?>";
     var data_type = "<?php echo $data_type; ?>";
     var senders = "<?php echo $senders; ?>";
     var selected_metrics = "<?php echo $selected_metrics; ?>";
@@ -83,7 +90,10 @@ if (array_key_exists('metrics', $_GET)) {
     // This is called once the Google chart stuff is loaded. We then grab the data and
     // plot the char
     function drawVisualization() {
-      $.getJSON('grab_metrics_data?data_type=' + data_type + '&senders=' + senders,
+      var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders;
+      if (data_type == 'generic')
+         url = 'grab_generic_metrics_data.php?tablename=' + tablename + '&senders=' + senders + '&metrics=' + selected_metrics
+      $.getJSON(url, 
            function(data) { 
 	   // In the return from the $.getJSON call to grab_metrics_data we plot the data
           drawChart(data); 
@@ -93,7 +103,19 @@ if (array_key_exists('metrics', $_GET)) {
     // Add columns to the table based on which metrics are selected
     function addColumns(data_type, data, unique_sender)
     {
-         if (data_type == 'network') {
+         if (data_type == 'generic') {
+	       var split_senders = senders.split(',');
+	       var num_senders = split_senders.length;
+	       var split_metrics = selected_metrics.split(',');
+	       var num_metrics = split_metrics.length;
+	       for(var i = 0; i < num_senders; i++) {
+	          sender = split_senders[i];
+		  for(var j = 0; j < num_metrics; j++) {
+		    var metric = split_metrics[j];
+		    data.addColumn('number', metric + "-" + sender);
+		  }
+               }
+         } else if (data_type == 'network') {
 	    if (metric_enabled('rx_bytes'))
                data.addColumn('number', 'RX-' + unique_sender);
 	    if (metric_enabled('tx_bytes'))
@@ -120,7 +142,10 @@ if (array_key_exists('metrics', $_GET)) {
    // How many columns are there for this data type? Depends on which are enabled
    function numDataColumns(data_type) {
      var num_columns = 0;
-     if(data_type == 'network') {
+     if(data_type == "generic") {
+        var split_metrics  = selected_metrics.split(',');
+        num_columns = split_metrics.length;
+     } else if(data_type == 'network') {
        if (metric_enabled('rx_bytes')) num_columns = num_columns + 1;
        if (metric_enabled('tx_bytes')) num_columns = num_columns + 1;
      } else if (data_type  == 'cpu') {
@@ -141,7 +166,17 @@ if (array_key_exists('metrics', $_GET)) {
    function fillRow(data_type, row, metric, sender_index) {
      var num_columns = numDataColumns(data_type);
      var metric_index = 1;
-     if (data_type == 'network') {
+     if (data_type == 'generic' ) {
+        var split_metrics  = selected_metrics.split(',');
+        var num_metrics = split_metrics.length;
+	 for(var i = 0; i < num_metrics; i++) {
+	    var metric_name = split_metrics[i];
+	    var value = parseFloat(metric[metric_name]);
+	    row[num_columns*sender_index+metric_index] = value;
+	    metric_index = metric_index + 1;
+         }
+     }
+     else if (data_type == 'network') {
 	 var rx_bytes = parseFloat(metric.rx_bytes);
 	 var tx_bytes = parseFloat(metric.tx_bytes);
          if (metric_enabled('rx_bytes')) {
