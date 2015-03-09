@@ -126,18 +126,12 @@ function displayData(map, data) {
     map.geniMarkers || (map.geniMarkers = []);
     map.geniPaths || (map.geniPaths = []);
     var i;
-    var deleted = false;
 
     // Remove all previous markers and paths from map
-    $.each(map.geniMarkers, function(i, marker) { marker.setMap(null);
-                                                  deleted = true; });
+    $.each(map.geniMarkers, function(i, marker) { marker.setMap(null); });
     map.geniMarkers = [];
-    $.each(map.geniPaths, function(i, path) { path.setMap(null);
-                                              deleted = true; });
+    $.each(map.geniPaths, function(i, path) { path.setMap(null); });
     map.geniPaths = [];
-
-    // Temporary for testing
-    if (deleted) { return; }
 
     // Draw Nodes, with radius proportional to number of nodes at site
     var site_counts = {};
@@ -185,10 +179,16 @@ function displayData(map, data) {
             getCoordsForNodeId(from_node_id, data),
             getCoordsForNodeId(to_node_id, data)
         ];
+        var linkColor = 'yellow';
+        if (link.status == "up") {
+            linkColor = "green";
+        } else if (link.status == "down") {
+            linkColor = "gray";
+        }
         var path = new google.maps.Polyline({
             path: pathCoords,
             geodesic: true,
-            strokeColor : 'green',
+            strokeColor : linkColor,
             strokeOpacity: 1.0,
             strokeWeight : 2
         });
