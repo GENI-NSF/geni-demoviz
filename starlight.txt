@@ -77,6 +77,14 @@ synchronize_metrics
 grab_generic_metrics_data.php?metrics=thruput_mbps&senders=canarie&tablename=starlight_metrics
 grab_generic_metrics_data&metrics=thruput_mbps&senders=canarie&tablename=starlight_metrics
 
+PGPASSWORD=0mlisg00d4u psql -h 155.99.144.155 -u oml2 gec22 -c"update starlight link set status = 'down' where id = 10"
+
+begin transaction;
+....
+commit;
+
+ 
+
 
 
 
