@@ -1,7 +1,7 @@
 
 function stopRecentering() {
     if (window.hasOwnProperty('map_resize')) {
-        console.log("Firing resize timeout");
+        // console.log("Firing resize timeout");
         clearInterval(window.map_resize.interval);
         delete window.map_resize;
     }
@@ -17,7 +17,7 @@ function keepMapCentered() {
             window.map_resize = Object();
             window.map_resize.center = map.getCenter();
             window.map_resize.interval = setInterval(function() {
-                console.log("Firing resize interval");
+                // console.log("Firing resize interval");
                 map.panTo(window.map_resize.center);
             }, 100);
             window.map_resize.timeout = setTimeout(stopRecentering, 1000);
