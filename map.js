@@ -38,15 +38,15 @@ function initialize() {
     var base_name = url_params.base_name || 'lwtesting_stitchtest';
     // Let the map show up, then paint the experiment data
     // momentarily (200 millis).
-    setTimeout(makeGrabFunction(map, base_name), 200);
-    setInterval(makeGrabFunction(map, base_name), 10 * 1000);
+    setTimeout(makeGrabFunction(map, base_name, url_params), 200);
+    setInterval(makeGrabFunction(map, base_name, url_params), 10 * 1000);
 }
 
-function makeGrabFunction(map, base_name) {
+function makeGrabFunction(map, base_name, params) {
     return function() {
         $.getJSON('grab_visualization_data.php?base_name=' + base_name,
                   function(data) {
-                      displayData(map, data);
+                      displayData(map, data, params);
                   })
     };
 }
@@ -148,7 +148,7 @@ function initMap(zoom, center_lat, center_lon)
     return map;
 }
 
-function displayData(map, data) {
+function displayData(map, data, params) {
     map.geniMarkers || (map.geniMarkers = []);
     map.geniPaths || (map.geniPaths = []);
     var i;
@@ -197,6 +197,8 @@ function displayData(map, data) {
     }
 
     // Draw links
+    var lineWidth = Number(params.line_width) || 2;
+
     for(var i = 0; i < data.links.length; i++) {
         var link = data.links[i];
         from_node_id = link.from_id;
@@ -216,7 +218,7 @@ function displayData(map, data) {
             geodesic: true,
             strokeColor : linkColor,
             strokeOpacity: 1.0,
-            strokeWeight : 2
+            strokeWeight : lineWidth
         });
         path.setMap(map);
         map.geniPaths.push(path);
