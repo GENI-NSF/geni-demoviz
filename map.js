@@ -1,25 +1,25 @@
-//----------------------------------------------------------------------        
-// Copyright (c) 2012-2015 Raytheon BBN Technologies                            
-//                                                                              
-// Permission is hereby granted, free of charge, to any person obtaining        
-// a copy of this software and/or hardware specification (the "Work") to        
-// deal in the Work without restriction, including without limitation the       
-// rights to use, copy, modify, merge, publish, distribute, sublicense,         
-// and/or sell copies of the Work, and to permit persons to whom the Work       
-// is furnished to do so, subject to the following conditions:                  
-//                                                                              
-// The above copyright notice and this permission notice shall be               
-// included in all copies or substantial portions of the Work.                  
-//                                                                              
-// THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS          
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                   
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                        
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT                  
-// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,                 
-// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,           
-// OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS           
-// IN THE WORK.                                                                 
-//---------------------------------------------------------------------- 
+//----------------------------------------------------------------------
+// Copyright (c) 2012-2015 Raytheon BBN Technologies
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and/or hardware specification (the "Work") to
+// deal in the Work without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Work, and to permit persons to whom the Work
+// is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Work.
+//
+// THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
+// IN THE WORK.
+//----------------------------------------------------------------------
 
 // Load google maps and then call 'initialize'
 google.maps.event.addDomListener(window, 'load', initialize);
@@ -140,7 +140,7 @@ function initMap(zoom, center_lat, center_lon)
         ]
     };
 
-    var map = new google.maps.Map(document.getElementById('map-canvas'), 
+    var map = new google.maps.Map(document.getElementById('map-canvas'),
                                   mapOptions);
     return map;
 }
@@ -193,7 +193,7 @@ function displayData(map, data) {
         map.geniMarkers.push(marker);
     }
 
-    // Draw links 
+    // Draw links
     for(var i = 0; i < data.links.length; i++) {
         var link = data.links[i];
         from_node_id = link.from_id;
