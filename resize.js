@@ -1,4 +1,31 @@
 
+function stopRecentering() {
+    if (window.hasOwnProperty('map_resize')) {
+        console.log("Firing resize timeout");
+        clearInterval(window.map_resize.interval);
+        delete window.map_resize;
+    }
+}
+
+function keepMapCentered() {
+    if (window.hasOwnProperty('map')) {
+        if (window.hasOwnProperty('map_resize')) {
+            clearTimeout(window.map_resize.timeout);
+            window.map_resize.timeout = setTimeout(stopRecentering, 1000);
+        } else {
+            var map = window.map;
+            window.map_resize = Object();
+            window.map_resize.center = map.getCenter();
+            window.map_resize.interval = setInterval(function() {
+                console.log("Firing resize interval");
+                map.panTo(window.map_resize.center);
+            }, 100);
+            window.map_resize.timeout = setTimeout(stopRecentering, 1000);
+        }
+    }
+}
+
+
 function resizeLayout(evt) {
     w = $( window ).width();
     h = $( window ).height();
@@ -10,7 +37,8 @@ function resizeLayout(evt) {
     mapw = w3 * 2;
     maph = h3 * 2;
     
-    //console.log("mapw: " + mapw + "; maph: " + maph);
+    // Set up an interval to keep the map center steady
+    keepMapCentered();
 
     $("#map-canvas").css({"position": "fixed",
                    "top": 0,

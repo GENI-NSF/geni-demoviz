@@ -32,6 +32,9 @@ function initialize() {
     var center_lon = Number(url_params.lon) || -98.0;
     var zoom = Number(url_params.zoom) || 4;
     var map = initMap(zoom, center_lat, center_lon);
+    // Make the map available globally
+    window.map = map;
+
     var base_name = url_params.base_name || 'lwtesting_stitchtest';
     // Let the map show up, then paint the experiment data
     // momentarily (200 millis).
