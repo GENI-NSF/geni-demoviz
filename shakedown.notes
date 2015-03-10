@@ -1,0 +1,74 @@
+insert into pa_project_member (project_id, member_id, role) values ('13d23020-dcb7-48bf-852b-e72d9c3f4e2c', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+
+insert into sa_slice_member (slice_id, member_id, role) values ('294284de-fc0d-4ef0-b290-847e29146d7a', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('b9f6af12-0efc-465f-9683-16367cb0f423', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('5b301dce-14ce-4eb9-b023-a53e46af00ab', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('9ab64e7b-8d72-4743-a499-4e2d93bf1e60', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('d4eeee1e-1076-4cf5-b615-92a432d8ffd9', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('28694a57-f801-4fb7-99cd-323dafc4be39', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('ee219e85-9491-4603-ba9d-cae13a484e04', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('807a03be-a6fd-4d68-a9d4-20ade54bb6b6', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('fa2abe19-b209-46c2-b744-53f3a7f49880', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('17478a67-a2f4-4b48-99f4-ab589aef155d', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('b6c0dad8-bebf-4bec-bc4e-0c663cc8e493', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('bc2595b5-c362-4ac0-a212-2c0e8f1c68bc', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('a1b25b65-9bc6-4d2d-84b8-883db9683417', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('bb84a0ca-97c8-4f2b-a7e3-12c56f102cf7', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('fbe46530-7ec7-4bdd-baac-d436b37260d8', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('96576baa-765b-4e09-a264-fc26cd4df6b6', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('1028ad36-bee3-4969-bc48-3e150b362064', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('b072f2e4-aa2b-4b76-9f5d-085759823ad0', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('8f0bc57b-b9b9-446d-bda0-72bcead3d603', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('1765a7e1-d550-45b5-9428-7a7c8a922193', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('f528ff03-d660-4ec1-ba23-dc08bfd81580', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+insert into sa_slice_member (slice_id, member_id, role) values ('1ad5b7ec-649b-4e9c-8fcb-701e7089b739', '4d15e257-05dd-4108-acbf-2b9508e821b4', 2);
+
+
+               slice_id               |                            slice_urn                            
+--------------------------------------+-----------------------------------------------------------------
+ 294284de-fc0d-4ef0-b290-847e29146d7a | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-1
+ b9f6af12-0efc-465f-9683-16367cb0f423 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-8
+ 5b301dce-14ce-4eb9-b023-a53e46af00ab | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-7
+ 9ab64e7b-8d72-4743-a499-4e2d93bf1e60 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-6
+ d4eeee1e-1076-4cf5-b615-92a432d8ffd9 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-5
+ 28694a57-f801-4fb7-99cd-323dafc4be39 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-4
+ ee219e85-9491-4603-ba9d-cae13a484e04 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-3
+ 807a03be-a6fd-4d68-a9d4-20ade54bb6b6 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-2
+ fa2abe19-b209-46c2-b744-53f3a7f49880 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ADCIRC-CORE
+ 17478a67-a2f4-4b48-99f4-ab589aef155d | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-8
+ b6c0dad8-bebf-4bec-bc4e-0c663cc8e493 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-7
+ bc2595b5-c362-4ac0-a212-2c0e8f1c68bc | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-6
+ a1b25b65-9bc6-4d2d-84b8-883db9683417 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-5
+ bb84a0ca-97c8-4f2b-a7e3-12c56f102cf7 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-4
+ fbe46530-7ec7-4bdd-baac-d436b37260d8 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-3
+ 96576baa-765b-4e09-a264-fc26cd4df6b6 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-2
+ 1028ad36-bee3-4969-bc48-3e150b362064 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-1
+ b072f2e4-aa2b-4b76-9f5d-085759823ad0 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+IDMSTest
+ 8f0bc57b-b9b9-446d-bda0-72bcead3d603 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+wi-1
+ 1765a7e1-d550-45b5-9428-7a7c8a922193 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+mu-1
+ f528ff03-d660-4ec1-ba23-dc08bfd81580 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ADCIRC-IDMS
+ 1ad5b7ec-649b-4e9c-8fcb-701e7089b739 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-1
+
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ADCIRC-CORE --table_base shakedown --clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ADCIRC-IDMS --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-8 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-7 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-6 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-5 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-4 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-3 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-2 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-1 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-8 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-7 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-6 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-5 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-4 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-3 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-2 --table_base shakedown --no-clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-1 --table_base shakedown --clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+IDMSTest --table_base shakedown --clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+wi-1 --table_base shakedown --clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+mu-1 --table_base shakedown --clear-tables
+
+
