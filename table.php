@@ -204,105 +204,12 @@ if (array_key_exists('tablename5', $_GET)) {
             }]
           }"></script>
   <script src="chart.js"></script>
-  <style type="text/css">
-    body {
-      margin: 0;
-      padding: 50px;
-      background-color: #FFFFFF;
-      color: #000000;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-    table, th, td {
-    border: none;
-    }
-    .table {
-      display: table;
-    }
-    .row {
-      display: table-row;
-    }
-
-    #map-canvas {
-    border-right: 1px solid;
-    border-bottom: 1px solid;
-    height: 100%;
-    min-height: 300px;
-    width: 100%;
-    }
-    #chart_div_right1 {
-    border-bottom: 1px solid;
-    height: auto;
-    width: auto;
-    }
-    #chart_div_right2 {
-    border-bottom: 1px solid;
-    height: auto;
-    width: auto;
-    }
-    #chart_div_bottom3 {
-    border-right: 1px solid;
-    height: auto;
-    width: auto;
-    }
-    #chart_div_bottom4 {
-    border-right: 1px solid;
-    height: auto;
-    width: auto;
-    }
-    /*
-    FOOTER CONTAINER
-    */
-
-#footer {
-  padding-top: 15px;
-  padding-bottom: 15px;
-  padding-left:62px;
-  padding-right:31px;
-    /* center */
-    margin-left: auto;
-    margin-right: auto;
-    width: 807px;
-    margin-bottom: 30px;
-    margin-top: 20px;
-  /* by default, let text be serif */
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    box-shadow: 0px 0px 10px #5F584E;
-    background-color: #5F584E;
-    color: #ffffff;
-    overflow: auto;
-    }
-
-#footer a {
-  text-decoration: none;
-  color: #ffffff;
-  font-weight: 700;
-}
-
-#footer-left {
-  float: left;
-  text-align: left;
-  width: 400px;
-  font-size: 0.9em;
-}
-
-#footer-right {
-  float: right;
-  text-align: right;
-  width: 400px;
-  font-size: 0.8em;
-  border-right: 2px solid #ffffff;
-  padding-right: 15px;
-    }
-    </style>
+<script src="resize.js"></script>
   </head>
   <body>
-<!--    <h1><center>Demo Visualization</center></h1> -->
-    <table height="90%">
-      <tr height="30%" align="center">
-	<td colspan="2" rowspan="2" style="text-align:center">  <div id="map-canvas"></div>
-	</td>
-	<td width="30%"  style="text-align:center"> <div id="chart_div_right1">
+	<div id="map-canvas"></div>
+	
+	<div id="chart_div_right1">
 	<?php
 	error_log("data_type1: $data_type1");
 	if ($data_type1 != 'none') {
@@ -313,13 +220,10 @@ if (array_key_exists('tablename5', $_GET)) {
 	  });
 	</script>
 EOF;
-	} else {
-	  echo "&nbsp;";
 	}
 ?>
-	</div></td>
-      <tr height="30%" align="center">
-	<td  style="text-align:center"> <div id="chart_div_right2">
+	</div>
+	<div id="chart_div_right2">
 	<?php
 	if ($data_type2 != 'none') {
 	  print <<< EOF
@@ -329,13 +233,10 @@ EOF;
 	  });
 	</script>
 EOF;
-	} else {
-	  echo "&nbsp;";
 	}
 ?>
-	</div></td>
-      <tr height="30%">
-	<td  style="text-align:center"> <div id="chart_div_bottom3">
+	</div>
+	<div id="chart_div_bottom3">
 	<?php
 	if ($data_type3 != 'none') {
 	  print <<< EOF
@@ -345,12 +246,10 @@ EOF;
 	  });
 	</script>
 EOF;
-	} else {
-	  echo "<table style='height:100%; width:100%;border:none;'><tr><td>&nbsp;</td></tr></table>";
 	}
 ?>
-       </div></td>
-	<td  style="text-align:center"> <div id="chart_div_bottom4">
+       </div>
+	<div id="chart_div_bottom4">
 	<?php
 	if ($data_type4 != 'none') {
 	  print <<< EOF
@@ -360,12 +259,10 @@ EOF;
 	  });
 	</script>
 EOF;
-	} else {
-	  echo "&nbsp;";
 	}
 ?>
-</div></td>
-	<td  style="text-align:center"> <div id="chart_div_bottom5">
+</div>
+	<div id="chart_div_bottom5">
 	<?php
 	if ($data_type5 != 'none') {
 	  print <<< EOF
@@ -375,23 +272,9 @@ EOF;
 	  });
 	</script>
 EOF;
-	} else {
-	  echo "&nbsp;";
 	}
 ?>
-</div></td>
-      </tr>
-    </table> 
-    <div id="footer">
-      <div id="footer-left">
-	<!-- <a href="https://portal.geni.net">GENI Portal Home</a><br>
-	     <a href="http://www.geni.net">GENI Home</a><br>
-	     <a href="http://groups.geni.net/geni">GENI Wiki</a> -->
-      </div>
-      <div id="footer-right">
-	<a href="http://www.geni.net/">GENI</a> is sponsored by the <a href="http://www.nsf.gov/"><img src="/common/nsf1.gif" alt="NSF Logo" height="16" width="16"/> National Science Foundation</a>
-      </div>
-    </div>
+</div>
   </body>
 </html>
 
