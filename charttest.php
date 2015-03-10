@@ -109,7 +109,7 @@ if (array_key_exists('tablename', $_GET)) {
 	       var split_metrics = selected_metrics.split(',');
 	       var num_metrics = split_metrics.length;
 	       for(var j = 0; j < num_metrics; j++) {
-	       	    var metric = split_metrics[j];
+		 var metric = split_metrics[j];
 		    data.addColumn('number', metric + "-" + unique_sender);
 	        }
          } else if (data_type == 'network') {
