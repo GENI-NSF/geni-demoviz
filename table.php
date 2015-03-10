@@ -211,7 +211,7 @@ if (array_key_exists('tablename5', $_GET)) {
 	
 	<div id="chart_div_right1">
 	<?php
-	error_log("data_type1: $data_type1");
+  //	error_log("data_type1: $data_type1");
 	if ($data_type1 != 'none') {
 	  print <<< EOF
 	<script>
