@@ -29,6 +29,13 @@ function metric_enabled(metric, selected_metrics) {
 // This is called once the Google chart stuff is loaded. We then grab the data and
 // plot the char
 function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv) {
+    if (! window.hasOwnProperty('geniCharts')) {
+        window.geniCharts = {};
+    }
+    if (! window.geniCharts.hasOwnProperty(chartdiv)) {
+        window.geniCharts[chartdiv] = {};
+        window.geniCharts[chartdiv].chart = new google.visualization.LineChart(document.getElementById(chartdiv));
+    }
     var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders;
     if (data_type == 'generic')
         url = 'grab_generic_metrics_data.php?tablename=' + tablename + '&senders=' + senders + '&metrics=' + selected_metrics
@@ -226,7 +233,7 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	    width: '60%'
 	}
     };
-    var chart = new google.visualization.LineChart(document.getElementById(chartdiv));
+    var chart = window.geniCharts[chartdiv].chart;
     chart.draw(data, options);
 
     // Refresh every 5 seconds
