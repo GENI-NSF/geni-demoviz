@@ -39,7 +39,7 @@ function initialize() {
     // Let the map show up, then paint the experiment data
     // momentarily (200 millis).
     setTimeout(makeGrabFunction(map, base_name, url_params), 200);
-    setInterval(makeGrabFunction(map, base_name, url_params), 10 * 1000);
+    setInterval(makeGrabFunction(map, base_name, url_params), 5 * 1000);
 }
 
 function makeGrabFunction(map, base_name, params) {
