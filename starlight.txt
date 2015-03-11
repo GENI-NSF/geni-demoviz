@@ -94,6 +94,10 @@ If a file is there, the link is 'up', otherwise 'down'.
 
 python sync_data.py --outfile /tmp/bar.out --dbhost 155.99.144.115 --dbtable starlight_metrics --dbfield thruput_mbps --dbtable_link starlight_link
 
+http://155.99.144.115/html/charttest.php?data_type=generic&metrics=thruput_mbps&senders=canarie,ebi,nih,chicago,starlight&tablename=starlight_metrics
+
+http://155.99.144.115/html/table.php?base_name=starlight&lat=40&lon=-40&zoom=3&data_type1=none&data_type2=none&data_type3=none&data_type4=none&data_type5=none
+
 
 
 

@@ -29,13 +29,6 @@ function metric_enabled(metric, selected_metrics) {
 // This is called once the Google chart stuff is loaded. We then grab the data and
 // plot the char
 function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv) {
-    if (! window.hasOwnProperty('geniCharts')) {
-        window.geniCharts = {};
-    }
-    if (! window.geniCharts.hasOwnProperty(chartdiv)) {
-        window.geniCharts[chartdiv] = {};
-        window.geniCharts[chartdiv].chart = new google.visualization.LineChart(document.getElementById(chartdiv));
-    }
     var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders;
     if (data_type == 'generic')
         url = 'grab_generic_metrics_data.php?tablename=' + tablename + '&senders=' + senders + '&metrics=' + selected_metrics
@@ -141,7 +134,7 @@ function fillRow(data_type, row, metric, sender_index, selected_metrics) {
 	    row[num_columns*sender_index+metric_index] = sys;
 	    metric_index = metric_index + 1;
         }
-        if (metric_enabled('sys', selected_metrics)) {
+        if (metric_enabled('idle', selected_metrics)) {
 	    row[num_columns*sender_index+metric_index] = idle;
         }
     } else {
@@ -185,6 +178,48 @@ function interpolateRows(rows) {
     }
 }
 
+// Make the values in slot X = slot(X)-slot(X-1) 
+// Where slot(X-1) is the previous entry for that sender
+// Put Slot(0) = Slot(1)
+function computeDeltas(rows, metric_data) {
+    var num_rows = rows.length;
+
+    var current_by_sender = {};
+    var predecessors = [];
+    predecessors[num_rows-1] = undefined;
+    var successors = [];
+    successors[num_rows-1] = undefined;
+
+    var indices_by_sender = {};
+
+    for(var i = 0; i < num_rows; i++) {
+	var sender = metric_data[i].sender;
+	if(!(sender in current_by_sender)) {
+	    predecessors[i] = -1;
+    	} else {
+	    var prev = current_by_sender[sender];
+	    predecessors[i] = prev;
+	    if (predecessors[prev] == -1)
+		successors[prev] = i;
+	}
+	current_by_sender[sender] = i;
+    }
+    var num_cols = rows[0].length;
+    // Skip the first 'ts' column
+    for(var col = 1; col < num_cols; col++) {
+	for(var row = num_rows-1; row >= 0; row--) {
+	    var pred_index = predecessors[row];
+	    if (pred_index > -1) {
+		rows[row][col] = rows[row][col] - rows[pred_index][col];
+	    } else {
+		var succ_index = successors[row];
+		rows[row][col] = rows[succ_index][col];
+	    }
+        }
+	rows[0][col] = rows[1][col];
+    }
+}
+
 // Draw the chart by grabbing the data, creating the table
 // adding the columns and then adding the rows
 function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename)
@@ -221,6 +256,9 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	rows.push(row);
     }
     interpolateRows(rows);
+    if (data_type ==  'network' || data_type == 'cpu')
+        computeDeltas(rows, metric_data);
+    
     data.addRows(rows);
 
     var options = {
@@ -233,7 +271,8 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	    width: '60%'
 	}
     };
-    var chart = window.geniCharts[chartdiv].chart;
+    var chart = new google.visualization.LineChart(document.getElementById(chartdiv));
+
     chart.draw(data, options);
 
     // Refresh every 5 seconds
