@@ -34,8 +34,14 @@ function resizeLayout(evt) {
     w3 = Math.floor(w/3);
     h3 = Math.floor(h/3);
 
-    mapw = w3 * 2;
-    maph = h3 * 2;
+    var chartExists = document.getElementById("chart_div_right1");
+    if (chartExists) {
+	mapw = w3 * 2;
+	maph = h3 * 2;
+    } else {
+	mapw = w;
+	maph = h;
+    }
     
     // Set up an interval to keep the map center steady
     keepMapCentered();
