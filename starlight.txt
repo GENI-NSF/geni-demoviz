@@ -84,6 +84,16 @@ begin transaction;
 commit;
 
  
+----
+
+Details:
+
+ssh mbrinn@pc4.instageni.gpolab.bbn.com -p 35898
+Look at files in /tmp/links
+If a file is there, the link is 'up', otherwise 'down'.
+
+python sync_data.py --outfile /tmp/bar.out --dbhost 155.99.144.115 --dbtable starlight_metrics --dbfield thruput_mbps --dbtable_link starlight_link
+
 
 
 
