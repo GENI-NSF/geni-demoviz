@@ -24,6 +24,7 @@
 // Load google maps and then call 'initialize'
 google.maps.event.addDomListener(window, 'load', initialize);
 
+var chart_counter = 0;
 
 // Once google is loaded, grab the topology data and draw the map
 function initialize() {
@@ -148,6 +149,64 @@ function initMap(zoom, center_lat, center_lon)
     return map;
 }
 
+function showMapChart(evt, site_id) {
+    //console.log("click: " + evt.kb.x + ", " + evt.kb.y);
+    var uid = chart_counter++;
+    var element_id = "jq-" + site_id + uid;
+    var chart_id = "chart-" + site_id + uid;
+    var close_id = "close-" + site_id + uid;
+    var chartTypes = ["memory", "cpu", "network"];
+    var chartType = chartTypes[uid % chartTypes.length];
+    $("body").append("<div id='" + element_id
+                     + "' class='ui-widget-content'>"
+                     + "<a href='#' id='" + close_id + "'>x</a>"
+                     + "<div id='" + chart_id + "'></div>"
+                     + "</div>");
+    setTimeout(function() {
+        var elementDiv = $("#" + element_id);
+        var closeLink = $("#" + close_id);
+        closeLink.click(function() {
+            elementDiv.fadeOut(300, function() {elementDiv.remove()})});
+        elementDiv.css({"position": "fixed",
+                        "top": Math.floor(evt.kb.y),
+                        "left": Math.floor(evt.kb.x),
+                        "width": "300px",
+                        "height": "150px"});
+        elementDiv.draggable();
+        //$("#" + element_id).resizable();
+        drawVisualization(chartType, "1", "", "", chart_id, true);
+    }, 100);
+}
+
+function createSiteMarker(map, site_id, site_count, site_coords) {
+    var site_radius = 5 * site_count;
+    var title = site_id.toString();
+    var marker = new google.maps.Marker({
+        position: site_coords,
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: site_radius,
+            strokeWeight: 1,
+        },
+        title: title,
+        map: map
+    });
+    iw_text = "Site " + site_id + "<br/> "
+        //+ '<a href="http://www.google.com/">google</a>'
+        + '<img src="https://portal.geni.net/images/VM-noTxt-centered.svg"'
+        + ' height="20" width="20" draggable="true"'
+        + ' ondragstart="dragSite(event, ' + site_id + ')"'
+        + '/>' ;
+    var infowindow = new google.maps.InfoWindow({
+        content: iw_text
+    });
+    google.maps.event.addListener(marker, 'click',
+                                  function(evt) {
+                                      showMapChart(evt, site_id);
+                                  });
+    return marker;
+}
+
 function displayData(map, data, params) {
     map.geniMarkers || (map.geniMarkers = []);
     map.geniPaths || (map.geniPaths = []);
@@ -172,28 +231,8 @@ function displayData(map, data, params) {
     for(var site_id in site_counts) {
         var site_count = site_counts[site_id];
         var site_coords = getCoordsForSiteId(site_id, data);
-        var site_radius = 2 * site_count;
-        siteOptions = {
-            strokeColor: 'black',
-            strokeOpacity: 0.8,
-            strokeWeight:  2,
-            fillColor: 'blue',
-            fillOpacity: 0.35,
-            map:map,
-            center: site_coords,
-            radius: site_radius
-        };
-        //circle = new google.maps.Circle(siteOptions);
-        var marker = new google.maps.Marker({
-            position: site_coords,
-            icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: site_radius,
-                strokeWeight: 1,
-            },
-            map: map
-        });
-        map.geniMarkers.push(marker);
+        map.geniMarkers.push(createSiteMarker(map, site_id, site_count,
+                                              site_coords));
     }
 
     // Draw links
