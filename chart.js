@@ -28,14 +28,14 @@ function metric_enabled(metric, selected_metrics) {
 
 // This is called once the Google chart stuff is loaded. We then grab the data and
 // plot the char
-function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv) {
+function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, hideLabels) {
     var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders;
     if (data_type == 'generic')
         url = 'grab_generic_metrics_data.php?tablename=' + tablename + '&senders=' + senders + '&metrics=' + selected_metrics
     $.getJSON(url, 
               function(data) { 
 		  // In the return from the $.getJSON call to grab_metrics_data we plot the data
-		  drawChart(data, senders, selected_metrics, chartdiv, data_type, tablename); 
+		  drawChart(data, senders, selected_metrics, chartdiv, data_type, tablename, hideLabels); 
 	      });
 };
 
@@ -222,7 +222,7 @@ function computeDeltas(rows, metric_data) {
 
 // Draw the chart by grabbing the data, creating the table
 // adding the columns and then adding the rows
-function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename)
+function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename, hideLabels)
 {
     var unique_senders = {}
     var num_unique_senders = 0;
@@ -261,22 +261,43 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     
     data.addRows(rows);
 
-    var options = {
-	title: data_type + ' Metrics',
-        chart: {
-	    title: data_type + ' Metrics'
-	},
-	chartArea: {
-	    height: '60%',
-	    width: '60%'
-	}
-    };
+    if (typeof hideLabels === 'undefined' || hideLabels === false) {
+	var options = {
+	    title: data_type + ' Metrics',
+            chart: {
+		title: data_type + ' Metrics'
+	    },
+	    chartArea: {
+		height: '65%',
+		width: '60%'
+	    }
+	};
+    } else {
+	// axisTitlesPosition
+	// vAxis.textPosition
+	var options = {
+	    title: data_type + ' Metrics',
+            chart: {
+		title: data_type + ' Metrics'
+	    },
+	    chartArea: {
+		height: '80%',
+		width: '85%'
+	    },
+	    legend: {
+		position: 'none'
+	    },
+	    hAxis: {
+		textPosition: 'none'
+	    }
+	};
+    }
     var chart = new google.visualization.LineChart(document.getElementById(chartdiv));
 
     chart.draw(data, options);
 
     // Refresh every 5 seconds
-    setTimeout(function() {drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv);}, 5000);
+    setTimeout(function() {drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, hideLabels);}, 5000);
 
 }
 
