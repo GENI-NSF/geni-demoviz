@@ -258,11 +258,13 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	fillRow(data_type, row, metric, sender_index, selected_metrics);
 	rows.push(row);
     }
-    interpolateRows(rows);
-    if (data_type ==  'network' || data_type == 'cpu')
-        computeDeltas(rows, metric_data);
-    
-    data.addRows(rows);
+
+    if (rows.length > 0) {
+	interpolateRows(rows);
+	if (data_type ==  'network' || data_type == 'cpu')
+	    computeDeltas(rows, metric_data);
+        data.addRows(rows);
+    }
 
     title = data_type.charAt(0).toUpperCase() + data_type.slice(1) + ' Metrics';
     if (data_type == 'generic') title = selected_metrics.charAt(0).toUpperCase() + selected_metrics.slice(1) + ' Metrics';
@@ -315,7 +317,8 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     }
     var chart = new google.visualization.LineChart(document.getElementById(chartdiv));
 
-    chart.draw(data, options);
+    if (rows.length > 0)
+	chart.draw(data, options);
 
     // Refresh every 5 seconds
     setTimeout(function() {drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, hideLabels);}, 5000);
