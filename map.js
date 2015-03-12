@@ -70,7 +70,7 @@ function getCoordsForSiteId(site_id, data)
     return new google.maps.LatLng(site.latitude, site.longitude);
 }
 
-// Get icon url for given site_id
+// Get icon for given site_id
 function getIconForSiteId(site_id, data, site_count)
 {
     var site = getSiteById(site_id, data);
@@ -86,31 +86,31 @@ function getIconForSiteId(site_id, data, site_count)
 	};
     }
 	
-    var geni_image = 'geni_globe.png';
-    var micr_image = 'http://upload.wikimedia.org/wikipedia/commons/f/fe/Octicons-microscope.svg';
-    var geni_icon = {
-	url: geni_image,
-	anchor: new google.maps.Point(2*site_radius, 2*site_radius),
-	scaledSize: new google.maps.Size(3*site_radius,3*site_radius)
-    };
-    var micr_icon = {
-	url: micr_image,
-	anchor: new google.maps.Point(site_radius, 2*site_radius),
-	scaledSize: new google.maps.Size(2*site_radius,3*site_radius)
-    };
+//    var geni_image = 'geni_globe.png';
+//    var micr_image = 'http://upload.wikimedia.org/wikipedia/commons/f/fe/Octicons-microscope.svg';
+//    var geni_icon = {
+//	url: geni_image,
+//	anchor: new google.maps.Point(2*site_radius, 2*site_radius),
+//	scaledSize: new google.maps.Size(3*site_radius,3*site_radius)
+//    };
+//    var micr_icon = {
+//	url: micr_image,
+//	anchor: new google.maps.Point(site_radius, 2*site_radius),
+//	scaledSize: new google.maps.Size(2*site_radius,3*site_radius)
+//    };
     var default_icon = {
         path: google.maps.SymbolPath.CIRCLE,
         scale: site_radius,
         strokeWeight: 1,
 //	strokeColor: "sienna"
     };
-    if (site_id % 3 == 0) {
+//    if (site_id % 3 == 0) {
 	return default_icon;
-    } else if (site_id % 2 == 0) {
-	return geni_icon;
-    } else {
-	return micr_icon;
-    }
+//    } else if (site_id % 2 == 0) {
+//	return geni_icon;
+//    } else {
+//	return micr_icon;
+//    }
 }
 
 // Get coordinates for a given node (from its site id)
