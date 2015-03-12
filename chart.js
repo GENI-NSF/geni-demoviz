@@ -315,10 +315,14 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	    }
 	};
     }
-    var chart = new google.visualization.LineChart(document.getElementById(chartdiv));
 
-    if (rows.length > 0)
+    if (rows.length > 0) {
+	var chart = new google.visualization.LineChart(document.getElementById(chartdiv));
 	chart.draw(data, options);
+    } else {
+	$("#" + chartdiv).empty(); // Remove the current map
+    }
+    
 
     // Refresh every 5 seconds
     setTimeout(function() {drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, hideLabels);}, 5000);
