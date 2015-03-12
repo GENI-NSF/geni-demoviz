@@ -30,8 +30,9 @@ function metric_enabled(metric, selected_metrics) {
 // plot the char
 function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, hideLabels) {
     var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders;
-    if (data_type == 'generic')
+    if (data_type == 'generic') {
         url = 'grab_generic_metrics_data.php?tablename=' + tablename + '&senders=' + senders + '&metrics=' + selected_metrics
+	    }
     $.getJSON(url, 
               function(data) { 
 		  // In the return from the $.getJSON call to grab_metrics_data we plot the data
@@ -174,6 +175,7 @@ function interpolateRows(rows) {
 		else if (i < num_rows-1 && rows[i+1][col] != null)
 	            rows[i][col] = rows[i+1][col];
             }
+	    rows[i][0] = i; // Set TS to sequential count, not actual (meaningless) TS
 	}
     }
 }
@@ -261,9 +263,10 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     
     data.addRows(rows);
 
+    title = data_type + ' Metrics';
+    if (data_type == 'generic') title = selected_metrics + ' Metrics';
     if (typeof hideLabels === 'undefined' || hideLabels === false) {
 	var options = {
-	    title: data_type + ' Metrics',
 	    titleTextStyle: {
 		fontSize: 16
 	    },
@@ -272,8 +275,9 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 		    fontSize: 10
 		}
 	    },
+	    title: title,
             chart: {
-		title: data_type + ' Metrics'
+		title: title,
 	    },
 	    chartArea: {
 		height: '65%',
@@ -284,7 +288,6 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	// axisTitlesPosition
 	// vAxis.textPosition
 	var options = {
-	    title: data_type + ' Metrics',
 	    titleTextStyle: {
 		fontSize: 16
 	    },
@@ -293,8 +296,9 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 		    fontSize: 10
 		}
 	    },
+	    title: title,
             chart: {
-		title: data_type + ' Metrics'
+		title: title,
 	    },
 	    chartArea: {
 		height: '75%',
