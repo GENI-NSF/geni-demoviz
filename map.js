@@ -117,6 +117,15 @@ gec.maps = {
                           gec.maps.updateData(data, map, base_name, params);
                       })
         };
+    },
+
+    showChart: function(event) {
+        var target = $(event.target);
+        var site_id = target.attr("class");
+        event.kb = {};
+        event.kb.x = event.pageX;
+        event.kb.y = event.pageY;
+        showMapChart(event.pageX, event.pageY, site_id);
     }
 };
 
@@ -427,7 +436,7 @@ function initMap(zoom, center_lat, center_lon)
     return map;
 }
 
-function showMapChart(evt, site_id) {
+function showMapChart(x, y, site_id) {
     //console.log("click: " + evt.kb.x + ", " + evt.kb.y);
     var uid = chart_counter++;
     var element_id = "jq-" + site_id + uid;
@@ -446,8 +455,8 @@ function showMapChart(evt, site_id) {
         closeLink.click(function() {
             elementDiv.fadeOut(300, function() {elementDiv.remove()})});
         elementDiv.css({"position": "fixed",
-                        "top": Math.floor(evt.kb.y),
-                        "left": Math.floor(evt.kb.x),
+                        "top": y,
+                        "left": x,
                         "width": "300px",
                         "height": "150px"});
         elementDiv.draggable();
@@ -478,12 +487,19 @@ function createSiteMarker(map, site_id, site_count, site_coords, site_icon) {
         + ' height="20" width="20" draggable="true"'
         + ' ondragstart="dragSite(event, ' + site_id + ')"'
         + '/>' ;
+
+
+    var content = $("#site-iw").clone();
+    var showLink = content.find("#show-chart");
+    showLink.attr("onclick", "gec.maps.showChart(event)");
+    showLink.attr("class", site_id);
     var infowindow = new google.maps.InfoWindow({
-        content: iw_text
+        content: content[0].outerHTML
     });
+
     google.maps.event.addListener(marker, 'click',
                                   function(evt) {
-                                      showMapChart(evt, site_id);
+                                      infowindow.open(map, marker);
                                   });
     return marker;
 }
