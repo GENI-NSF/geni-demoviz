@@ -21,6 +21,229 @@
 // IN THE WORK.
 //----------------------------------------------------------------------
 
+// Strict mode - error undeclared variables
+"use strict";
+
+// Establish the geni namespace
+var gec;
+gec = gec || {};
+
+// Establish the maps sub-namespace
+gec.maps = {
+    // Provide a UID for charts to allow multiple charts per node
+    chart_counter: 0,
+
+    // How many seconds between topology refreshes
+    refreshSeconds: 5,
+
+    allNodes: {},
+
+    allLinks: {},
+
+    allSites: {},
+
+    getNode: function(id) {
+        return this.allNodes[id];
+    },
+
+    addNode: function(node) {
+        this.allNodes[node.id] = node;
+        return node;
+    },
+
+    getLink: function(id) {
+        return this.allLinks[id];
+    },
+
+    addLink: function(link) {
+        this.allLinks[link.id] = link;
+        return link;
+    },
+
+    getSite: function(id) {
+        return this.allSites[id];
+    },
+
+    addSite: function(site) {
+        this.allSites[site.id] = site;
+        return site;
+    },
+
+    initData: function(data, map, base_name, params) {
+        var sites = {};
+        $.each(data.sites, function(i, s) {
+            sites[s.id] = s;
+        });
+
+        var that = this;
+        $.each(data.nodes, function(i, n) {
+            var site = that.getSite(n.site_id)
+                || that.addSite(new that.Site(sites[n.site_id], map));
+            var node = new that.Node(n, site);
+            gec.maps.addNode(node);
+            site.addNode(node);
+        });
+
+        $.each(this.allSites, function(id, site) {
+            site.updateMarker();
+        });
+
+        $.each(data.links, function(i, l) {
+            var link = new that.Link(l, map, params.line_width);
+            gec.maps.addLink(link);
+        });
+
+        // Update the data refreshSeconds from now
+        setTimeout(this.makeUpdateFunction(map, base_name, params),
+                   this.refreshSeconds * 1000);
+    },
+
+    updateData: function(data, map, base_name, params) {
+        var that = this;
+        $.each(data.links, function(i, l) {
+            var link = that.getLink(l.id);
+            link.update(l);
+        });
+
+        // Update the data refreshSeconds from now
+        setTimeout(this.makeUpdateFunction(map, base_name, params),
+                   this.refreshSeconds * 1000);
+    },
+
+    makeUpdateFunction: function(map, base_name, params) {
+        return function() {
+            $.getJSON('grab_visualization_data.php?base_name=' + base_name,
+                      function(data) {
+                          gec.maps.updateData(data, map, base_name, params);
+                      })
+        };
+    }
+};
+
+
+
+/*----------------------------------------------------------------------
+ * Node class
+ *----------------------------------------------------------------------
+ */
+gec.maps.Node = function(data, site) {
+    this.id = data.id;
+    this.sender = data.sender;
+    this.name = data.client_id;
+    this.site = site;
+};
+
+gec.maps.Node.prototype.LatLng = function() {
+    return this.site.latLng;
+};
+
+/*----------------------------------------------------------------------
+ * Link class
+ *----------------------------------------------------------------------
+ */
+gec.maps.Link = function(data, map, lineWidth) {
+    this.id = data.id;
+    this.fromNode = gec.maps.getNode(data.from_id);
+    this.toNode = gec.maps.getNode(data.to_id);
+    this.fromInterface = data.from_if_name;
+    this.toInterface = data.to_if_name;
+    this.status = data.status;
+    this.map = map;
+    this.lineWidth = lineWidth;
+    this.marker = this.makeMarker();
+    this.marker.setMap(this.map);
+};
+
+gec.maps.Link.prototype.color = function() {
+    switch (this.status) {
+    case "up":
+        return "green";
+    case "down":
+        return "gray";
+    default:
+        return "yellow";
+    }
+};
+
+gec.maps.Link.prototype.makeMarker = function () {
+    var pathCoords = [
+        this.fromNode.LatLng(),
+        this.toNode.LatLng()
+    ];
+    var marker = new google.maps.Polyline({
+        path: pathCoords,
+        geodesic: true,
+        strokeColor : this.color(),
+        strokeOpacity: 1.0,
+        strokeWeight : this.lineWidth
+    });
+    return marker;
+};
+
+gec.maps.Link.prototype.update = function (data) {
+    if (this.status != data.status) {
+        this.status = data.status;
+        this.marker && this.marker.setMap(null);
+        this.marker = this.makeMarker();
+        this.marker.setMap(this.map);
+    }
+}
+
+
+/*----------------------------------------------------------------------
+ * Site class
+ * ----------------------------------------------------------------------
+ */
+gec.maps.Site = function(data, map) {
+    this.id = data.id;
+    this.name = data.am_name;
+    this.icon = data.icon;
+    this.latLng = new google.maps.LatLng(data.latitude, data.longitude);
+    this.map = map;
+    this.nodes = [];
+    this.marker = undefined;
+};
+
+gec.maps.Site.prototype.makeMarker = function () {
+    var site_radius = 4 * this.nodes.length;
+    if (this.icon) {
+	return {
+	    url: this.icon,
+	    anchor: new google.maps.Point(2*site_radius, 2*site_radius),
+	    scaledSize: new google.maps.Size(3*site_radius,3*site_radius)
+	};
+    } else {
+        return {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: site_radius,
+            strokeWeight: 1,
+            //	strokeColor: "sienna"
+        };
+    }
+}
+
+gec.maps.Site.prototype.updateMarker = function () {
+    // If there is a marker, remove it from the map.
+    this.marker && this.marker.setMap(null);
+    this.marker = createSiteMarker(this.map, this.id, this.nodes.length,
+                                   this.latLng, this.makeMarker());
+};
+
+/*
+ * Add a node to a site.
+ */
+gec.maps.Site.prototype.addNode = function (node) {
+    this.nodes.push(node);
+};
+
+
+/*----------------------------------------------------------------------
+ *
+ * Old Code
+ *
+ *----------------------------------------------------------------------
+ */
+
 // Load google maps and then call 'initialize'
 google.maps.event.addDomListener(window, 'load', initialize);
 
@@ -29,9 +252,10 @@ var chart_counter = 0;
 // Once google is loaded, grab the topology data and draw the map
 function initialize() {
     var url_params = getURLParameters();
-    var center_lat = Number(url_params.lat) || 38.0;
-    var center_lon = Number(url_params.lon) || -98.0;
+    var center_lat = Number(url_params.lat || 38.0);
+    var center_lon = Number(url_params.lon || -98.0);
     var zoom = Number(url_params.zoom) || 4;
+    gec.maps.refreshSeconds = Number(url_params.refresh) || 5;
     var map = initMap(zoom, center_lat, center_lon);
     // Make the map available globally
     window.map = map;
@@ -39,18 +263,29 @@ function initialize() {
     var base_name = url_params.base_name || 'lwtesting_stitchtest';
     // Let the map show up, then paint the experiment data
     // momentarily (200 millis).
-    setTimeout(makeGrabFunction(map, base_name, url_params), 200);
-    setInterval(makeGrabFunction(map, base_name, url_params), 5 * 1000);
+    //setTimeout(makeGrabFunction(map, base_name, url_params), 1000);
+    setTimeout(makeInitFunction(map, base_name, url_params), 100);
+    //setInterval(makeGrabFunction(map, base_name, url_params), 5 * 1000);
 }
 
 function makeGrabFunction(map, base_name, params) {
     return function() {
         $.getJSON('grab_visualization_data.php?base_name=' + base_name,
                   function(data) {
-                      displayData(map, data, params);
+                      displayData(data, map, base_name, params);
                   })
     };
 }
+
+function makeInitFunction(map, base_name, params) {
+    return function() {
+        $.getJSON('grab_visualization_data.php?base_name=' + base_name,
+                  function(data) {
+                      gec.maps.initData(data, map, base_name, params);
+                  })
+    };
+}
+
 
 // Get site info by site_id
 function getSiteById(site_id, data)
@@ -229,7 +464,7 @@ function createSiteMarker(map, site_id, site_count, site_coords, site_icon) {
         title: title,
         map: map
     });
-    iw_text = "Site " + site_id + "<br/> "
+    var iw_text = "Site " + site_id + "<br/> "
         //+ '<a href="http://www.google.com/">google</a>'
         + '<img src="https://portal.geni.net/images/VM-noTxt-centered.svg"'
         + ' height="20" width="20" draggable="true"'
@@ -245,7 +480,7 @@ function createSiteMarker(map, site_id, site_count, site_coords, site_icon) {
     return marker;
 }
 
-function displayData(map, data, params) {
+function displayData(data, map, base_name, params) {
     map.geniMarkers || (map.geniMarkers = []);
     map.geniPaths || (map.geniPaths = []);
     var i;
@@ -259,6 +494,7 @@ function displayData(map, data, params) {
     // Draw Nodes, with radius proportional to number of nodes at site
     var site_counts = {};
     for(var i = 0; i < data.nodes.length; i++) {
+        var n = new gec.maps.Node(data.nodes[i]);
         var node = data.nodes[i];
         var site_id = node.site_id;
         if (!(site_id in site_counts)) {
@@ -279,8 +515,8 @@ function displayData(map, data, params) {
 
     for(var i = 0; i < data.links.length; i++) {
         var link = data.links[i];
-        from_node_id = link.from_id;
-        to_node_id = link.to_id;
+        var from_node_id = link.from_id;
+        var to_node_id = link.to_id;
         var pathCoords = [
             getCoordsForNodeId(from_node_id, data),
             getCoordsForNodeId(to_node_id, data)
@@ -301,4 +537,7 @@ function displayData(map, data, params) {
         path.setMap(map);
         map.geniPaths.push(path);
     }
+    setTimeout(makeGrabFunction(map, base_name, params),
+               gec.maps.refreshSeconds * 1000);
+
 }
