@@ -33,7 +33,7 @@ include "db_utils.php";
 // Get information about all sites (aggregates typically)
 function get_aggregate_info()
 {
-    $query = "select id, am_name, am_urn, longitude, latitude from allsites";
+    $query = "select id, am_name, am_urn, longitude, latitude, icon from allsites";
     return get_rows_for_query($query);
 }
 

@@ -120,6 +120,7 @@ class SliceTopologyGenerator:
         self._table_base = opts.table_base
         if self._table_base == None:
             self._table_base = self._slice_urn.split(':')[-1].replace('+slice+', '_')
+            self._table_base = self._table_base.replace('-', '_')
         self._node_table = self._table_base + "_node"
         self._link_table = self._table_base + "_link"
 
@@ -324,7 +325,8 @@ class SliceTopologyGenerator:
         for sliver_urn, sliver_details in self._sliver_info.iteritems():
             agg_urn = sliver_details['SLIVER_INFO_AGGREGATE_URN']
             agg_manifest = self.get_manifest(agg_urn)
-            self._manifest_by_am[agg_urn] = agg_manifest
+            if agg_manifest:
+                self._manifest_by_am[agg_urn] = agg_manifest
 
     # Get manifest for specific AM (V2)
     def get_manifest(self, am_urn):
@@ -339,6 +341,8 @@ class SliceTopologyGenerator:
                    'geni_compressed' : False}
         (result, msg) = _do_ssl(self._framework, suppress_errors, reason, 
                                 fcn,  self._creds, options)
+        if result['code']['geni_code'] != 0:
+            return None
         status = result['value']
         return status
 
@@ -411,6 +415,7 @@ class SliceTopologyGenerator:
 
     # Get list of client_id's on nodes manifest
     def get_aggregate_client_ids(self, agg_urn):
+        if agg_urn not in self._manifest_by_am: return []
         manifest = self._manifest_by_am[agg_urn]
         manifest_doc = parseString(manifest)
         nodes = manifest_doc.getElementsByTagName('node')
@@ -432,6 +437,7 @@ class SliceTopologyGenerator:
         stitched_links = []
         links_by_am = {}
         for agg_urn in self._unique_agg_urns_with_site_info:
+            if agg_urn not in self._manifest_by_am: continue
             manifest = self._manifest_by_am[agg_urn]
             manifest_doc = parseString(manifest)
             manifest_root = manifest_doc.getElementsByTagName('rspec')[0]
@@ -447,6 +453,7 @@ class SliceTopologyGenerator:
         # Save this as a stitched link
         for i in range(len(self._unique_agg_urns_with_site_info)):
             agg_urn = self._unique_agg_urns_with_site_info[i]
+            if agg_urn not in links_by_am: continue
             am_links = links_by_am[agg_urn]
             for am_link in am_links:
                 client_id = am_link.getAttribute('client_id')
@@ -636,6 +643,7 @@ class SliceTopologyGenerator:
             if agg_urn not in self._interface_info_by_site:
                 self._interface_info_by_site[agg_urn] = []
 
+            if agg_urn not in self._manifest_by_am: continue
             manifest = self._manifest_by_am[agg_urn]
             manifest_doc = parseString(manifest)
             nodes = manifest_doc.getElementsByTagName('node')
@@ -692,6 +700,7 @@ class SliceTopologyGenerator:
             agg_status = self._status_by_am[agg_urn]
             agg_site_id = self._sites_info[agg_urn]['id']
             for res in agg_status['geni_resources']:
+                if 'geni_client_id' not in res or 'geni_status' not in res: continue
                 node_name = res['geni_client_id']
                 node_status = res['geni_status']
                 status = self.convert_am_status_to_status(node_status)
