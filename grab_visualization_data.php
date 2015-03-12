@@ -41,7 +41,7 @@ function get_aggregate_info()
 function get_node_info($table_base)
 {
     $table_name = $table_base . "_node";
-    $query = "select id, site_id, name, client_id, zoom_level, status from $table_name";
+    $query = "select id, site_id, name, client_id, zoom_level, status, sender from $table_name";
     return get_rows_for_query($query);
 }
 
@@ -85,8 +85,6 @@ if($base_name == NULL) {
 }
 
 $ch = "ch.geni.net";
-$slice_name = $_GET['slice_name'];
-$project_name = $_GET['project_name'];
 $slice_urn = "urn:publicid:IDN+$ch+$project_name+slice+$slice_name";
 
 // echo "Hello from $slice_urn";

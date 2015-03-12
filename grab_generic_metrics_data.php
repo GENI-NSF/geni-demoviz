@@ -91,7 +91,7 @@ function get_metrics_data($tablename, $metrics, $senders_clause)
    $query = "select sender, ts, $metrics from $tablename where $timespan_clause";
    if ($senders_clause != "")
       $query = $query . " AND $senders_clause";
-   error_log("Q = $query");
+   //   error_log("Q = $query");
    return get_rows_for_query($query);
 }
 
