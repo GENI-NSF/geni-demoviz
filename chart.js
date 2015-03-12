@@ -263,8 +263,8 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     
     data.addRows(rows);
 
-    title = data_type + ' Metrics';
-    if (data_type == 'generic') title = selected_metrics + ' Metrics';
+    title = data_type.charAt(0).toUpperCase() + data_type.slice(1) + ' Metrics';
+    if (data_type == 'generic') title = selected_metrics.charAt(0).toUpperCase() + selected_metrics.slice(1) + ' Metrics';
     if (typeof hideLabels === 'undefined' || hideLabels === false) {
 	var options = {
 	    titleTextStyle: {
