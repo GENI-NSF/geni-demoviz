@@ -605,7 +605,8 @@ class SliceTopologyGenerator:
         # Create a database based on the slice_urn (if not already exists)
         conn = self._db_engine.connect()
         create_template = "create table %s (id serial primary key, " + \
-            "site_id integer, name varchar, client_id varchar, zoom_level integer default 0, status varchar)";
+            "site_id integer, name varchar, client_id varchar, zoom_level integer default 0, " + \
+            "status varchar, sender varchar)";
         create_statement =  create_template % self._node_table
         try:
             conn.execute(create_statement);

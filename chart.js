@@ -165,6 +165,7 @@ function fillRow(data_type, row, metric, sender_index, selected_metrics) {
 // Fill in null entries by interpolating between adjacent points
 function interpolateRows(rows) {
     var num_rows = rows.length;
+    if (num_rows == 0) return;
     var num_cols = rows[0].length;
     // Skip the first 'ts' column
     for(var col = 1; col < num_cols; col++) {
