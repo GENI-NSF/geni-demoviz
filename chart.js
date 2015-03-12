@@ -244,6 +244,16 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     var data = new google.visualization.DataTable();
     data.addColumn('number', 'TS');
 
+    // If no specific metrics are selected,
+    // then show 'user' for 'cpu', and 'used' for 'memory'
+    if (selected_metrics == '') {
+	if (data_type == 'cpu') {
+	    selected_metrics = 'user';
+	} else if (data_type == 'memory') {
+	    selected_metrics = 'used';
+	}
+    }
+
     for(var unique_sender in unique_senders) {
         addColumns(data_type, data, unique_sender, senders, selected_metrics);
     }
