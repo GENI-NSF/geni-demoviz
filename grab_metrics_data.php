@@ -46,6 +46,11 @@ if(array_key_exists('data_type', $_GET)) {
   $data_type = $_GET['data_type'];
 }
 
+$seconds = 120;
+if(array_key_exists('seconds', $_GET)) {
+  $seconds = $_GET['seconds'];
+}
+
 // Check if this is one of the recognized data types
 if($data_type != 'cpu' && $data_type != 'memory' && $data_type != 'network') {
       error_log("Unrecognized data type: " . $data_type);
@@ -53,30 +58,33 @@ if($data_type != 'cpu' && $data_type != 'memory' && $data_type != 'network') {
 }
 
 // Get CPU data from the database
-function get_cpu_data()
+function get_cpu_data($seconds=null)
 {
    return get_metrics_data('100*c.user/c.total as user, 100*c.sys/c.total as sys, 100*c.idle/c.total as idle', 
-   'nmetrics_cpu');
+			   'nmetrics_cpu', $seconds);
 }
 
 // Get Memory data from the database
-function get_memory_data()
+function get_memory_data($seconds=null)
 {
    return get_metrics_data('100*c.used/c.total as used, 100*c.free/c.total as free, ' . 
    '100*c.actual_used/c.total as actual_used, 100*c.actual_free/c.total as actual_free',
-   'nmetrics_memory');
+			   'nmetrics_memory', $seconds);
 }
 
 // Get network data from the database
-function get_network_data()
+function get_network_data($seconds=null)
 {
-   return get_metrics_data('c.rx_bytes, c.tx_bytes', 'nmetrics_network');
+  return get_metrics_data('c.rx_bytes, c.tx_bytes', 'nmetrics_network', $seconds);
 }
 
 // A timespan clause causes us to only get the most recent data (N seconds)
-function get_timespan_clause($tablename)
+function get_timespan_clause($tablename, $seconds=null)
 {
     global $senders_clause;
+    if (is_null($seconds)) {
+      $seconds = 120;
+    }
     $qualifier = "";
     if ($senders_clause != "") $qualifier = " WHERE $senders_clause";
     return "(oml_ts_client + 120) > (select max(oml_ts_client) from $tablename $qualifier)";
@@ -84,10 +92,10 @@ function get_timespan_clause($tablename)
 
 // Get all the data for the given query 
 // (which data, fields from which table with which timespan)
-function get_metrics_data($fields, $tablename)
+function get_metrics_data($fields, $tablename, $seconds=null)
 {
    global $senders_clause;
-   $timespan_clause = get_timespan_clause($tablename);
+   $timespan_clause = get_timespan_clause($tablename, $seconds);
    $query = "select c.oml_sender_id, s.name as sender, c.oml_ts_client as ts, " . 
    "$fields from $tablename as c, _senders as s where $timespan_clause and c.oml_sender_id = s.id";
    if ($senders_clause != "")
@@ -99,11 +107,11 @@ $data = array();
 
 // Top level code: grab the right data and return as JSON
 if ($data_type == 'cpu')
-   $data= get_cpu_data();
+   $data= get_cpu_data($seconds);
 else if ($data_type == 'memory')
-   $data = get_memory_data();
+   $data = get_memory_data($seconds);
 else
-   $data = get_network_data();
+   $data = get_network_data($seconds);
 
 print json_encode($data);
 

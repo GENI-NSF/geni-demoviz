@@ -74,20 +74,28 @@ if($tablename == "") {
       exit;
 }
 
+$seconds = 120;
+if(array_key_exists('seconds', $_GET)) {
+  $seconds = $_GET['seconds'];
+}
+
 // A timespan clause causes us to only get the most recent data (N seconds)
-function get_timespan_clause($tablename)
+function get_timespan_clause($tablename, $seconds=null)
 {
     global $senders_clause;
     $qualifier = "";
+    if (is_null($seconds)) {
+      $seconds = 120;
+    }
     if ($senders_clause != "") $qualifier = " WHERE $senders_clause";
-    return "(ts + 120) > (select max(ts) from $tablename $qualifier)";
+    return "(ts + $seconds) > (select max(ts) from $tablename $qualifier)";
 }
 
 // Get all the data for the given query 
 // (which data, fields from which table with which timespan)
-function get_metrics_data($tablename, $metrics, $senders_clause)
+function get_metrics_data($tablename, $metrics, $senders_clause, $seconds=null)
 {
-   $timespan_clause = get_timespan_clause($tablename);
+  $timespan_clause = get_timespan_clause($tablename, $seconds);
    $query = "select sender, ts, $metrics from $tablename where $timespan_clause";
    if ($senders_clause != "")
       $query = $query . " AND $senders_clause";
@@ -97,7 +105,7 @@ function get_metrics_data($tablename, $metrics, $senders_clause)
 
 $data = array();
 
-$data = get_metrics_data($tablename, $metrics, $senders_clause);
+$data = get_metrics_data($tablename, $metrics, $senders_clause, $seconds);
 print json_encode($data);
 
 

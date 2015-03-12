@@ -28,15 +28,18 @@ function metric_enabled(metric, selected_metrics) {
 
 // This is called once the Google chart stuff is loaded. We then grab the data and
 // plot the char
-function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, hideLabels) {
-    var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders;
+function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, hideLabels, seconds) {
+    if (typeof seconds === 'undefined') {
+	seconds = 120;
+    }
+    var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders + '&seconds=' + seconds;
     if (data_type == 'generic') {
         url = 'grab_generic_metrics_data.php?tablename=' + tablename + '&senders=' + senders + '&metrics=' + selected_metrics
 	    }
     $.getJSON(url, 
               function(data) { 
 		  // In the return from the $.getJSON call to grab_metrics_data we plot the data
-		  drawChart(data, senders, selected_metrics, chartdiv, data_type, tablename, hideLabels); 
+		  drawChart(data, senders, selected_metrics, chartdiv, data_type, tablename, hideLabels, seconds); 
 	      });
 };
 
@@ -225,7 +228,7 @@ function computeDeltas(rows, metric_data) {
 
 // Draw the chart by grabbing the data, creating the table
 // adding the columns and then adding the rows
-function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename, hideLabels)
+function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename, hideLabels, seconds)
 {
     var unique_senders = {}
     var num_unique_senders = 0;
@@ -321,7 +324,7 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	chart.draw(data, options);
 
     // Refresh every 5 seconds
-    setTimeout(function() {drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, hideLabels);}, 5000);
+    setTimeout(function() {drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, hideLabels, seconds);}, 5000);
 
 }
 
