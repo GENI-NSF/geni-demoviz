@@ -30,7 +30,8 @@ function metric_enabled(metric, selected_metrics) {
 // plot the char
 function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, hideLabels, seconds) {
     if (typeof seconds === 'undefined') {
-	seconds = 120;
+	var url_params = getURLParameters();
+	seconds = Number(url_params.seconds) || 120;
     }
     var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders + '&seconds=' + seconds;
     if (data_type == 'generic') {
