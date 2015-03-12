@@ -452,7 +452,15 @@ function showMapChart(evt, site_id) {
                         "height": "150px"});
         elementDiv.draggable();
         //$("#" + element_id).resizable();
-        drawVisualization(chartType, "1", "", "", chart_id, true);
+        var senders = "1";
+        var tablename = "";
+        var selected_metrics = "";
+        var chartdiv = chart_id;
+        var showXAxis = false;
+        var seconds = undefined;
+        var chartTitle = "";
+        drawVisualization(chartType, senders, tablename, selected_metrics,
+                          chartdiv, showXAxis, seconds, chartTitle);
     }, 100);
 }
 
