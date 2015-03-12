@@ -215,8 +215,9 @@ if (array_key_exists('tablename5', $_GET)) {
 	if ($data_type1 != 'none') {
 	  print <<< EOF
 	<script>
+	  //	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true, 240);
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true, 240);
+	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true, 240, 'My Custom Title');
 	  });
 	</script>
 EOF;
