@@ -31,7 +31,6 @@ function metric_enabled(metric, selected_metrics) {
 function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, hideLabels) {
     var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders;
     if (data_type == 'generic') {
-	if (typeof hideLabels == "undefined") hideLabels=true;
         url = 'grab_generic_metrics_data.php?tablename=' + tablename + '&senders=' + senders + '&metrics=' + selected_metrics
 	    }
     $.getJSON(url, 
@@ -176,6 +175,7 @@ function interpolateRows(rows) {
 		else if (i < num_rows-1 && rows[i+1][col] != null)
 	            rows[i][col] = rows[i+1][col];
             }
+	    rows[i][0] = i; // Set TS to sequential count, not actual (meaningless) TS
 	}
     }
 }
