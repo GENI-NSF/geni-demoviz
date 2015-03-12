@@ -158,7 +158,7 @@ def main():
     sd = DataSynchronizer();
     while True:
         sd.run()
-        time.sleep(5)
+        time.sleep(2)
 
 
 
