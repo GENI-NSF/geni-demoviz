@@ -263,11 +263,13 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     
     data.addRows(rows);
 
+    title = data_type + ' Metrics';
+    if (data_type == 'generic') title = selected_metrics + ' Metrics';
     if (typeof hideLabels === 'undefined' || hideLabels === false) {
 	var options = {
-	    title: data_type + ' Metrics',
+		title: title,
             chart: {
-		title: data_type + ' Metrics'
+		    title: title,
 	    },
 	    chartArea: {
 		height: '65%',
@@ -278,9 +280,9 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	// axisTitlesPosition
 	// vAxis.textPosition
 	var options = {
-	    title: data_type + ' Metrics',
+	    title: title,
             chart: {
-		title: data_type + ' Metrics'
+		title: title,
 	    },
 	    chartArea: {
 		height: '80%',
