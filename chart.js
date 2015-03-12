@@ -62,7 +62,7 @@ function addMetricColumn(data, num_senders, num_metrics, metric, unique_sender) 
     } else if (num_metrics == 1) {
 	data.addColumn('number', unique_sender);
     } else {
-	data.addColumn('number', metric + unique_sender);
+	data.addColumn('number', metric + ' ' + unique_sender);
     }
 }
 
