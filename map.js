@@ -181,13 +181,26 @@ function showMapChart(evt, site_id) {
 function createSiteMarker(map, site_id, site_count, site_coords) {
     var site_radius = 5 * site_count;
     var title = site_id.toString();
+	var geni_icon = {
+	    url: geni_image,
+	    origin: new google.maps.Point(2*site_radius, 2*site_radius),
+	    scaledSize: new google.maps.Size(4*site_radius,4*site_radius)
+	};
+	var micr_icon = {
+	    url: micr_image,
+	    scaledSize: new google.maps.Size(5*site_radius,6*site_radius)
+	};
+	if (site_id % 2 == 0) {
+	    geni_icon = micr_icon;
+	}
     var marker = new google.maps.Marker({
         position: site_coords,
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: site_radius,
-            strokeWeight: 1,
-        },
+	icon: geni_icon,
+//        icon: {
+//            path: google.maps.SymbolPath.CIRCLE,
+//            scale: site_radius,
+//            strokeWeight: 1,
+//        },
         title: title,
         map: map
     });
@@ -228,6 +241,8 @@ function displayData(map, data, params) {
         }
         site_counts[site_id] = site_counts[site_id] + 1;
     }
+    var geni_image = 'geni_globe.png';
+    var micr_image = 'http://upload.wikimedia.org/wikipedia/commons/f/fe/Octicons-microscope.svg';
     for(var site_id in site_counts) {
         var site_count = site_counts[site_id];
         var site_coords = getCoordsForSiteId(site_id, data);

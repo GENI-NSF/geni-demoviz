@@ -216,7 +216,7 @@ if (array_key_exists('tablename5', $_GET)) {
 	  print <<< EOF
 	<script>
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1');
+	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true);
 	  });
 	</script>
 EOF;

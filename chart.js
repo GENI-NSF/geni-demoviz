@@ -264,6 +264,14 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     if (typeof hideLabels === 'undefined' || hideLabels === false) {
 	var options = {
 	    title: data_type + ' Metrics',
+	    titleTextStyle: {
+		fontSize: 16
+	    },
+	    vAxis: {
+		textStyle: {
+		    fontSize: 10
+		}
+	    },
             chart: {
 		title: data_type + ' Metrics'
 	    },
@@ -277,11 +285,19 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	// vAxis.textPosition
 	var options = {
 	    title: data_type + ' Metrics',
+	    titleTextStyle: {
+		fontSize: 16
+	    },
+	    vAxis: {
+		textStyle: {
+		    fontSize: 10
+		}
+	    },
             chart: {
 		title: data_type + ' Metrics'
 	    },
 	    chartArea: {
-		height: '80%',
+		height: '75%',
 		width: '85%'
 	    },
 	    legend: {
