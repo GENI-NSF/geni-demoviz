@@ -87,10 +87,16 @@ class DataSynchronizer:
        self.check_options(opts)
        return opts
 
+    # Insert link status update statement                                                                                             
     def link_statement(self, sql_file, host, status):
         update_statement = "update %s set status = '%s' where link_id = '%s-link';\n" % \
             (self._opts.dbtable_link, status, host)
         sql_file.write(update_statement);
+
+    # Delete all entries for given host                                                                                               
+    def clear_statement(self, sql_file, host):
+        delete_statement = "delete from %s where sender = '%s';\n" % (self._opts.dbtable, host)
+        sql_file.write(delete_statement);
 
     # Parse given file (indicated by name and towards_sl)                                        
     # If exists, parse and generate insert statements                                            
@@ -139,6 +145,8 @@ class DataSynchronizer:
             else:
                 # Disable link                                                                   
                 self.link_statement(sql_file, host, 'down');
+                self.clear_statement(sql_file, host);
+		self._latest_time_per_host[host] = None
 
 
         # Add 'commit';                                                                          
