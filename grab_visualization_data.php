@@ -53,6 +53,33 @@ function get_link_info($table_base)
     return get_rows_for_query($query);
 }
 
+// Get information about interfaces by senders
+function get_senders_interface_info($senders)
+{
+  $query = "select distinct name, oml_sender_id from nmetrics_network";
+  if (count($senders) > 0) {
+    $senders_string = "";
+    $first = true;
+    foreach($senders as $sender) {
+      if (!$first) $senders_string = $senders_string . ",";
+      $first = false;
+      $senders_string = $senders_string . $sender;
+    }
+    $query = $query . " where oml_sender_id in (" .  $senders_string . ")";
+  }
+  $rows = get_rows_for_query($query);
+  $interfaces_by_sender = array();
+  foreach( $rows as $row) {
+    $sender = $row['oml_sender_id'];
+    $interface = $row['name'];
+    if (!(array_key_exists($sender, $interfaces_by_sender))) {
+      $interfaces_by_sender[$sender] = array();
+    }
+    $interfaces_by_sender[$sender][] = $interface;
+  }
+  return $interfaces_by_sender;
+}
+
 // Required arguments in $_GET (on URL PUT)
 //    slice_urn
 
@@ -103,11 +130,25 @@ $node_info = get_node_info($base_name);
 $link_info = get_link_info($base_name);
 //error_log("LINKS = " . print_r($link_info, true));
 
+$nodes_by_sender = array();
+$unique_senders_assoc = array();
+foreach($node_info as $node) {
+  if ($node['sender'] != NULL) {
+    $sender = $node['sender'];
+    $unique_senders_assoc[$sender] = true;
+    $nodes_by_sender[$sender] = $node;
+  }
+}
+$unique_senders = array_keys($unique_senders_assoc);
+
+$senders_interface_info = get_senders_interface_info($unique_senders);
+
 // Top level code: Get the sites/nodes/links data
 // and return as JSON
 $data = array('sites' => $agg_info, 
-      'nodes' => $node_info, 
-      'links' => $link_info);
+	      'nodes' => $node_info, 
+	      'links' => $link_info,
+	      'interfaces' => $senders_interface_info);
 print json_encode($data);
 
 
