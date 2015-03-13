@@ -295,19 +295,61 @@ gec.maps.Site.prototype.createMarker = function() {
 
 gec.maps.Site.prototype.mapClick = function() {
     var that = this;
-    var showLink = $("<a/>", {
-        text: "Show Chart",
-        href: "javascript:;"
-    });
-    var infowindow = new google.maps.InfoWindow();
+    var outerDiv = $("<div/>");
 
-    showLink.click(function(event) {
-        console.log("site clicked " + that.name);
-        that.showChart(event);
-        infowindow.close();
-    });
-    infowindow.setContent(showLink[0]);
+    // Show the site name
+    outerDiv.append($("<b/>", { text: this.name }));
+    outerDiv.append($("<br/>"));
 
+    var nodes = $.grep(this.nodes, function(n) { return n.sender; });
+
+    if (nodes.length > 0) {
+
+        // Add the chart node chooser
+        var nodeSelector = $("<select/>");
+        $.each(this.nodes, function(i, n) {
+            var nodeOption = $("<option/>", {
+                value: n.sender,
+                text: n.name
+            });
+            nodeSelector.append(nodeOption);
+        });
+        outerDiv.append(nodeSelector);
+
+        // Add the chart type chooser
+        outerDiv.append($("<br/>"));
+        var chartSelector = $("<select/>");
+        $.each(["cpu", "memory", "network"],
+               function(i, t) {
+                   var chartOption = $("<option/>", {
+                       value: t,
+                       text: t
+                   });
+                   chartSelector.append(chartOption);
+               });
+        outerDiv.append(chartSelector);
+
+        // Add the "Show Chart" link
+        outerDiv.append($("<br/>"));
+        var showLink = $("<a/>", {
+            text: "Show Chart",
+            href: "javascript:;"
+        });
+        outerDiv.append(showLink);
+
+        var infowindow = new google.maps.InfoWindow();
+
+        showLink.click(function(event) {
+            console.log("site clicked " + that.name);
+            that.showChart(event, nodeSelector, chartSelector);
+            infowindow.close();
+        });
+        infowindow.setContent(outerDiv[0]);
+    } else {
+        outerDiv.append("<br/>").append("No nodes are reporting data");
+        var infowindow = new google.maps.InfoWindow();
+        infowindow.setContent(outerDiv[0]);
+    }
     infowindow.open(this.map, this.marker);
 };
 
@@ -318,30 +360,28 @@ gec.maps.Site.prototype.addNode = function (node) {
     this.nodes.push(node);
 };
 
-gec.maps.Site.prototype.randomChartType = function(i) {
-    var chartTypes = ["memory", "cpu", "network"];
-    var chartType = chartTypes[Number(i) % chartTypes.length];
-    return chartType;
-};
-
-gec.maps.Site.prototype.showChart = function(event) {
+gec.maps.Site.prototype.showChart = function(event, nodeSelector,
+                                             chartSelector) {
     var site_id = this.id;
     var uid = chart_counter++;
     var idBase = "site" + site_id + "-" + uid;
-    var chartType = this.randomChartType(uid);
+    var chartType = chartSelector.val();
+    var sender = nodeSelector.val();
+    var nodeName = nodeSelector.children(':selected').text();
+    var chartTitle = nodeName + " " + chartType;
     var chartOpts = {
         x: event.pageX,
         y: event.pageY,
         siteId: site_id,
         idBase: idBase,
         // FIXME: get node, then sender from node
-        senders: "1",
+        senders: sender,
         showXAxis: false,
         tablename: undefined,
         selectedMetrics: undefined,
         seconds: undefined,
         chartType: chartType,
-        chartTitle: "Site " + site_id + " " + chartType
+        chartTitle: chartTitle
     };
     showMapChart(chartOpts);
 };
