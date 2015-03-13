@@ -291,6 +291,11 @@ class SliceTopologyGenerator:
         (result, msg) = _do_ssl(self._framework, suppress_errors, reason, fcn,  {})
         self._aggregate_info = result['value']
 
+        # Add additional aggregates not in SR
+        wix = {'SERVICE_URL' : 'http://wixam.maxgigapop.net:12346',
+               'SERVICE_NAME' : 'WIX',
+               'SERVICE_URN' : 'urn:publicid:IDN+wix.internet2.edu+authority+am'}
+        self._aggregate_info.append(wix)
 
     # Find the aggregate info for given am_urn
     def get_agg_info_for_urn(self, am_urn):
@@ -310,6 +315,9 @@ class SliceTopologyGenerator:
     # Get sliver status for particular AM (V2)
     def get_sliver_status(self, am_urn):
         am_info = self.get_agg_info_for_urn(am_urn)
+        if am_info == None: 
+            print "AM not registered: %s" % am_urn
+            return None
         am_url = am_info['SERVICE_URL']
         client = self.get_client(am_url)
         fcn = eval('client.SliverStatus')
@@ -331,6 +339,9 @@ class SliceTopologyGenerator:
     # Get manifest for specific AM (V2)
     def get_manifest(self, am_urn):
         am_info = self.get_agg_info_for_urn(am_urn)
+        if am_info == None: 
+            print "AM not registered: %s" % am_urn
+            return None
         am_url = am_info['SERVICE_URL']
         client = self.get_client(am_url)
         fcn = eval('client.ListResources')
@@ -513,15 +524,22 @@ class SliceTopologyGenerator:
             am2_node_name = self.lookup_node_for_interface(am2_urn, am2_if)
             am2_node_id = self.lookup_node_id(am2_site_id, am2_node_name)
             link_status = 'unknown'
-            print "   LINK %s <-> %s (%s) %d %d"  % \
-                (am1_urn, am2_urn, link_id, am1_node_id, am2_node_id)
-            insert_template = "insert into %s (from_id, from_if_name, " + \
-                "to_id, to_if_name, status, link_id) values " +\
-                "(%d, '%s', %d, '%s', '%s', '%s')"
+            if am1_node_id == None:
+                print "Unknown node: URN %s IF %s NAME %s" % (am1_urn, am2_if, am2_node_name)
+            if am2_node_id == None:
+                print "Unknown node: URN %s IF %s NAME %s" % (am2_urn, am2_if, am2_node_name)
+            if am1_node_id is not None and am2_node_id is not None:
+                print "   LINK %s <-> %s (%s) %d %d"  % \
+                    (am1_urn, am2_urn, link_id, am1_node_id, am2_node_id)
+                insert_template = "insert into %s (from_id, from_if_name, " + \
+                    "to_id, to_if_name, status, link_id) values " +\
+                    "(%d, '%s', %d, '%s', '%s', '%s')"
 
-            insert_stmt = insert_template % (self._link_table, am1_node_id, physical_interface1, \
-                                                 am2_node_id, physical_interface2, link_status, link_id)
-            insert_stmts.append(insert_stmt)
+                insert_stmt = insert_template % (self._link_table, am1_node_id, 
+                                                 physical_interface1, 
+                                                 am2_node_id, physical_interface2,
+                                                 link_status, link_id)
+                insert_stmts.append(insert_stmt)
 
         trans = conn.begin() # Open transaction
         try:
@@ -585,6 +603,7 @@ class SliceTopologyGenerator:
         for agg_urn in self._unique_agg_urns:
 
             agg_info = self.get_agg_info_for_urn(agg_urn)
+            if agg_info == None: continue
             agg_url = agg_info['SERVICE_URL']
             agg_name = agg_info['SERVICE_NAME']
             status = 'unknown'
@@ -605,8 +624,8 @@ class SliceTopologyGenerator:
         # Create a database based on the slice_urn (if not already exists)
         conn = self._db_engine.connect()
         create_template = "create table %s (id serial primary key, " + \
-            "site_id integer, name varchar, client_id varchar, zoom_level integer default 0, " + \
-            "status varchar, sender varchar)";
+            "site_id integer, name varchar, client_id varchar, " + \
+            "zoom_level integer default 0, status varchar, sender varchar)";
         create_statement =  create_template % self._node_table
         try:
             conn.execute(create_statement);
@@ -700,6 +719,7 @@ class SliceTopologyGenerator:
         for agg_urn in self._unique_agg_urns_with_site_info:
             agg_status = self._status_by_am[agg_urn]
             agg_site_id = self._sites_info[agg_urn]['id']
+            if agg_status is None: continue
             for res in agg_status['geni_resources']:
                 if 'geni_client_id' not in res or 'geni_status' not in res: continue
                 node_name = res['geni_client_id']
