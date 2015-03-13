@@ -205,7 +205,7 @@ function interpolateRows(rows) {
 // Make the values in slot X = slot(X)-slot(X-1) 
 // Where slot(X-1) is the previous entry for that sender
 // Put Slot(0) = Slot(1)
-function computeDeltas(rows, metric_data) {
+function computeDeltas(rows, metric_data, compute_rate) {
     var num_rows = rows.length;
 
     var current_by_sender = {};
@@ -235,6 +235,10 @@ function computeDeltas(rows, metric_data) {
 	    var pred_index = predecessors[row];
 	    if (pred_index > -1) {
 		rows[row][col] = rows[row][col] - rows[pred_index][col];
+		if (compute_rate){
+		    var delta_t = rows[row][0] - rows[pred_index][0];
+		    rows[row][col] = rows[row][col]/delta_t;
+		}
 	    } else {
 		var succ_index = successors[row];
 		rows[row][col] = rows[succ_index][col];
@@ -293,8 +297,10 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 
     if (rows.length > 0) {
 	interpolateRows(rows);
-	if (data_type ==  'network' || data_type == 'cpu')
-	    computeDeltas(rows, metric_data);
+	if (data_type ==  'network')
+	    computeDeltas(rows, metric_data, true);
+	else if (data_type == 'cpu')
+	    computeDeltas(rows, metric_data, false);
         data.addRows(rows);
     }
 
