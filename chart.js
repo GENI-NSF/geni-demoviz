@@ -300,7 +300,9 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 
     var split_metrics = selected_metrics.split(',');
     var num_metrics = split_metrics.length;
-
+    if (data_type == 'network') {
+	if (selected_metrics === '') num_metrics = 2;
+    }
     // Calculate chart title
     // 1 sender & 1 metric: sender metric data_type
     // 1 sender mult metrics: sender data_Type metrics
@@ -315,7 +317,7 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	if (data_type == 'generic') title = initCase(sender) + " " + initCase(selected_metrics);
 	showLegend = 'none';
     } else if (num_unique_senders == 1) {
-	title = initCase(sender) + title;
+	title = initCase(sender) + " " + title;
 	// Legend lists metric not sender
 	showLegend = 'right';
     } else if (num_metrics == 1) {
