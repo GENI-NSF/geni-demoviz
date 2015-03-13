@@ -60,7 +60,7 @@ if($data_type != 'cpu' && $data_type != 'memory' && $data_type != 'network') {
 // Get CPU data from the database
 function get_cpu_data($seconds=null)
 {
-   return get_metrics_data('100*c.user/c.total as user, 100*c.sys/c.total as sys, 100*c.idle/c.total as idle', 
+   return get_metrics_data('c.user/100 as user, c.sys/100 as sys, c.idle/100 as idle', 
 			   'nmetrics_cpu', $seconds);
 }
 
