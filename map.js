@@ -302,58 +302,63 @@ gec.maps.Site.prototype.createMarker = function() {
     return marker;
 };
 
-gec.maps.Site.prototype.mapClick = function() {
+gec.maps.Site.prototype.makeChartUI = function(parent) {
+    // For the closure for inner functions
     var that = this;
+
+    // Add the chart node chooser
+    var nodeSelector = $("<select/>");
+    $.each(this.nodes, function(i, n) {
+        var nodeOption = $("<option/>", {
+            value: n.id,
+            text: n.name
+        });
+        nodeSelector.append(nodeOption);
+    });
+    parent.append(nodeSelector);
+
+    // Add the chart type chooser
+    parent.append($("<br/>"));
+    var chartSelector = $("<select/>");
+    $.each(["cpu", "memory", "network"],
+           function(i, t) {
+               var chartOption = $("<option/>", {
+                   value: t,
+                   text: t
+               });
+               chartSelector.append(chartOption);
+           });
+    parent.append(chartSelector);
+
+    // Add the "Show Chart" link
+    parent.append($("<br/>"));
+    var showLink = $("<a/>", {
+        text: "Show Chart",
+        href: "javascript:;"
+    });
+    parent.append(showLink);
+
+    var infowindow = new google.maps.InfoWindow();
+
+    showLink.click(function(event) {
+        console.log("site clicked " + that.name);
+        that.showChart(event, nodeSelector, chartSelector);
+        infowindow.close();
+    });
+    infowindow.setContent(parent[0]);
+    return infowindow;
+};
+
+gec.maps.Site.prototype.mapClick = function() {
     var outerDiv = $("<div/>");
 
     // Show the site name
     outerDiv.append($("<b/>", { text: this.name }));
     outerDiv.append($("<br/>"));
 
-    var nodes = $.grep(this.nodes, function(n) { return n.sender; });
-
-    if (nodes.length > 0) {
-
-        // Add the chart node chooser
-        var nodeSelector = $("<select/>");
-        $.each(this.nodes, function(i, n) {
-            var nodeOption = $("<option/>", {
-                value: n.sender,
-                text: n.name
-            });
-            nodeSelector.append(nodeOption);
-        });
-        outerDiv.append(nodeSelector);
-
-        // Add the chart type chooser
-        outerDiv.append($("<br/>"));
-        var chartSelector = $("<select/>");
-        $.each(["cpu", "memory", "network"],
-               function(i, t) {
-                   var chartOption = $("<option/>", {
-                       value: t,
-                       text: t
-                   });
-                   chartSelector.append(chartOption);
-               });
-        outerDiv.append(chartSelector);
-
-        // Add the "Show Chart" link
-        outerDiv.append($("<br/>"));
-        var showLink = $("<a/>", {
-            text: "Show Chart",
-            href: "javascript:;"
-        });
-        outerDiv.append(showLink);
-
-        var infowindow = new google.maps.InfoWindow();
-
-        showLink.click(function(event) {
-            console.log("site clicked " + that.name);
-            that.showChart(event, nodeSelector, chartSelector);
-            infowindow.close();
-        });
-        infowindow.setContent(outerDiv[0]);
+    var nodesWithSenders = $.grep(this.nodes, function(n) { return n.sender; });
+    if (nodesWithSenders.length > 0) {
+        var infowindow = this.makeChartUI(outerDiv);
     } else {
         outerDiv.append("<br/>").append("No nodes are reporting data");
         var infowindow = new google.maps.InfoWindow();
@@ -375,7 +380,19 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
     var uid = chart_counter++;
     var idBase = "site" + site_id + "-" + uid;
     var chartType = chartSelector.val();
-    var sender = nodeSelector.val();
+    var nodeId = nodeSelector.val();
+    var node = gec.maps.getNode(nodeId);
+    var senders = []
+    var interfaces = []
+    if (node.interfaces.length) {
+        $.each(node.interfaces, function(idx, ifc) {
+            interfaces.push(ifc);
+            senders.push(node.sender);
+        });
+    } else {
+        senders.push(node.sender);
+    }
+
     var nodeName = nodeSelector.children(':selected').text();
     var chartTitle = nodeName + " " + chartType;
     var chartOpts = {
@@ -383,8 +400,8 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
         y: event.pageY,
         siteId: site_id,
         idBase: idBase,
-        // FIXME: get node, then sender from node
-        senders: sender,
+        senders: senders.join(),
+        interfaces: interfaces.join(),
         showXAxis: false,
         tablename: undefined,
         selectedMetrics: undefined,
@@ -533,6 +550,6 @@ function showMapChart(opts) {
                           // chart.js chokes on undefined
                           copts.selectedMetrics || "",
                           chart_id, copts.showXAxis, copts.seconds,
-                          copts.chartTitle);
+                          copts.chartTitle, copts.interfaces);
     }, 100);
 }
