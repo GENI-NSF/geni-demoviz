@@ -301,8 +301,35 @@ gec.maps.Site.prototype.makeMarker = function () {
 gec.maps.Site.prototype.updateMarker = function () {
     // If there is a marker, remove it from the map.
     this.marker && this.marker.setMap(null);
-    this.marker = createSiteMarker(this.map, this.id, this.nodes.length,
-                                   this.latLng, this.makeMarker());
+    this.marker = this.createMarker();
+};
+
+gec.maps.Site.prototype.createMarker = function() {
+    var marker = new google.maps.Marker({
+        position: this.latLng,
+	icon: this.makeMarker(),
+        title: this.name,
+        map: this.map
+    });
+
+    // For the closure...
+    var that = this;
+    google.maps.event.addListener(marker, 'click',
+                                  function(evt) {
+                                      that.mapClick(evt);
+                                  });
+    return marker;
+};
+
+gec.maps.Site.prototype.mapClick = function() {
+    var content = $("#site-iw").clone();
+    var showLink = content.find("#show-chart");
+    showLink.attr("onclick", "gec.maps.showChart(event)");
+    showLink.attr("class", this.id);
+    var infowindow = new google.maps.InfoWindow({
+        content: content[0].outerHTML
+    });
+    infowindow.open(this.map, this.marker);
 };
 
 /*
