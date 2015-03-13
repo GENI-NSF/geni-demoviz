@@ -121,7 +121,6 @@ gec.maps = {
 
     randomChartType: function(i) {
         var chartTypes = ["memory", "cpu", "network"];
-        // chart_counter is a global
         var chartType = chartTypes[Number(i) % chartTypes.length];
         return chartType;
     },
@@ -366,18 +365,7 @@ function initialize() {
     var base_name = url_params.base_name || 'lwtesting_stitchtest';
     // Let the map show up, then paint the experiment data
     // momentarily (200 millis).
-    //setTimeout(makeGrabFunction(map, base_name, url_params), 1000);
     setTimeout(makeInitFunction(map, base_name, url_params), 100);
-    //setInterval(makeGrabFunction(map, base_name, url_params), 5 * 1000);
-}
-
-function makeGrabFunction(map, base_name, params) {
-    return function() {
-        $.getJSON('grab_visualization_data.php?base_name=' + base_name,
-                  function(data) {
-                      displayData(data, map, base_name, params);
-                  })
-    };
 }
 
 function makeInitFunction(map, base_name, params) {
@@ -387,80 +375,6 @@ function makeInitFunction(map, base_name, params) {
                       gec.maps.initData(data, map, base_name, params);
                   })
     };
-}
-
-
-// Get site info by site_id
-function getSiteById(site_id, data)
-{
-    for(var i = 0; i < data.sites.length; i++) {
-        var site = data.sites[i];
-        if(site.id == site_id)
-            return site;
-    }
-    return null;
-}
-
-// Get coordinates object for given site_id
-function getCoordsForSiteId(site_id, data)
-{
-    var site = getSiteById(site_id, data);
-    return new google.maps.LatLng(site.latitude, site.longitude);
-}
-
-// Get icon for given site_id
-function getIconForSiteId(site_id, data, site_count)
-{
-    var site = getSiteById(site_id, data);
-    var site_radius = 4 * site_count;
-//    if (site_radius < 6) {
-//	site_radius = 6;
-//    }
-    if (typeof site.icon !== 'undefined' && site.icon !== 'null' && site.icon !== '') {
-	return {
-	    url: site.icon,
-	    anchor: new google.maps.Point(2*site_radius, 2*site_radius),
-	    scaledSize: new google.maps.Size(3*site_radius,3*site_radius)
-	};
-    }
-	
-//    var geni_image = 'geni_globe.png';
-//    var micr_image = 'http://upload.wikimedia.org/wikipedia/commons/f/fe/Octicons-microscope.svg';
-//    var geni_icon = {
-//	url: geni_image,
-//	anchor: new google.maps.Point(2*site_radius, 2*site_radius),
-//	scaledSize: new google.maps.Size(3*site_radius,3*site_radius)
-//    };
-//    var micr_icon = {
-//	url: micr_image,
-//	anchor: new google.maps.Point(site_radius, 2*site_radius),
-//	scaledSize: new google.maps.Size(2*site_radius,3*site_radius)
-//    };
-    var default_icon = {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: site_radius,
-        strokeWeight: 1,
-//	strokeColor: "sienna"
-    };
-//    if (site_id % 3 == 0) {
-	return default_icon;
-//    } else if (site_id % 2 == 0) {
-//	return geni_icon;
-//    } else {
-//	return micr_icon;
-//    }
-}
-
-// Get coordinates for a given node (from its site id)
-function getCoordsForNodeId(node_id, data)
-{
-    for(var i = 0; i < data.nodes.length; i++) {
-        var node = data.nodes[i];
-        if(node.id == node_id) {
-            return getCoordsForSiteId(node.site_id, data);
-        }
-    }
-    return null;
 }
 
 // Draw the map
@@ -559,97 +473,4 @@ function showMapChart(opts) {
                           chart_id, copts.showXAxis, copts.seconds,
                           copts.chartTitle);
     }, 100);
-}
-
-function createSiteMarker(map, site_id, site_count, site_coords, site_icon) {
-    var title = site_id.toString();
-    var marker = new google.maps.Marker({
-        position: site_coords,
-	icon: site_icon,
-        title: title,
-        map: map
-    });
-    var iw_text = "Site " + site_id + "<br/> "
-        //+ '<a href="http://www.google.com/">google</a>'
-        + '<img src="https://portal.geni.net/images/VM-noTxt-centered.svg"'
-        + ' height="20" width="20" draggable="true"'
-        + ' ondragstart="dragSite(event, ' + site_id + ')"'
-        + '/>' ;
-
-
-    var content = $("#site-iw").clone();
-    var showLink = content.find("#show-chart");
-    showLink.attr("onclick", "gec.maps.showChart(event)");
-    showLink.attr("class", site_id);
-    var infowindow = new google.maps.InfoWindow({
-        content: content[0].outerHTML
-    });
-
-    google.maps.event.addListener(marker, 'click',
-                                  function(evt) {
-                                      infowindow.open(map, marker);
-                                  });
-    return marker;
-}
-
-function displayData(data, map, base_name, params) {
-    map.geniMarkers || (map.geniMarkers = []);
-    map.geniPaths || (map.geniPaths = []);
-    var i;
-
-    // Remove all previous markers and paths from map
-    $.each(map.geniMarkers, function(i, marker) { marker.setMap(null); });
-    map.geniMarkers = [];
-    $.each(map.geniPaths, function(i, path) { path.setMap(null); });
-    map.geniPaths = [];
-
-    // Draw Nodes, with radius proportional to number of nodes at site
-    var site_counts = {};
-    for(var i = 0; i < data.nodes.length; i++) {
-        var n = new gec.maps.Node(data.nodes[i]);
-        var node = data.nodes[i];
-        var site_id = node.site_id;
-        if (!(site_id in site_counts)) {
-            site_counts[site_id] = 0;
-        }
-        site_counts[site_id] = site_counts[site_id] + 1;
-    }
-    for(var site_id in site_counts) {
-        var site_count = site_counts[site_id];
-        var site_coords = getCoordsForSiteId(site_id, data);
-        var site_icon = getIconForSiteId(site_id, data, site_count);
-        map.geniMarkers.push(createSiteMarker(map, site_id, site_count,
-                                              site_coords, site_icon));
-    }
-
-    // Draw links
-    var lineWidth = Number(params.line_width) || 2;
-
-    for(var i = 0; i < data.links.length; i++) {
-        var link = data.links[i];
-        var from_node_id = link.from_id;
-        var to_node_id = link.to_id;
-        var pathCoords = [
-            getCoordsForNodeId(from_node_id, data),
-            getCoordsForNodeId(to_node_id, data)
-        ];
-        var linkColor = 'yellow';
-        if (link.status == "up") {
-            linkColor = "green";
-        } else if (link.status == "down") {
-            linkColor = "gray";
-        }
-        var path = new google.maps.Polyline({
-            path: pathCoords,
-            geodesic: true,
-            strokeColor : linkColor,
-            strokeOpacity: 1.0,
-            strokeWeight : lineWidth
-        });
-        path.setMap(map);
-        map.geniPaths.push(path);
-    }
-    setTimeout(makeGrabFunction(map, base_name, params),
-               gec.maps.refreshSeconds * 1000);
-
 }
