@@ -280,12 +280,14 @@ gec.maps.Site = function(data, map) {
 };
 
 gec.maps.Site.prototype.makeMarker = function () {
-    var site_radius = 4 * this.nodes.length;
+    // 3/13: Do not scale site by num nodes. Assume square icons
+//    var site_radius = 4 * this.nodes.length;
+    var site_radius = 4;
     if (this.icon) {
 	return {
 	    url: this.icon,
 	    anchor: new google.maps.Point(2*site_radius, 2*site_radius),
-	    scaledSize: new google.maps.Size(3*site_radius,3*site_radius)
+	    scaledSize: new google.maps.Size(4*site_radius,4*site_radius)
 	};
     } else {
         return {
@@ -361,6 +363,11 @@ function initialize() {
     var map = initMap(zoom, center_lat, center_lon);
     // Make the map available globally
     window.map = map;
+
+    // Show the GENI, NSF and US Ignite logos
+    var logosDiv = document.createElement('div-logos');
+    logosDiv.innerHTML = '<image style="height: 30px; width: 30px" src="/common/geni.png"/>&nbsp;<image style="height: 30px; width: 30px" src="/common/nsf1.gif"/><image style="height: 30px; width: 110px" src="https://us-ignite-org.s3.amazonaws.com/static/v1/img/furniture/logo-small.png"/>';
+    map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(logosDiv);
 
     var base_name = url_params.base_name || 'lwtesting_stitchtest';
     // Let the map show up, then paint the experiment data

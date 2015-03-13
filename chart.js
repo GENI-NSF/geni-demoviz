@@ -252,17 +252,21 @@ function computeDeltas(rows, metric_data, compute_rate) {
 // adding the columns and then adding the rows
 function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle)
 {
-    var unique_senders = {}
+    var unique_senders_assoc = {}
     var num_unique_senders = 0;
     var sender = null;
     for(var i = 0; i < metric_data.length; i++) {
         var metric = metric_data[i];
 	var sender = metric.sender;
-	if (!(sender in unique_senders)) {
-	    unique_senders[sender] = num_unique_senders;
+	if (!(sender in unique_senders_assoc)) {
+	    unique_senders_assoc[sender] = num_unique_senders;
 	    num_unique_senders = num_unique_senders + 1;
         }
     }
+    var unique_senders = [];
+    for(var sender in unique_senders_assoc) unique_senders.push(sender);
+    unique_senders.sort(); // We want a list of unique, sorted senders
+
     var data = new google.visualization.DataTable();
     data.addColumn('number', 'TS');
 
@@ -276,7 +280,8 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	}
     }
 
-    for(var unique_sender in unique_senders) {
+    for(var i = 0; i < unique_senders.length; i++) {
+	var unique_sender = unique_senders[i];
         addColumns(data_type, data, unique_sender, senders, selected_metrics);
     }
 
@@ -285,7 +290,7 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
         var metric = metric_data[i];
 	var ts = parseFloat(metric.ts);
 	sender = metric.sender;
-	var sender_index = unique_senders[sender];
+	var sender_index = unique_senders_assoc[sender];
 	row = [ts];
 	for(var j = 0; j < num_unique_senders; j++) {
 	    for(var k = 0; k < numDataColumns(data_type, selected_metrics); k++)
