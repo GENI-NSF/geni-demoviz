@@ -318,8 +318,12 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     if (data_type == 'generic') title = initCase(selected_metrics) + ' Metrics';
     var showLegend = 'right';
 
+    var title_type = initCase(data_type);
+    if (data_type == 'cpu') {
+	title_type = 'CPU';
+    }
     if (num_unique_senders == 1 && num_metrics == 1) {
-	title = initCase(sender) + " " + initCase(selected_metrics) + " " + initCase(data_type);
+	title = initCase(sender) + " " + initCase(selected_metrics) + " " + title_type;
 	if (data_type == 'generic') title = initCase(sender) + " " + initCase(selected_metrics);
 	showLegend = 'none';
     } else if (num_unique_senders == 1) {
@@ -327,7 +331,7 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	// Legend lists metric not sender
 	showLegend = 'right';
     } else if (num_metrics == 1) {
-	title = initCase(selected_metrics) + " " + initCase(data_type);
+	title = initCase(selected_metrics) + " " + title_type;
 	if (data_type == 'generic') title = initCase(selected_metrics);
 	// Legend lists sender not metric
 	showLegend = 'right';
@@ -358,6 +362,10 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	vAxis: {
 	    textStyle: {
 		fontSize: 10
+	    },
+	    minValue: 0,
+	    viewWindow: {
+		min: 0
 	    }
 	},
 	title: title,
@@ -375,6 +383,11 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	    textPosition: xAxisDisplay
 	}
     };
+
+    // To force a graph type to extend up to a particular number (rounded up to next tick mark):
+    if (data_type == 'cpu' || data_type == 'memory') {
+	options.vAxis.maxValue = 100;
+    }
 
     if (rows.length > 0) {
 	var chart = new google.visualization.LineChart(document.getElementById(chartdiv));
