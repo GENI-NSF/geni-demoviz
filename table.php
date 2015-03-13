@@ -68,6 +68,11 @@ if (array_key_exists('tablename1', $_GET)) {
    $tablename1 = $_GET['tablename1'];
 }
 
+$ifcs1 = 'eth1';
+if (array_key_exists('ifcs1', $_GET)) {
+  $ifcs1 = $_GET['ifcs1'];
+}
+
 // ---
 
 $data_type2 = 'memory';
@@ -94,6 +99,11 @@ if (array_key_exists('metrics2', $_GET)) {
 $tablename2 = '';
 if (array_key_exists('tablename2', $_GET)) {
    $tablename2 = $_GET['tablename2'];
+}
+
+$ifcs2 = 'eth1';
+if (array_key_exists('ifcs2', $_GET)) {
+  $ifcs2 = $_GET['ifcs2'];
 }
 
 // ---
@@ -124,6 +134,11 @@ if (array_key_exists('tablename3', $_GET)) {
    $tablename3 = $_GET['tablename3'];
 }
 
+$ifcs3 = 'eth1';
+if (array_key_exists('ifcs3', $_GET)) {
+  $ifcs3 = $_GET['ifcs3'];
+}
+
 // ---
 
 $data_type4 = 'none';
@@ -152,6 +167,11 @@ if (array_key_exists('tablename4', $_GET)) {
    $tablename4 = $_GET['tablename4'];
 }
 
+$ifcs4 = 'eth1';
+if (array_key_exists('ifcs4', $_GET)) {
+  $ifcs4 = $_GET['ifcs4'];
+}
+
 // ---
 
 $data_type5 = 'none';
@@ -178,6 +198,11 @@ if (array_key_exists('metrics5', $_GET)) {
 $tablename5 = '';
 if (array_key_exists('tablename5', $_GET)) {
    $tablename5 = $_GET['tablename5'];
+}
+
+$ifcs5 = 'eth1';
+if (array_key_exists('ifcs5', $_GET)) {
+  $ifcs5 = $_GET['ifcs5'];
 }
 
 ?>
@@ -217,7 +242,7 @@ if (array_key_exists('tablename5', $_GET)) {
 	<script>
 	  //	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true, seconds, customTitle);
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true);
+	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true, null, null, "$ifcs1");
 	  });
 	</script>
 EOF;
@@ -230,7 +255,7 @@ EOF;
 	  print <<< EOF
 	<script>
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type2", "$senders2", "$tablename2", "$selected_metrics2", 'chart_div_right2', true);
+	    drawVisualization("$data_type2", "$senders2", "$tablename2", "$selected_metrics2", 'chart_div_right2', true, null, null, "$ifcs2");
 	  });
 	</script>
 EOF;
@@ -243,7 +268,7 @@ EOF;
 	  print <<< EOF
 		<script>
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type3", "$senders3", "$tablename3", "$selected_metrics3", 'chart_div_bottom3', true);
+	    drawVisualization("$data_type3", "$senders3", "$tablename3", "$selected_metrics3", 'chart_div_bottom3', true, null, null, "$ifcs3");
 	  });
 	</script>
 EOF;
@@ -256,7 +281,7 @@ EOF;
 	  print <<< EOF
 		<script>
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type4", "$senders4", "$tablename4", "$selected_metrics4", 'chart_div_bottom4', true);
+	    drawVisualization("$data_type4", "$senders4", "$tablename4", "$selected_metrics4", 'chart_div_bottom4', true, null, null, "$ifcs4");
 	  });
 	</script>
 EOF;
@@ -269,16 +294,13 @@ EOF;
 	  print <<< EOF
 		<script>
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type5", "$senders5", "$tablename5", "$selected_metrics5", 'chart_div_bottom5', true);
+	    drawVisualization("$data_type5", "$senders5", "$tablename5", "$selected_metrics5", 'chart_div_bottom5', true, null, null, "$ifcs5");
 	  });
 	</script>
 EOF;
 	}
 ?>
 </div>
-        <div id="site-iw">
-          <a id="show-chart" href="javascript:;">Show Chart</a>
-        </div>
   </body>
 </html>
 

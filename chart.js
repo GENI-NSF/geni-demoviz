@@ -32,10 +32,13 @@ function metric_enabled(metric, selected_metrics) {
 
 // This is called once the Google chart stuff is loaded. We then grab the data and
 // plot the char
-function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, showXAxis, seconds, chartTitle) {
-    if (typeof seconds === 'undefined') {
+function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, showXAxis, seconds, chartTitle, interfaceNames) {
+    if (typeof seconds === 'undefined' || seconds === null) {
 	var url_params = getURLParameters();
 	seconds = Number(url_params.seconds) || 120;
+    }
+    if (typeof interfaceNames === 'undefined') {
+	interfaceNames = 'eth1';
     }
     var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders + '&seconds=' + seconds;
     if (data_type == 'generic') {
@@ -44,30 +47,38 @@ function drawVisualization(data_type, senders, tablename, selected_metrics, char
     $.getJSON(url, 
               function(data) { 
 		  // In the return from the $.getJSON call to grab_metrics_data we plot the data
-		  drawChart(data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle); 
+		  drawChart(data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle, interfaceNames); 
 	      });
 };
 
 // Add a column for this metric if it is selected
-function maybeAddMetricColumn(metric, selected_metrics, num_senders, num_metrics, data, metric_label, unique_sender) {
+function maybeAddMetricColumn(metric, selected_metrics, num_senders, num_metrics, data, metric_label, unique_sender, interfaceName) {
     if (metric_enabled(metric, selected_metrics)) {
-	addMetricColumn(data, num_senders, num_metrics, metric_label, unique_sender);
+	addMetricColumn(data, num_senders, num_metrics, metric_label, unique_sender, interfaceName);
     }
 }
 
 // Add the given metrics column with a proper label
-function addMetricColumn(data, num_senders, num_metrics, metric, unique_sender) {
+function addMetricColumn(data, num_senders, num_metrics, metric, unique_sender, interfaceName) {
     if (num_senders == 1) {
 	data.addColumn('number', metric);
     } else if (num_metrics == 1) {
-	data.addColumn('number', unique_sender);
+	if (typeof interfaceName !== 'undefined') {
+	    data.addColumn('number', unique_sender + ':' + interfaceName);
+	} else {
+	    data.addColumn('number', unique_sender);
+	}
     } else {
-	data.addColumn('number', metric + ' ' + unique_sender);
+	if (typeof interfaceName !== 'undefined') {
+	    data.addColumn('number', metric + ' ' + unique_sender + ':' + interfaceName);
+	} else {
+	    data.addColumn('number', metric + ' ' + unique_sender);
+	}
     }
 }
 
 // Add columns to the table based on which metrics are selected
-function addColumns(data_type, data, unique_sender, senders, selected_metrics)
+function addColumns(data_type, data, unique_sender, senders, selected_metrics, interfaceName)
 {
     var split_senders = senders.split(',');
     var num_senders = split_senders.length;
@@ -82,9 +93,10 @@ function addColumns(data_type, data, unique_sender, senders, selected_metrics)
 	    addMetricColumn(data, num_senders, num_metrics, metric, unique_sender);
 	}
     } else if (data_type == 'network') {
-	if (selected_metrics === '') num_metrics = 2;
-	maybeAddMetricColumn('rx_bytes', selected_metrics, num_senders, num_metrics, data, 'RX', unique_sender);
-	maybeAddMetricColumn('tx_bytes', selected_metrics, num_senders, num_metrics, data, 'TX', unique_sender);
+	if (selected_metrics === '') num_metrics = 1;
+	maybeAddMetricColumn('tot_bytes', selected_metrics, num_senders, num_metrics, data, 'Total', unique_sender, interfaceName);
+	maybeAddMetricColumn('rx_bytes', selected_metrics, num_senders, num_metrics, data, 'RX', unique_sender, interfaceName);
+	maybeAddMetricColumn('tx_bytes', selected_metrics, num_senders, num_metrics, data, 'TX', unique_sender, interfaceName);
     } else if (data_type == 'cpu') {
 	maybeAddMetricColumn('user', selected_metrics, num_senders, num_metrics, data, 'User', unique_sender);
 	maybeAddMetricColumn('sys', selected_metrics, num_senders, num_metrics, data, 'Sys', unique_sender);
@@ -104,6 +116,7 @@ function numDataColumns(data_type, selected_metrics) {
         var split_metrics  = selected_metrics.split(',');
         num_columns = split_metrics.length;
     } else if(data_type == 'network') {
+	if (metric_enabled('tot_bytes', selected_metrics)) num_columns = num_columns + 1;
 	if (metric_enabled('rx_bytes', selected_metrics)) num_columns = num_columns + 1;
 	if (metric_enabled('tx_bytes', selected_metrics)) num_columns = num_columns + 1;
     } else if (data_type  == 'cpu') {
@@ -121,9 +134,10 @@ function numDataColumns(data_type, selected_metrics) {
 }
 
 // Fill in row of data for given type based on selected metrics
-function fillRow(data_type, row, metric, sender_index, selected_metrics) {
+function fillRow(data_type, row, metric, sender_index, selected_metrics, interfaceName) {
     var num_columns = numDataColumns(data_type, selected_metrics);
     var metric_index = 1;
+    var ret = true;
     if (data_type == 'generic' ) {
         var split_metrics  = selected_metrics.split(',');
         var num_metrics = split_metrics.length;
@@ -137,13 +151,23 @@ function fillRow(data_type, row, metric, sender_index, selected_metrics) {
     else if (data_type == 'network') {
 	var rx_bytes = parseFloat(metric.rx_bytes);
 	var tx_bytes = parseFloat(metric.tx_bytes);
-        if (metric_enabled('rx_bytes', selected_metrics)) {
-	    row[num_columns*sender_index+metric_index] = rx_bytes;
-	    metric_index = metric_index + 1;
-        }
-        if (metric_enabled('tx_bytes', selected_metrics)) {
-	    row[num_columns*sender_index+metric_index] = tx_bytes;
-        }
+	var tot_bytes = rx_bytes + tx_bytes;
+	var ifc = metric.name;
+	if (interfaceName == ifc) {
+            if (metric_enabled('tot_bytes', selected_metrics)) {
+		row[num_columns*sender_index+metric_index] = tot_bytes;
+		metric_index = metric_index + 1;
+            }
+            if (metric_enabled('rx_bytes', selected_metrics)) {
+		row[num_columns*sender_index+metric_index] = rx_bytes;
+		metric_index = metric_index + 1;
+            }
+            if (metric_enabled('tx_bytes', selected_metrics)) {
+		row[num_columns*sender_index+metric_index] = tx_bytes;
+            }
+	} else {
+	    ret = false;
+	}
     } else if (data_type == 'cpu') {
         var user = parseFloat(metric.user);
         var sys = parseFloat(metric.sys);
@@ -181,6 +205,7 @@ function fillRow(data_type, row, metric, sender_index, selected_metrics) {
 	    row[num_columns*sender_index+metric_index] = actual_free;
         }
     }
+    return ret;
 }
 
 // Fill in null entries by interpolating between adjacent points
@@ -250,7 +275,7 @@ function computeDeltas(rows, metric_data, compute_rate) {
 
 // Draw the chart by grabbing the data, creating the table
 // adding the columns and then adding the rows
-function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle)
+function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle, interfaceNames)
 {
     var unique_senders_assoc = {}
     var num_unique_senders = 0;
@@ -270,6 +295,14 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     var data = new google.visualization.DataTable();
     data.addColumn('number', 'TS');
 
+    var split_ifcs = interfaceNames.split(',');
+    var num_ifcs = split_ifcs.length;
+    var split_senders = senders.split(',');
+    var num_senders = split_senders.length;
+    if (data_type == 'network' && num_ifcs != num_senders) {
+	console.log("Sender/IFC mismatch: " + senders + ", " + interfaceNames);
+    }
+
     // If no specific metrics are selected,
     // then show 'user' for 'cpu', and 'used' for 'memory'
     if (selected_metrics == '') {
@@ -277,12 +310,16 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	    selected_metrics = 'user';
 	} else if (data_type == 'memory') {
 	    selected_metrics = 'used';
+	} else if (data_type == 'network') {
+	    selected_metrics = 'tot_bytes';
 	}
     }
 
     for(var i = 0; i < unique_senders.length; i++) {
 	var unique_sender = unique_senders[i];
-        addColumns(data_type, data, unique_sender, senders, selected_metrics);
+	var sender_index = unique_senders_assoc[unique_sender];
+	var interfaceName = split_ifcs[sender_index];
+        addColumns(data_type, data, unique_sender, senders, selected_metrics, interfaceName);
     }
 
     rows = [];
@@ -296,8 +333,10 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	    for(var k = 0; k < numDataColumns(data_type, selected_metrics); k++)
 		row.push(null); // Place holders for entries from the appropriate sender
         }
-	fillRow(data_type, row, metric, sender_index, selected_metrics);
-	rows.push(row);
+	var interfaceName = split_ifcs[sender_index];
+	if (fillRow(data_type, row, metric, sender_index, selected_metrics, interfaceName)) {
+	    rows.push(row);
+	}
     }
 
     if (rows.length > 0) {
@@ -327,22 +366,38 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     if (data_type == 'cpu') {
 	title_type = 'CPU';
     }
+    var title_sender = initCase(sender);
+    if (data_type == 'network') {
+	var sender_index = unique_senders_assoc[sender];
+	var interfaceName = split_ifcs[sender_index];
+	title_sender = title_sender + ":" + interfaceName;
+    }
+    var title_metric = initCase(selected_metrics);
+    if (num_metrics == 1 && data_type == 'network') {
+	if (selected_metrics == 'tot_bytes') {
+	    title_metric = 'Total Bytes';
+	} else if (selected_metrics == 'rx_bytes') {
+	    title_metric = 'RX Bytes';
+	} else {
+	    title_metric = 'TX Bytes';
+	}
+    }
     if (num_unique_senders == 1 && num_metrics == 1) {
-	title = initCase(sender) + " " + initCase(selected_metrics) + " " + title_type;
-	if (data_type == 'generic') title = initCase(sender) + " " + initCase(selected_metrics);
+	title = title_sender + " " + title_metric + " " + title_type;
+	if (data_type == 'generic') title = title_sender + " " + title_metric;
 	showLegend = 'none';
     } else if (num_unique_senders == 1) {
-	title = initCase(sender) + " " + title;
+	title = title_sender + " " + title;
 	// Legend lists metric not sender
 	showLegend = 'right';
     } else if (num_metrics == 1) {
-	title = initCase(selected_metrics) + " " + title_type;
-	if (data_type == 'generic') title = initCase(selected_metrics);
+	title = title_metric + " " + title_type;
+	if (data_type == 'generic') title = title_metric;
 	// Legend lists sender not metric
 	showLegend = 'right';
     }
 
-    if (typeof chartTitle !== 'undefined' && chartTitle != '') {
+    if (typeof chartTitle !== 'undefined' && chartTitle != '' && chartTitle != null) {
 	title = chartTitle;
     }
 
@@ -403,7 +458,7 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     
 
     // Refresh every 5 seconds
-    setTimeout(function() {drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, showXAxis, seconds, chartTitle);}, 5000);
+    setTimeout(function() {drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, showXAxis, seconds, chartTitle, interfaceNames);}, 5000);
 
 }
 
