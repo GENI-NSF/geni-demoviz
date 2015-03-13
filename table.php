@@ -215,9 +215,9 @@ if (array_key_exists('tablename5', $_GET)) {
 	if ($data_type1 != 'none') {
 	  print <<< EOF
 	<script>
-	  //	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true, 240);
+	  //	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true, seconds, customTitle);
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true, 240, 'My Custom Title');
+	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true);
 	  });
 	</script>
 EOF;
@@ -230,7 +230,7 @@ EOF;
 	  print <<< EOF
 	<script>
 	google.setOnLoadCallback(function() {
-	      drawVisualization("$data_type2", "$senders2", "$tablename2", "$selected_metrics2", 'chart_div_right2');
+	    drawVisualization("$data_type2", "$senders2", "$tablename2", "$selected_metrics2", 'chart_div_right2', true);
 	  });
 	</script>
 EOF;
@@ -243,7 +243,7 @@ EOF;
 	  print <<< EOF
 		<script>
 	google.setOnLoadCallback(function() {
-	      drawVisualization("$data_type3", "$senders3", "$tablename3", "$selected_metrics3", 'chart_div_bottom3');
+	    drawVisualization("$data_type3", "$senders3", "$tablename3", "$selected_metrics3", 'chart_div_bottom3', true);
 	  });
 	</script>
 EOF;
@@ -256,7 +256,7 @@ EOF;
 	  print <<< EOF
 		<script>
 	google.setOnLoadCallback(function() {
-	      drawVisualization("$data_type4", "$senders4", "$tablename4", "$selected_metrics4", 'chart_div_bottom4');
+	    drawVisualization("$data_type4", "$senders4", "$tablename4", "$selected_metrics4", 'chart_div_bottom4', true);
 	  });
 	</script>
 EOF;
@@ -269,7 +269,7 @@ EOF;
 	  print <<< EOF
 		<script>
 	google.setOnLoadCallback(function() {
-	      drawVisualization("$data_type5", "$senders5", "$tablename5", "$selected_metrics5", 'chart_div_bottom5');
+	    drawVisualization("$data_type5", "$senders5", "$tablename5", "$selected_metrics5", 'chart_div_bottom5', true);
 	  });
 	</script>
 EOF;
