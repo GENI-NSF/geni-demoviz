@@ -80,6 +80,7 @@ gec.maps = {
             var site = that.getSite(n.site_id)
                 || that.addSite(new that.Site(sites[n.site_id], map));
             var node = new that.Node(n, site);
+            node.addInterfaces(data.interfaces);
             gec.maps.addNode(node);
             site.addNode(node);
         });
@@ -131,10 +132,18 @@ gec.maps.Node = function(data, site) {
     this.sender = data.sender;
     this.name = data.client_id;
     this.site = site;
+    this.interfaces = [];
 };
 
 gec.maps.Node.prototype.LatLng = function() {
     return this.site.latLng;
+};
+
+gec.maps.Node.prototype.addInterfaces = function(interfaces) {
+    if (this.sender && this.sender in interfaces) {
+        // Duplicate the list so we don't stomp on someone else.
+        this.interfaces = interfaces[this.sender].slice();
+    }
 };
 
 /*----------------------------------------------------------------------
