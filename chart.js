@@ -93,7 +93,8 @@ function addColumns(data_type, data, unique_sender, senders, selected_metrics, i
 	    addMetricColumn(data, num_senders, num_metrics, metric, unique_sender);
 	}
     } else if (data_type == 'network') {
-	if (selected_metrics === '') num_metrics = 2;
+	if (selected_metrics === '') num_metrics = 1;
+	maybeAddMetricColumn('tot_bytes', selected_metrics, num_senders, num_metrics, data, 'Total', unique_sender, interfaceName);
 	maybeAddMetricColumn('rx_bytes', selected_metrics, num_senders, num_metrics, data, 'RX', unique_sender, interfaceName);
 	maybeAddMetricColumn('tx_bytes', selected_metrics, num_senders, num_metrics, data, 'TX', unique_sender, interfaceName);
     } else if (data_type == 'cpu') {
@@ -115,6 +116,7 @@ function numDataColumns(data_type, selected_metrics) {
         var split_metrics  = selected_metrics.split(',');
         num_columns = split_metrics.length;
     } else if(data_type == 'network') {
+	if (metric_enabled('tot_bytes', selected_metrics)) num_columns = num_columns + 1;
 	if (metric_enabled('rx_bytes', selected_metrics)) num_columns = num_columns + 1;
 	if (metric_enabled('tx_bytes', selected_metrics)) num_columns = num_columns + 1;
     } else if (data_type  == 'cpu') {
@@ -149,8 +151,13 @@ function fillRow(data_type, row, metric, sender_index, selected_metrics, interfa
     else if (data_type == 'network') {
 	var rx_bytes = parseFloat(metric.rx_bytes);
 	var tx_bytes = parseFloat(metric.tx_bytes);
+	var tot_bytes = rx_bytes + tx_bytes;
 	var ifc = metric.name;
 	if (interfaceName == ifc) {
+            if (metric_enabled('tot_bytes', selected_metrics)) {
+		row[num_columns*sender_index+metric_index] = tot_bytes;
+		metric_index = metric_index + 1;
+            }
             if (metric_enabled('rx_bytes', selected_metrics)) {
 		row[num_columns*sender_index+metric_index] = rx_bytes;
 		metric_index = metric_index + 1;
@@ -303,6 +310,8 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	    selected_metrics = 'user';
 	} else if (data_type == 'memory') {
 	    selected_metrics = 'used';
+	} else if (data_type == 'network') {
+	    selected_metrics = 'tot_bytes';
 	}
     }
 
@@ -363,17 +372,27 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	var interfaceName = split_ifcs[sender_index];
 	title_sender = title_sender + ":" + interfaceName;
     }
+    var title_metric = initCase(selected_metrics);
+    if (num_metrics == 1 && data_type == 'network') {
+	if (selected_metrics == 'tot_bytes') {
+	    title_metric = 'Total Bytes';
+	} else if (selected_metrics == 'rx_bytes') {
+	    title_metric = 'RX Bytes';
+	} else {
+	    title_metric = 'TX Bytes';
+	}
+    }
     if (num_unique_senders == 1 && num_metrics == 1) {
-	title = title_sender + " " + initCase(selected_metrics) + " " + title_type;
-	if (data_type == 'generic') title = title_sender + " " + initCase(selected_metrics);
+	title = title_sender + " " + title_metric + " " + title_type;
+	if (data_type == 'generic') title = title_sender + " " + title_metric;
 	showLegend = 'none';
     } else if (num_unique_senders == 1) {
 	title = title_sender + " " + title;
 	// Legend lists metric not sender
 	showLegend = 'right';
     } else if (num_metrics == 1) {
-	title = initCase(selected_metrics) + " " + title_type;
-	if (data_type == 'generic') title = initCase(selected_metrics);
+	title = title_metric + " " + title_type;
+	if (data_type == 'generic') title = title_metric;
 	// Legend lists sender not metric
 	showLegend = 'right';
     }
