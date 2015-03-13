@@ -75,7 +75,7 @@ function get_memory_data($seconds=null)
 // Get network data from the database
 function get_network_data($seconds=null)
 {
-  return get_metrics_data('c.rx_bytes, c.tx_bytes', 'nmetrics_network', $seconds);
+  return get_metrics_data('c.rx_bytes, c.tx_bytes, c.name', 'nmetrics_network', $seconds);
 }
 
 // A timespan clause causes us to only get the most recent data (N seconds)
