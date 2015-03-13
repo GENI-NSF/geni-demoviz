@@ -119,13 +119,34 @@ gec.maps = {
         };
     },
 
+    randomChartType: function(i) {
+        var chartTypes = ["memory", "cpu", "network"];
+        // chart_counter is a global
+        var chartType = chartTypes[Number(i) % chartTypes.length];
+        return chartType;
+    },
+
     showChart: function(event) {
         var target = $(event.target);
         var site_id = target.attr("class");
-        event.kb = {};
-        event.kb.x = event.pageX;
-        event.kb.y = event.pageY;
-        showMapChart(event.pageX, event.pageY, site_id);
+        var uid = chart_counter++;
+        var idBase = "site" + site_id + "-" + uid;
+        var chartType = this.randomChartType(uid);
+        var chartOpts = {
+            x: event.pageX,
+            y: event.pageY,
+            siteId: site_id,
+            idBase: idBase,
+            // FIXME: get node, then sender from node
+            senders: "1",
+            showXAxis: false,
+            tablename: undefined,
+            selectedMetrics: undefined,
+            seconds: undefined,
+            chartType: chartType,
+            chartTitle: "Site " + site_id + " " + chartType
+        };
+        showMapChart(chartOpts);
     }
 };
 
@@ -186,6 +207,12 @@ gec.maps.Link.prototype.makeMarker = function () {
         strokeOpacity: 1.0,
         strokeWeight : this.lineWidth
     });
+    var that = this;
+    google.maps.event.addListener(marker, 'click',
+                                  function(evt) {
+                                      console.log("link click");
+                                      that.showChart();
+                                  });
     return marker;
 };
 
@@ -196,8 +223,11 @@ gec.maps.Link.prototype.update = function (data) {
         this.marker = this.makeMarker();
         this.marker.setMap(this.map);
     }
-}
+};
 
+gec.maps.Link.prototype.showChart = function () {
+    console.log("show chart " + this.id + ": " + this.status);
+};
 
 /*----------------------------------------------------------------------
  * Site class
@@ -436,40 +466,34 @@ function initMap(zoom, center_lat, center_lon)
     return map;
 }
 
-function showMapChart(x, y, site_id) {
-    //console.log("click: " + evt.kb.x + ", " + evt.kb.y);
-    var uid = chart_counter++;
-    var element_id = "jq-" + site_id + uid;
-    var chart_id = "chart-" + site_id + uid;
-    var close_id = "close-" + site_id + uid;
-    var chartTypes = ["memory", "cpu", "network"];
-    var chartType = chartTypes[uid % chartTypes.length];
+function showMapChart(opts) {
+    var element_id = "jq-" + opts.idBase;
+    var chart_id = "chart-" + opts.idBase;
+    var close_id = "close-" + opts.idBase;
     $("body").append("<div id='" + element_id
                      + "' class='ui-widget-content'>"
                      + "<a href='#' id='" + close_id + "'>x</a>"
                      + "<div id='" + chart_id + "'></div>"
                      + "</div>");
+    // 'copts' is for closure of timeout function below
+    var copts = opts;
     setTimeout(function() {
         var elementDiv = $("#" + element_id);
         var closeLink = $("#" + close_id);
         closeLink.click(function() {
             elementDiv.fadeOut(300, function() {elementDiv.remove()})});
         elementDiv.css({"position": "fixed",
-                        "top": y,
-                        "left": x,
+                        "top": Number(copts.y || 0),
+                        "left": Number(copts.x || 0),
                         "width": "300px",
                         "height": "150px"});
         elementDiv.draggable();
         //$("#" + element_id).resizable();
-        var senders = "1";
-        var tablename = "";
-        var selected_metrics = "";
-        var chartdiv = chart_id;
-        var showXAxis = false;
-        var seconds = undefined;
-        var chartTitle = "";
-        drawVisualization(chartType, senders, tablename, selected_metrics,
-                          chartdiv, showXAxis, seconds, chartTitle);
+        drawVisualization(copts.chartType, copts.senders, copts.tablename,
+                          // chart.js chokes on undefined
+                          copts.selectedMetrics || "",
+                          chart_id, copts.showXAxis, copts.seconds,
+                          copts.chartTitle);
     }, 100);
 }
 
