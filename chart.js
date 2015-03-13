@@ -21,6 +21,9 @@
 // IN THE WORK.                                                                 
 //---------------------------------------------------------------------- 
 
+// Strict mode - error undeclared variables
+"use strict";
+
 function initCase(lowerstring) {
     return lowerstring.charAt(0).toUpperCase() + lowerstring.slice(1);
 }
@@ -322,13 +325,13 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
         addColumns(data_type, data, unique_sender, senders, selected_metrics, interfaceName);
     }
 
-    rows = [];
+    var rows = [];
     for(var i = 0; i < metric_data.length; i++) {
         var metric = metric_data[i];
 	var ts = parseFloat(metric.ts);
-	sender = metric.sender;
+	var sender = metric.sender;
 	var sender_index = unique_senders_assoc[sender];
-	row = [ts];
+	var row = [ts];
 	for(var j = 0; j < num_unique_senders; j++) {
 	    for(var k = 0; k < numDataColumns(data_type, selected_metrics); k++)
 		row.push(null); // Place holders for entries from the appropriate sender
