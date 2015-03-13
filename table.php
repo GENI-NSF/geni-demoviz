@@ -276,9 +276,6 @@ EOF;
 	}
 ?>
 </div>
-        <div id="site-iw">
-          <a id="show-chart" href="javascript:;">Show Chart</a>
-        </div>
   </body>
 </html>
 

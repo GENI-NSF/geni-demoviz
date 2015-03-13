@@ -117,35 +117,6 @@ gec.maps = {
                           gec.maps.updateData(data, map, base_name, params);
                       })
         };
-    },
-
-    randomChartType: function(i) {
-        var chartTypes = ["memory", "cpu", "network"];
-        var chartType = chartTypes[Number(i) % chartTypes.length];
-        return chartType;
-    },
-
-    showChart: function(event) {
-        var target = $(event.target);
-        var site_id = target.attr("class");
-        var uid = chart_counter++;
-        var idBase = "site" + site_id + "-" + uid;
-        var chartType = this.randomChartType(uid);
-        var chartOpts = {
-            x: event.pageX,
-            y: event.pageY,
-            siteId: site_id,
-            idBase: idBase,
-            // FIXME: get node, then sender from node
-            senders: "1",
-            showXAxis: false,
-            tablename: undefined,
-            selectedMetrics: undefined,
-            seconds: undefined,
-            chartType: chartType,
-            chartTitle: "Site " + site_id + " " + chartType
-        };
-        showMapChart(chartOpts);
     }
 };
 
@@ -323,13 +294,20 @@ gec.maps.Site.prototype.createMarker = function() {
 };
 
 gec.maps.Site.prototype.mapClick = function() {
-    var content = $("#site-iw").clone();
-    var showLink = content.find("#show-chart");
-    showLink.attr("onclick", "gec.maps.showChart(event)");
-    showLink.attr("class", this.id);
-    var infowindow = new google.maps.InfoWindow({
-        content: content[0].outerHTML
+    var that = this;
+    var showLink = $("<a/>", {
+        text: "Show Chart",
+        href: "javascript:;"
     });
+    var infowindow = new google.maps.InfoWindow();
+
+    showLink.click(function(event) {
+        console.log("site clicked " + that.name);
+        that.showChart(event);
+        infowindow.close();
+    });
+    infowindow.setContent(showLink[0]);
+
     infowindow.open(this.map, this.marker);
 };
 
@@ -338,6 +316,34 @@ gec.maps.Site.prototype.mapClick = function() {
  */
 gec.maps.Site.prototype.addNode = function (node) {
     this.nodes.push(node);
+};
+
+gec.maps.Site.prototype.randomChartType = function(i) {
+    var chartTypes = ["memory", "cpu", "network"];
+    var chartType = chartTypes[Number(i) % chartTypes.length];
+    return chartType;
+};
+
+gec.maps.Site.prototype.showChart = function(event) {
+    var site_id = this.id;
+    var uid = chart_counter++;
+    var idBase = "site" + site_id + "-" + uid;
+    var chartType = this.randomChartType(uid);
+    var chartOpts = {
+        x: event.pageX,
+        y: event.pageY,
+        siteId: site_id,
+        idBase: idBase,
+        // FIXME: get node, then sender from node
+        senders: "1",
+        showXAxis: false,
+        tablename: undefined,
+        selectedMetrics: undefined,
+        seconds: undefined,
+        chartType: chartType,
+        chartTitle: "Site " + site_id + " " + chartType
+    };
+    showMapChart(chartOpts);
 };
 
 
