@@ -210,8 +210,7 @@ gec.maps.Link.prototype.makeMarker = function () {
     var that = this;
     google.maps.event.addListener(marker, 'click',
                                   function(evt) {
-                                      console.log("link click");
-                                      that.showChart();
+                                      that.showChart(evt);
                                   });
     return marker;
 };
@@ -225,8 +224,46 @@ gec.maps.Link.prototype.update = function (data) {
     }
 };
 
-gec.maps.Link.prototype.showChart = function () {
-    console.log("show chart " + this.id + ": " + this.status);
+gec.maps.Link.prototype.showChart = function (event) {
+    //console.log("show chart " + this.id + ": " + this.status);
+    // What if this link's status is "down"? Pop up an alert?
+    if ('kb' in event) {
+        // this is a google map event, so grab the inner event
+        event = event.kb;
+    }
+    var uid = chart_counter++;
+    var idBase = "link" + this.id + "-" + uid;
+    var chartType = "network";
+    var senders = [];
+    var chartTitle = "";
+    if (this.fromNode.sender) {
+        senders.push(this.fromNode.sender);
+        chartTitle += this.fromNode.name;
+    }
+    if (this.toNode.sender) {
+        senders.push(this.toNode.sender);
+        if (chartTitle) {
+            chartTitle += " & " + this.toNode.name;
+        } else {
+            chartTitle += this.toNode.name;
+        }
+    }
+    senders = senders.join();
+    chartTitle += " " + chartType;
+    var chartOpts = {
+        x: event.pageX,
+        y: event.pageY,
+        idBase: idBase,
+        // FIXME: get node, then sender from node
+        senders: senders,
+        showXAxis: false,
+        tablename: undefined,
+        selectedMetrics: undefined,
+        seconds: undefined,
+        chartType: chartType,
+        chartTitle: chartTitle
+    };
+    showMapChart(chartOpts);
 };
 
 /*----------------------------------------------------------------------
