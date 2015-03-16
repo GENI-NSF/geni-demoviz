@@ -266,8 +266,8 @@ gec.maps.Site.prototype.makeMarker = function () {
     if (this.icon) {
 	return {
 	    url: this.icon,
-	    anchor: new google.maps.Point(2*site_radius, 2*site_radius),
-	    scaledSize: new google.maps.Size(4*site_radius,4*site_radius)
+	    anchor: new google.maps.Point(8*site_radius, 8*site_radius),
+	    scaledSize: new google.maps.Size(16*site_radius,16*site_radius)
 	};
     } else {
         return {
