@@ -286,7 +286,7 @@ EOF;
 	  print <<< EOF
 		<script>
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type4", "$senders4", "$tablename4", "$selected_metrics4", 'chart_div_bottom4', true, null, null, "$ifcs4", $frqeuency);
+	    drawVisualization("$data_type4", "$senders4", "$tablename4", "$selected_metrics4", 'chart_div_bottom4', true, null, null, "$ifcs4", $frequency);
 	  });
 	</script>
 EOF;
