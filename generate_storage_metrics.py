@@ -50,7 +50,7 @@ class StorageMetricGenerator(MetricGenerator):
 
     # Set of metrics by value
     def getMetricValues(self):
-        st = os.statvfs('/')        
+        st = os.statvfs(self._opts.file_root)        
         free = (st.f_bavail * st.f_frsize)
         total = (st.f_blocks * st.f_frsize)
         used = (st.f_blocks - st.f_bfree) * st.f_frsize
@@ -66,8 +66,9 @@ class StorageMetricGenerator(MetricGenerator):
 def main():
     smg = StorageMetricGenerator()
     while True:
+        frequency = int(smg._opts.frequency)
         smg.run()
-        time.sleep(2)
+        time.sleep(frequency)
 
 
 

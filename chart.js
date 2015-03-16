@@ -269,7 +269,8 @@ function computeDeltas(rows, metric_data, compute_rate) {
 		}
 	    } else {
 		var succ_index = successors[row];
-		rows[row][col] = rows[succ_index][col];
+		if (succ_index != undefined)
+		    rows[row][col] = rows[succ_index][col];
 	    }
         }
 	rows[0][col] = rows[1][col];

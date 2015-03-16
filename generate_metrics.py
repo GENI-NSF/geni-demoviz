@@ -50,6 +50,7 @@ class MetricGenerator:
         parser.add_option("--dbport", help="Database port", default="5432")
         parser.add_option("--dbtable", help="Name of database table")
         parser.add_option('--sender', help="Name of sender/host/server associated with metrics");
+        parser.add_option('--frequency', help="How often to gather metrics in seconds", default="5")
 
     # Check that all required parser arguments are provided                                      
     def check_options(self, opts):
@@ -101,10 +102,11 @@ class MetricGenerator:
 
 # Run indefinitely, only adding new rows                                                         
 def main():
-    sd = DataSynchronizer();
+    mg = MetricGenerator()
     while True:
-        sd.run()
-        time.sleep(2)
+        mg.run()
+        frequency = int(mg._opts.frequency)
+        time.sleep(frequency)
 
 
 
