@@ -362,7 +362,10 @@ gec.maps.Site.prototype.makeChartUI = function(parent) {
                                              id: interfaceSelectorId });
 
     // Populate the node selector
-    nodeSelector.append($("<option/>", { text: gec.maps.chartOptionAll }));
+    if (this.nodes.length > 1) {
+        // Add All if there is more than 1 node
+        nodeSelector.append($("<option/>", { text: gec.maps.chartOptionAll }));
+    }
     $.each(this.nodes, function(i, n) {
         var nodeOption = $("<option/>", {
             value: n.id,
