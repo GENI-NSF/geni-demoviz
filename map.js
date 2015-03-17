@@ -213,8 +213,10 @@ gec.maps.Link.prototype.update = function (data) {
 };
 
 gec.maps.Link.prototype.showChart = function (event) {
-    // FIXME: What if this link's status is "down"?
-    //    Pop up an alert?
+    if (this.status === "down") {
+        alert("Network link " + this.name + " is down.");
+        return;
+    }
     var x, y;
     // Find the location, which might be buried inside a google maps event
     if ('pageX' in event) {
