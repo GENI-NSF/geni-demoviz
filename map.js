@@ -526,7 +526,13 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
                                    interfaces);
 
     var nodeName = nodeSelector.children(':selected').text();
-    var chartTitle = nodeName + " " + chartType;
+    var chartTitle = "";
+    if (nodeName === gec.maps.chartOptionAll) {
+        chartTitle = "Site " + this.name + " " + chartType;
+    } else {
+        var ifs = interfaces.join(', ');
+        chartTitle = nodeName + " " + ifs + " " + chartType;
+    }
     var chartOpts = {
         x: event.pageX,
         y: event.pageY,
