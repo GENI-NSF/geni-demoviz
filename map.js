@@ -36,6 +36,11 @@ gec.maps = {
     // How many seconds between topology refreshes
     refreshSeconds: 5,
 
+    chartTypeCPU: "cpu",
+    chartTypeMemory: "memory",
+    chartTypeNetwork: "network",
+    chartOptionAll: "All",
+
     allNodes: {},
 
     allLinks: {},
@@ -212,7 +217,7 @@ gec.maps.Link.prototype.showChart = function (event) {
     }
     var uid = chart_counter++;
     var idBase = "link" + this.id + "-" + uid;
-    var chartType = "network";
+    var chartType = gec.maps.chartTypeNetwork;
     var senders = [];
     var chartTitle = "";
     if (this.fromNode.sender) {
@@ -302,25 +307,10 @@ gec.maps.Site.prototype.createMarker = function() {
     return marker;
 };
 
-gec.maps.Site.prototype.makeChartUI = function(parent) {
-    // For the closure for inner functions
-    var that = this;
-
-    // Add the chart node chooser
-    var nodeSelector = $("<select/>");
-    $.each(this.nodes, function(i, n) {
-        var nodeOption = $("<option/>", {
-            value: n.id,
-            text: n.name
-        });
-        nodeSelector.append(nodeOption);
-    });
-    parent.append(nodeSelector);
-
-    // Add the chart type chooser
-    parent.append($("<br/>"));
-    var chartSelector = $("<select/>");
-    $.each(["cpu", "memory", "network"],
+gec.maps.Site.prototype.fillChartTypeSelect = function(chartSelector,
+                                                       interfaceSelector) {
+    $.each([gec.maps.chartTypeCPU, gec.maps.chartTypeMemory,
+            gec.maps.chartTypeNetwork],
            function(i, t) {
                var chartOption = $("<option/>", {
                    value: t,
@@ -328,21 +318,100 @@ gec.maps.Site.prototype.makeChartUI = function(parent) {
                });
                chartSelector.append(chartOption);
            });
-    parent.append(chartSelector);
+    // For the change closure
+    var ethSelector = interfaceSelector;
+    chartSelector.change(function(event) {
+        var select = $(this);
+        var chosenText = select.children(':selected').text();
+        if (chosenText === gec.maps.chartTypeNetwork) {
+            ethSelector.prop('disabled', false);
+        } else {
+            ethSelector.prop('disabled', true);
+        }
+    });
+}
+
+
+gec.maps.Site.prototype.makeChartUI = function(parent) {
+    // For the closure for inner functions
+    var that = this;
+
+    // Create the various drop down menus
+    var nodeSelector = $("<select/>");
+    var chartSelector = $("<select/>");
+    var interfaceSelector = $("<select/>", { disabled: true });
+
+    // Populate the node selector
+    nodeSelector.append($("<option/>", { text: gec.maps.chartOptionAll }));
+    $.each(this.nodes, function(i, n) {
+        var nodeOption = $("<option/>", {
+            value: n.id,
+            text: n.name
+        });
+        nodeSelector.append(nodeOption);
+    });
+    nodeSelector.change(function(event) {
+        var select = $(this);
+        var nodeId = select.children(':selected').prop("value");
+        var interfaces = undefined;
+        if (nodeId === gec.maps.chartOptionAll) {
+            interfaces = that.allInterfaces();
+        } else {
+            var node = gec.maps.getNode(nodeId);
+            interfaces = node.interfaces;
+        }
+        if (interfaces.length > 0) {
+            interfaceSelector.empty();
+            // If length is greater than 1, add All
+            // otherwise just add the single interface and skip "All"
+            if (interfaces.length > 1) {
+                interfaceSelector.append($("<option/>",
+                                           { text: gec.maps.chartOptionAll }
+                                          ));
+            }
+            $.each(interfaces, function(idx, iface) {
+                interfaceSelector.append($("<option/>", { text: iface }));
+            });
+            var chartType = chartSelector.children(':selected').text();
+            if (chartType === gec.maps.chartTypeNetwork) {
+                interfaceSelector.prop('disabled', false);
+            }
+        } else {
+            // disable the interfaceSelector
+            interfaceSelector.empty();
+            interfaceSelector.prop('disabled', true);
+        }
+    });
+
+    // Populate the chart type selector
+    this.fillChartTypeSelect(chartSelector, interfaceSelector);
+
+    // Populate the interface selector
+    var interfaceOption = $("<option/>", { text: gec.maps.chartOptionAll });
+    interfaceSelector.append(interfaceOption);
 
     // Add the "Show Chart" link
-    parent.append($("<br/>"));
     var showLink = $("<a/>", {
         text: "Show Chart",
         href: "javascript:;"
     });
+
+    parent.append(nodeSelector);
+    parent.append($("<br/>"));
+    parent.append(chartSelector);
+    parent.append($("<br/>"));
+    parent.append(interfaceSelector);
+    parent.append($("<br/>"));
+
     parent.append(showLink);
+    // Call the change handler to get the right items in the interfaceSelector.
+    nodeSelector.change();
 
     var infowindow = new google.maps.InfoWindow();
 
     showLink.click(function(event) {
         console.log("site clicked " + that.name);
-        that.showChart(event, nodeSelector, chartSelector);
+        that.showChart(event, nodeSelector, chartSelector, interfaceSelector);
         infowindow.close();
     });
     infowindow.setContent(parent[0]);
@@ -374,24 +443,59 @@ gec.maps.Site.prototype.addNode = function (node) {
     this.nodes.push(node);
 };
 
+/*
+ * Given node, chart, and interface selections, generate the correct
+ * lists of senders and interfaces.
+ */
+gec.maps.Site.prototype.chartSendersAndInterfaces = function(node,
+                                                             chart,
+                                                             iface,
+                                                             senders,
+                                                             interfaces) {
+    
+    if (chart === gec.maps.chartTypeCPU || chart == gec.maps.chartTypeMemory) {
+        if (node === gec.maps.chartOptionAll) {
+            $.each(this.nodes, function(i, n) { senders.push(n); });
+        } else {
+            senders.push(gec.maps.getNode(node).sender);
+        }
+        return;
+    }
+    // It must be a network chart...
+    var nodes = [];
+    if (node === gec.maps.chartOptionAll) {
+        nodes = this.nodes;
+    } else {
+        nodes.push(gec.maps.getNode(node));
+    }
+    $.each(nodes, function(i, n) {
+        if (iface === gec.maps.chartOptionAll) {
+            $.each(n.interfaces, function(idx, ifc) {
+                senders.push(n.sender);
+                interfaces.push(ifc);
+            });
+        } else {
+            if ($.inArray(iface, n.interfaces) !== -1) {
+                senders.push(n.sender);
+                interfaces.push(iface);
+            }
+        }
+    });
+};
+
 gec.maps.Site.prototype.showChart = function(event, nodeSelector,
-                                             chartSelector) {
+                                             chartSelector, interfaceSelector) {
     var site_id = this.id;
     var uid = chart_counter++;
     var idBase = "site" + site_id + "-" + uid;
     var chartType = chartSelector.val();
     var nodeId = nodeSelector.val();
+    var iface = interfaceSelector.val();
     var node = gec.maps.getNode(nodeId);
     var senders = []
     var interfaces = []
-    if (node.interfaces.length) {
-        $.each(node.interfaces, function(idx, ifc) {
-            interfaces.push(ifc);
-            senders.push(node.sender);
-        });
-    } else {
-        senders.push(node.sender);
-    }
+    this.chartSendersAndInterfaces(nodeId, chartType, iface, senders,
+                                   interfaces);
 
     var nodeName = nodeSelector.children(':selected').text();
     var chartTitle = nodeName + " " + chartType;
@@ -412,6 +516,23 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
     showMapChart(chartOpts);
 };
 
+/*
+ * Get a list of all network interfaces on all nodes at this
+ * site. There will be no duplicates in this list. An empty set
+ * indicates either no nodes are present at this site, or no
+ * interfaces are present on any of the nodes.
+ */
+gec.maps.Site.prototype.allInterfaces = function () {
+    var interfaces = [];
+    $.each(this.nodes, function(i, n) {
+        $.each(n.interfaces, function(idx, ifc) {
+            if ($.inArray(ifc, interfaces) === -1) {
+                interfaces.push(ifc);
+            }
+        });
+    });
+    return interfaces;
+};
 
 /*----------------------------------------------------------------------
  *
