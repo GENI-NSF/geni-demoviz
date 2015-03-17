@@ -40,7 +40,15 @@ function drawVisualization(data_type, senders, tablename, selected_metrics, char
 	var url_params = getURLParameters();
 	seconds = Number(url_params.seconds) || 120;
     }
-    if (typeof interfaceNames === 'undefined') {
+    // interfaceNames defaults to 1 eth1 per sender
+    if (typeof interfaceNames === 'undefined' && typeof senders !== 'undefined') {
+	var split_senders = senders.split(',');
+	var num_senders = split_senders.length;
+	var ifcs = [];
+	for (var i = 0; i < num_senders; i++) {
+	    ifcs.push('eth1');
+	}
+	interfaceNames = ifcs.join();
 	interfaceNames = 'eth1';
     }
     var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders + '&seconds=' + seconds;
@@ -317,8 +325,14 @@ function computeDeltas(rows, metric_data, compute_rate) {
     var num_ifcs = split_ifcs.length;
     var split_senders = senders.split(',');
     var num_senders = split_senders.length;
+    if (num_senders != num_unique_senders) {
+	console.log("Data returned " + num_unique_senders + " unique senders but arg specified " + num_senders);
+    }
     if (data_type == 'network' && num_ifcs != num_senders) {
-	console.log("Sender/IFC mismatch: " + senders + ", " + interfaceNames);
+	console.log("Sender/IFC count mismatch: " + senders + ", " + interfaceNames);
+	if (data_type == 'network' && num_ifcs == num_unique_senders) {
+	    console.log("... but matched # of unique senders");
+	}
     }
 
     // If no specific metrics are selected,
@@ -368,9 +382,7 @@ function computeDeltas(rows, metric_data, compute_rate) {
 
     var split_metrics = selected_metrics.split(',');
     var num_metrics = split_metrics.length;
-    if (data_type == 'network') {
-	if (selected_metrics === '') num_metrics = 2;
-    }
+
     // Calculate chart title
     // 1 sender & 1 metric: sender metric data_type
     // 1 sender mult metrics: sender data_Type metrics
