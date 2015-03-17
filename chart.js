@@ -467,11 +467,14 @@ function computeDeltas(rows, metric_data, compute_rate) {
 	options.vAxis.maxValue = 100;
     }
 
+    var container = document.getElementById(chartdiv);
     if (rows.length > 0) {
-	var chart = new google.visualization.LineChart(document.getElementById(chartdiv));
-	chart.draw(data, options);
+        if (container) {
+            var chart = new google.visualization.LineChart(container);
+            chart.draw(data, options);
+        }
     } else {
-	$("#" + chartdiv).empty(); // Remove the current map
+        $(container).empty(); // Remove the current map
     }
     
 
