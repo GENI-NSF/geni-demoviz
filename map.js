@@ -36,6 +36,9 @@ gec.maps = {
     // How many seconds between topology refreshes
     refreshSeconds: 5,
 
+    // How many millis between chart refreshes
+    chartRefreshMillis: 5000,
+
     chartTypeCPU: "cpu",
     chartTypeMemory: "memory",
     chartTypeNetwork: "network",
@@ -554,7 +557,10 @@ function initialize() {
     var center_lat = Number(url_params.lat || 38.0);
     var center_lon = Number(url_params.lon || -98.0);
     var zoom = Number(url_params.zoom) || 4;
-    gec.maps.refreshSeconds = Number(url_params.refresh) || 5;
+    gec.maps.refreshSeconds = (Number(url_params.refresh)
+                               || gec.maps.refreshSeconds);
+    gec.maps.chartRefreshMillis = (Number(url_params.frequency)
+                                    || gec.maps.chartRefreshMillis);
     var map = initMap(zoom, center_lat, center_lon);
     // Make the map available globally
     window.map = map;
@@ -673,6 +679,7 @@ function showMapChart(opts) {
                           // chart.js chokes on undefined
                           copts.selectedMetrics || "",
                           chart_id, copts.showXAxis, copts.seconds,
-                          copts.chartTitle, copts.interfaces);
+                          copts.chartTitle, copts.interfaces,
+                          gec.maps.chartRefreshMillis);
     }, 100);
 }
