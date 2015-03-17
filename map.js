@@ -439,7 +439,6 @@ gec.maps.Site.prototype.makeChartUI = function(parent) {
     var infowindow = new google.maps.InfoWindow();
 
     showLink.click(function(event) {
-        console.log("site clicked " + that.name);
         that.showChart(event, nodeSelector, chartSelector, interfaceSelector);
         infowindow.close();
     });
