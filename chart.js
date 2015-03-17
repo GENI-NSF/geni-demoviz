@@ -364,6 +364,13 @@ function computeDeltas(rows, metric_data, compute_rate) {
 	else if (data_type == 'cpu')
 	    computeDeltas(rows, metric_data, false);
         data.addRows(rows);
+    } else {
+        var container = document.getElementById(chartdiv);
+        if (container) {
+            $(container).empty(); // Remove the current map
+            $(container).append("<i>No data found</i>");
+        }
+        return;
     }
 
     var split_metrics = selected_metrics.split(',');
@@ -468,21 +475,16 @@ function computeDeltas(rows, metric_data, compute_rate) {
     }
 
     var container = document.getElementById(chartdiv);
-    if (rows.length > 0) {
-        if (container) {
-            var chart = new google.visualization.LineChart(container);
-            chart.draw(data, options);
-            // Refresh every N (default = 5) seconds
-            setTimeout(function() {
-                drawVisualization(data_type, senders, tablename,
-                                  selected_metrics, chartdiv, showXAxis,
-                                  seconds, chartTitle, interfaceNames,
-                                  frequency);
-            }, frequency);
-        }
-    } else {
-        $(container).empty(); // Remove the current map
-        $(container).append("<i>No data found</i>");
+    if (container) {
+        var chart = new google.visualization.LineChart(container);
+        chart.draw(data, options);
+        // Refresh every N (default = 5) seconds
+        setTimeout(function() {
+            drawVisualization(data_type, senders, tablename,
+                              selected_metrics, chartdiv, showXAxis,
+                              seconds, chartTitle, interfaceNames,
+                              frequency);
+        }, frequency);
     }
 }
 
