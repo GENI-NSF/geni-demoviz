@@ -39,9 +39,9 @@ gec.maps = {
     // How many millis between chart refreshes
     chartRefreshMillis: 5000,
 
-    chartTypeCPU: "cpu",
-    chartTypeMemory: "memory",
-    chartTypeNetwork: "network",
+    chartTypeCPU: "CPU",
+    chartTypeMemory: "Memory",
+    chartTypeNetwork: "Network",
     chartOptionAll: "All",
 
     allNodes: {},
@@ -235,7 +235,7 @@ gec.maps.Link.prototype.showChart = function (event) {
     var chartType = gec.maps.chartTypeNetwork;
     var senders = [];
     var interfaces = [];
-    var chartTitle = this.name + " Network";
+    var chartTitle = this.name + " total bytes";
     if (this.toNode.sender) {
         senders.push(this.toNode.sender);
         interfaces.push(this.toInterface);
@@ -259,7 +259,7 @@ gec.maps.Link.prototype.showChart = function (event) {
         tablename: undefined,
         selectedMetrics: "tot_bytes",
         seconds: undefined,
-        chartType: chartType,
+        chartType: chartType.toLowerCase(),
         chartTitle: chartTitle
     };
     showMapChart(chartOpts);
@@ -522,6 +522,10 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
     var node = gec.maps.getNode(nodeId);
     var senders = []
     var interfaces = []
+    var selectedMetrics = undefined;
+    if (chartType === gec.maps.chartTypeNetwork) {
+        selectedMetrics = "tot_bytes";
+    }
     this.chartSendersAndInterfaces(nodeId, chartType, iface, senders,
                                    interfaces);
 
@@ -531,7 +535,7 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
         chartTitle = "Site " + this.name + " " + chartType;
     } else {
         var ifs = interfaces.join(', ');
-        chartTitle = nodeName + " " + ifs + " " + chartType;
+        chartTitle = this.name + " " + nodeName + " " + ifs + " " + chartType;
     }
     var chartOpts = {
         x: event.pageX,
@@ -542,9 +546,9 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
         interfaces: interfaces.join(),
         showXAxis: false,
         tablename: undefined,
-        selectedMetrics: undefined,
+        selectedMetrics: selectedMetrics,
         seconds: undefined,
-        chartType: chartType,
+        chartType: chartType.toLowerCase(),
         chartTitle: chartTitle
     };
     showMapChart(chartOpts);
