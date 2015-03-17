@@ -472,18 +472,18 @@ function computeDeltas(rows, metric_data, compute_rate) {
         if (container) {
             var chart = new google.visualization.LineChart(container);
             chart.draw(data, options);
+            // Refresh every N (default = 5) seconds
+            setTimeout(function() {
+                drawVisualization(data_type, senders, tablename,
+                                  selected_metrics, chartdiv, showXAxis,
+                                  seconds, chartTitle, interfaceNames,
+                                  frequency);
+            }, frequency);
         }
     } else {
         $(container).empty(); // Remove the current map
         $(container).append("<i>No data found</i>");
     }
-    
-
-    // Refresh every N (default = 5) seconds
-    setTimeout(function() {drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, 
-	       showXAxis, seconds, chartTitle, interfaceNames, frequency);}, 
-	       frequency);
-
 }
 
 google.load('visualization', '1');
