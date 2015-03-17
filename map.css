@@ -1,20 +1,3 @@
-
-/*
-body {
-    font-family: Arial;
-    border: 0 none;
+.chart-container {
+    background: white;
 }
-*/
-
-/* Make the map canvas the size of the browser window */
-/* #map-canvas {
-    width: 100vw;
-    height: 100vh;
-} */
-
-/*
-#map-canvas {
-    width: 800px;
-    height: 600px;
-}
-*/

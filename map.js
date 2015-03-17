@@ -686,7 +686,7 @@ function showMapChart(opts) {
     var chart_id = "chart-" + opts.idBase;
     var close_id = "close-" + opts.idBase;
     $("body").append("<div id='" + element_id
-                     + "' class='ui-widget-content'>"
+                     + "' class='chart-container ui-widget-content'>"
                      + "<a href='#' id='" + close_id + "'>x</a>"
                      + "<div id='" + chart_id + "'></div>"
                      + "</div>");
