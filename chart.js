@@ -475,6 +475,7 @@ function computeDeltas(rows, metric_data, compute_rate) {
         }
     } else {
         $(container).empty(); // Remove the current map
+        $(container).append("<i>No data found</i>");
     }
     
 
