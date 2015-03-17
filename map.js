@@ -36,6 +36,9 @@ gec.maps = {
     // How many seconds between topology refreshes
     refreshSeconds: 5,
 
+    // How many millis between chart refreshes
+    chartRefreshMillis: 5000,
+
     chartTypeCPU: "cpu",
     chartTypeMemory: "memory",
     chartTypeNetwork: "network",
@@ -157,6 +160,7 @@ gec.maps.Node.prototype.addInterfaces = function(interfaces) {
  */
 gec.maps.Link = function(data, map, lineWidth) {
     this.id = data.id;
+    this.name = data.link_id.toString();
     this.fromNode = gec.maps.getNode(data.from_id);
     this.toNode = gec.maps.getNode(data.to_id);
     this.fromInterface = data.from_if_name;
@@ -209,40 +213,51 @@ gec.maps.Link.prototype.update = function (data) {
 };
 
 gec.maps.Link.prototype.showChart = function (event) {
-    //console.log("show chart " + this.id + ": " + this.status);
-    // What if this link's status is "down"? Pop up an alert?
-    if ('kb' in event) {
-        // this is a google map event, so grab the inner event
-        event = event.kb;
+    if (this.status === "down") {
+        alert("Network link " + this.name + " is down.");
+        return;
+    }
+    var x, y;
+    // Find the location, which might be buried inside a google maps event
+    if ('pageX' in event) {
+        x = event.pageX;
+        y = event.pageY;
+    } else {
+        $.each(event, function(i,val) {
+            if (val && 'pageX' in val) {
+                x = val.pageX;
+                y = val.pageY;
+            }
+        });
     }
     var uid = chart_counter++;
     var idBase = "link" + this.id + "-" + uid;
     var chartType = gec.maps.chartTypeNetwork;
     var senders = [];
-    var chartTitle = "";
-    if (this.fromNode.sender) {
-        senders.push(this.fromNode.sender);
-        chartTitle += this.fromNode.name;
-    }
+    var interfaces = [];
+    var chartTitle = this.name + " Network";
     if (this.toNode.sender) {
         senders.push(this.toNode.sender);
-        if (chartTitle) {
-            chartTitle += " & " + this.toNode.name;
-        } else {
-            chartTitle += this.toNode.name;
-        }
+        interfaces.push(this.toInterface);
+    } else if (this.fromNode.sender) {
+        senders.push(this.fromNode.sender);
+        interfaces.push(this.fromInterface);
+    } else {
+        alert("Network link " + this.name
+              + " has no data available.");
+        return;
     }
     senders = senders.join();
-    chartTitle += " " + chartType;
+    interfaces = interfaces.join();
     var chartOpts = {
-        x: event.pageX,
-        y: event.pageY,
+        x: x,
+        y: y,
         idBase: idBase,
-        // FIXME: get node, then sender from node
         senders: senders,
+        interfaces: interfaces,
         showXAxis: false,
         tablename: undefined,
-        selectedMetrics: undefined,
+        selectedMetrics: "tot_bytes",
         seconds: undefined,
         chartType: chartType,
         chartTitle: chartTitle
@@ -552,7 +567,10 @@ function initialize() {
     var center_lat = Number(url_params.lat || 38.0);
     var center_lon = Number(url_params.lon || -98.0);
     var zoom = Number(url_params.zoom) || 4;
-    gec.maps.refreshSeconds = Number(url_params.refresh) || 5;
+    gec.maps.refreshSeconds = (Number(url_params.refresh)
+                               || gec.maps.refreshSeconds);
+    gec.maps.chartRefreshMillis = (Number(url_params.frequency)
+                                    || gec.maps.chartRefreshMillis);
     var map = initMap(zoom, center_lat, center_lon);
     // Make the map available globally
     window.map = map;
@@ -671,6 +689,7 @@ function showMapChart(opts) {
                           // chart.js chokes on undefined
                           copts.selectedMetrics || "",
                           chart_id, copts.showXAxis, copts.seconds,
-                          copts.chartTitle, copts.interfaces);
+                          copts.chartTitle, copts.interfaces,
+                          gec.maps.chartRefreshMillis);
     }, 100);
 }
