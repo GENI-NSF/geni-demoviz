@@ -215,10 +215,18 @@ gec.maps.Link.prototype.update = function (data) {
 gec.maps.Link.prototype.showChart = function (event) {
     // FIXME: What if this link's status is "down"?
     //    Pop up an alert?
-    // FIXME: loop searching for an internal "MouseEvent".
-    if ('jb' in event) {
-        // this is a google map event, so grab the inner event
-        event = event.jb;
+    var x, y;
+    // Find the location, which might be buried inside a google maps event
+    if ('pageX' in event) {
+        x = event.pageX;
+        y = event.pageY;
+    } else {
+        $.each(event, function(i,val) {
+            if (val && 'pageX' in val) {
+                x = val.pageX;
+                y = val.pageY;
+            }
+        });
     }
     var uid = chart_counter++;
     var idBase = "link" + this.id + "-" + uid;
@@ -240,8 +248,8 @@ gec.maps.Link.prototype.showChart = function (event) {
     senders = senders.join();
     interfaces = interfaces.join();
     var chartOpts = {
-        x: event.pageX,
-        y: event.pageY,
+        x: x,
+        y: y,
         idBase: idBase,
         senders: senders,
         interfaces: interfaces,
