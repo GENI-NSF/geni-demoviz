@@ -292,6 +292,17 @@ function computeDeltas(rows, metric_data, compute_rate) {
 	    num_unique_senders = num_unique_senders + 1;
         }
     }
+
+    // Add any senders that don't have any data, so they appear in legend but with no line
+    var split_senders = senders.split(',');
+    for(var i = 0; i < split_senders.length; i++) {
+	var sender = split_senders[i];
+	if(!(sender in unique_senders_assoc)) {
+	    unique_senders_assoc[sender] = num_unique_senders;
+	    num_unique_senders = num_unique_senders + 1;
+	}
+    }
+
     var unique_senders = [];
     for(var sender in unique_senders_assoc) unique_senders.push(sender);
     unique_senders.sort(); // We want a list of unique, sorted senders
