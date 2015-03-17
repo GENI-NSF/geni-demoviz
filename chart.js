@@ -293,13 +293,16 @@ function computeDeltas(rows, metric_data, compute_rate) {
         }
     }
 
+    // In case of data_type = generic
     // Add any senders that don't have any data, so they appear in legend but with no line
-    var split_senders = senders.split(',');
-    for(var i = 0; i < split_senders.length; i++) {
-	var sender = split_senders[i];
-	if(!(sender in unique_senders_assoc)) {
-	    unique_senders_assoc[sender] = num_unique_senders;
-	    num_unique_senders = num_unique_senders + 1;
+    if (data_type == 'generic') {
+	var split_senders = senders.split(',');
+	for(var i = 0; i < split_senders.length; i++) {
+	    var sender = split_senders[i];
+	    if(!(sender in unique_senders_assoc)) {
+		unique_senders_assoc[sender] = num_unique_senders;
+		num_unique_senders = num_unique_senders + 1;
+	    }
 	}
     }
 
