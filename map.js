@@ -351,10 +351,15 @@ gec.maps.Site.prototype.makeChartUI = function(parent) {
     // For the closure for inner functions
     var that = this;
 
+    var nodeSelectorId = "node_selector";
+    var chartSelectorId = "chart_selector";
+    var interfaceSelectorId = "interface_selector";
+
     // Create the various drop down menus
-    var nodeSelector = $("<select/>");
-    var chartSelector = $("<select/>");
-    var interfaceSelector = $("<select/>", { disabled: true });
+    var nodeSelector = $("<select/>", { id: nodeSelectorId });
+    var chartSelector = $("<select/>", { id: chartSelectorId });
+    var interfaceSelector = $("<select/>", { disabled: true,
+                                             id: interfaceSelectorId });
 
     // Populate the node selector
     nodeSelector.append($("<option/>", { text: gec.maps.chartOptionAll }));
@@ -411,10 +416,16 @@ gec.maps.Site.prototype.makeChartUI = function(parent) {
         href: "javascript:;"
     });
 
+    parent.append($("<label/>", { text: "Node: ",
+                                  for: nodeSelectorId }));
     parent.append(nodeSelector);
     parent.append($("<br/>"));
+    parent.append($("<label/>", { text: "Chart: ",
+                                  for: chartSelectorId }));
     parent.append(chartSelector);
     parent.append($("<br/>"));
+    parent.append($("<label/>", { text: "Interface: ",
+                                  for: interfaceSelectorId }));
     parent.append(interfaceSelector);
     parent.append($("<br/>"));
 
