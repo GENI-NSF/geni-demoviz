@@ -49,26 +49,251 @@ insert into sa_slice_member (slice_id, member_id, role) values ('1ad5b7ec-649b-4
  f528ff03-d660-4ec1-ba23-dc08bfd81580 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ADCIRC-IDMS
  1ad5b7ec-649b-4e9c-8fcb-701e7089b739 | urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-1
 
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ADCIRC-CORE --table_base shakedown --clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ADCIRC-IDMS --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-8 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-7 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-6 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-5 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-4 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-3 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-2 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-ig-1 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-8 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-7 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-6 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-5 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-4 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-3 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-2 --table_base shakedown --no-clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-1 --table_base shakedown --clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+IDMSTest --table_base shakedown --clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+wi-1 --table_base shakedown --clear-tables
-python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+mu-1 --table_base shakedown --clear-tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ADCIRC-CORE --table_base shakedown --clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-4 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-3 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-2 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ucla-1 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-4 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-3 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-2 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ny-1 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ddc-4 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ddc-3 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ddc-2 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+ddc-1 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+max-4 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+max-3 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+max-2 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+max-1 --table_base shakedown --no_clear_tables
 
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+mu-4 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+mu-3 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+mu-2 --table_base shakedown --no_clear_tables
+python generate_topology_table.py --sites_table allsites --ch ch.geni.net --key mbrinn-nye-cert-key.pem  --cert mbrinn-nye-cert-key.pem --slice_urn urn:publicid:IDN+ch.geni.net:ScienceShakedown+slice+mu-1 --table_base shakedown --no_clear_tables
+
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 4;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 5;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 6;
+update shakedown_node set sender = (select id from _senders where client_id = name)  where id = 7;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 8;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 9;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 10;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 11;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 12;
+
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 13;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 14;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 15;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 16;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 17;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 18;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 20;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 21;
+
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 22;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 23;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 24;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 25;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 26;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 27;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 32;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 33;
+
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 34;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 35;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 36;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 37;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 38;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 39;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 41;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 42;
+
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 43;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 44;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 45;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 46;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 47;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 48;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 50;
+update shakedown_node set sender = (select id from _senders where client_id = name) where id = 51;
+
+ucdavis 292
+ufl 259
+tamu 276 ***
+wvnet 248 ***
+fiu 296 ***
+pcs 299
+
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (292, 'UCDAVIS', 'ucdavis', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (259, 'UFL', 'ufl', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (275, 'TAMU', 'tamu', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (248, 'WVNET', 'wvnet', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (296, 'FIU', 'fiu', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (299, 'PSC', 'psc', 0, 'up');
+
+
+
+ id | site_id |        name        |  client_id   | zoom_level | status | sender 
+----+---------+--------------------+--------------+------------+--------+--------
+  3 |     274 | UCLA InstaGENI     | ovs          |          0 | up     | 
+  4 |     274 | UCLA InstaGENI     | workers1-106 |          0 | up     | 
+  5 |     274 | UCLA InstaGENI     | workers1-107 |          0 | up     | 
+  6 |     274 | UCLA InstaGENI     | workers1-104 |          0 | up     | 
+  7 |     274 | UCLA InstaGENI     | workers1-105 |          0 | up     | 
+  9 |     274 | UCLA InstaGENI     | workers1-103 |          0 | up     | 
+  8 |     274 | UCLA InstaGENI     | workers1-102 |          0 | up     | 
+ 10 |     274 | UCLA InstaGENI     | nfs-1        |          0 | up     | 
+ 11 |     274 | UCLA InstaGENI     | workers1-100 |          0 | up     | 
+ 12 |     274 | UCLA InstaGENI     | workers1-101 |          0 | up     | 
+ 13 |     300 | NYSERNet InstaGENI | workers3-106 |          0 | up     | 
+ 14 |     300 | NYSERNet InstaGENI | workers3-107 |          0 | up     | 
+ 16 |     300 | NYSERNet InstaGENI | workers3-105 |          0 | up     | 
+ 15 |     300 | NYSERNet InstaGENI | workers3-104 |          0 | up     | 
+ 18 |     300 | NYSERNet InstaGENI | workers3-103 |          0 | up     | 
+ 17 |     300 | NYSERNet InstaGENI | workers3-102 |          0 | up     | 
+ 21 |     300 | NYSERNet InstaGENI | workers3-101 |          0 | up     | 
+ 19 |     300 | NYSERNet InstaGENI | nfs-3        |          0 | up     | 
+ 20 |     300 | NYSERNet InstaGENI | workers3-100 |          0 | up     | 
+ 22 |     306 | UtahDDC InstaGENI  | workers4-106 |          0 | up     | 
+ 23 |     306 | UtahDDC InstaGENI  | workers4-107 |          0 | up     | 
+ 25 |     306 | UtahDDC InstaGENI  | workers4-105 |          0 | up     | 
+ 24 |     306 | UtahDDC InstaGENI  | workers4-104 |          0 | up     | 
+ 26 |     306 | UtahDDC InstaGENI  | workers4-102 |          0 | up     | 
+ 27 |     306 | UtahDDC InstaGENI  | workers4-103 |          0 | up     | 
+ 33 |     306 | UtahDDC InstaGENI  | workers4-101 |          0 | up     | 
+ 32 |     306 | UtahDDC InstaGENI  | workers4-100 |          0 | up     | 
+ 31 |     306 | UtahDDC InstaGENI  | nfs-4        |          0 | up     | 
+ 34 |     245 | MAX InstaGENI      | workers5-106 |          0 | up     | 
+ 35 |     245 | MAX InstaGENI      | workers5-107 |          0 | up     | 
+ 36 |     245 | MAX InstaGENI      | workers5-104 |          0 | up     | 
+ 37 |     245 | MAX InstaGENI      | workers5-105 |          0 | up     | 
+ 39 |     245 | MAX InstaGENI      | workers5-103 |          0 | up     | 
+ 38 |     245 | MAX InstaGENI      | workers5-102 |          0 | up     | 
+ 30 |     245 | MAX InstaGENI      | workers5-101 |          0 | up     | 
+ 42 |     245 | MAX InstaGENI      | workers5-101 |          0 | up     | 
+ 29 |     245 | MAX InstaGENI      | workers5-100 |          0 | up     | 
+ 41 |     245 | MAX InstaGENI      | workers5-100 |          0 | up     | 
+ 28 |     245 | MAX InstaGENI      | nfs-5        |          0 | up     | 
+ 40 |     245 | MAX InstaGENI      | nfs-5        |          0 | up     | 
+
+ ADCIRC-master                    |  3
+ workers1-100                     |  4
+ workers1-101                     |  6
+ workers1-102                     | 19
+ workers1-103                     | 17
+ workers1-104                     |  7
+ workers1-105                     |  9
+ workers1-106                     |  5
+ workers1-107                     |  8
+ workers2-100                     | 21
+ workers2-101                     | 23
+ workers2-102                     | 20
+ workers2-103                     | 26
+ workers2-104                     | 24
+ workers2-105                     | 25
+ workers2-106                     | 27
+ workers2-107                     | 22
+ workers3-100                     | 13
+ workers3-101                     | 16
+ workers3-102                     | 12
+ workers3-103                     | 15
+ workers3-104                     | 10
+ workers3-105                     | 18
+ workers3-106                     | 14
+ workers3-107                     | 11
+ workers4-100                     | 28
+ workers4-101                     | 29
+ workers4-102                     | 32
+ workers4-103                     | 33
+ workers4-104                     | 36
+ workers4-105                     | 38
+ workers4-106                     | 40
+ workers4-107                     | 39
+ workers5-100                     | 31
+ workers5-101                     | 30
+ workers5-102                     | 43
+ workers5-103                     | 34
+ workers5-104                     | 37
+ workers5-105                     | 35
+ workers5-106                     | 41
+ workers5-107                     | 42
+
+
+ id | site_id |        name        |  client_id   | zoom_level | status | sender 
+----+---------+--------------------+--------------+------------+--------+--------
+  3 |     274 | UCLA InstaGENI     | ovs          |          0 | up     | 
+  4 |     274 | UCLA InstaGENI     | workers1-106 |          0 | up     | 5
+  5 |     274 | UCLA InstaGENI     | workers1-107 |          0 | up     | 8
+  6 |     274 | UCLA InstaGENI     | workers1-104 |          0 | up     | 7
+  7 |     274 | UCLA InstaGENI     | workers1-105 |          0 | up     | 9
+  8 |     274 | UCLA InstaGENI     | workers1-102 |          0 | up     | 19
+  9 |     274 | UCLA InstaGENI     | workers1-103 |          0 | up     | 17
+ 10 |     274 | UCLA InstaGENI     | nfs-1        |          0 | up     | 
+ 11 |     274 | UCLA InstaGENI     | workers1-100 |          0 | up     | 4
+ 12 |     274 | UCLA InstaGENI     | workers1-101 |          0 | up     | 6
+ 13 |     300 | NYSERNet InstaGENI | workers3-106 |          0 | up     | 14
+ 14 |     300 | NYSERNet InstaGENI | workers3-107 |          0 | up     | 11
+ 15 |     300 | NYSERNet InstaGENI | workers3-104 |          0 | up     | 10
+ 16 |     300 | NYSERNet InstaGENI | workers3-105 |          0 | up     | 18
+ 17 |     300 | NYSERNet InstaGENI | workers3-102 |          0 | up     | 12
+ 18 |     300 | NYSERNet InstaGENI | workers3-103 |          0 | up     | 15
+ 19 |     300 | NYSERNet InstaGENI | nfs-3        |          0 | up     | 
+ 20 |     300 | NYSERNet InstaGENI | workers3-100 |          0 | up     | 13
+ 21 |     300 | NYSERNet InstaGENI | workers3-101 |          0 | up     | 16
+ 22 |     306 | UtahDDC InstaGENI  | workers4-106 |          0 | up     | 40
+ 23 |     306 | UtahDDC InstaGENI  | workers4-107 |          0 | up     | 39
+ 24 |     306 | UtahDDC InstaGENI  | workers4-104 |          0 | up     | 36
+ 25 |     306 | UtahDDC InstaGENI  | workers4-105 |          0 | up     | 38
+ 26 |     306 | UtahDDC InstaGENI  | workers4-102 |          0 | up     | 32
+ 27 |     306 | UtahDDC InstaGENI  | workers4-103 |          0 | up     | 33
+ 28 |     245 | MAX InstaGENI      | nfs-5        |          0 | up     | 
+ 29 |     245 | MAX InstaGENI      | workers5-100 |          0 | up     | 
+ 30 |     245 | MAX InstaGENI      | workers5-101 |          0 | up     | 
+ 31 |     306 | UtahDDC InstaGENI  | nfs-4        |          0 | up     | 
+ 32 |     306 | UtahDDC InstaGENI  | workers4-100 |          0 | up     | 28
+ 33 |     306 | UtahDDC InstaGENI  | workers4-101 |          0 | up     | 29
+ 34 |     245 | MAX InstaGENI      | workers5-106 |          0 | up     | 41
+ 35 |     245 | MAX InstaGENI      | workers5-107 |          0 | up     | 42
+ 36 |     245 | MAX InstaGENI      | workers5-104 |          0 | up     | 37
+ 37 |     245 | MAX InstaGENI      | workers5-105 |          0 | up     | 35
+ 38 |     245 | MAX InstaGENI      | workers5-102 |          0 | up     | 43
+ 39 |     245 | MAX InstaGENI      | workers5-103 |          0 | up     | 34
+ 40 |     245 | MAX InstaGENI      | nfs-5        |          0 | up     | 
+ 41 |     245 | MAX InstaGENI      | workers5-100 |          0 | up     | 31
+ 42 |     245 | MAX InstaGENI      | workers5-101 |          0 | up     | 30
+ 43 |     263 | Missouri InstaGENI | workers2-106 |          0 | up     | 27
+ 44 |     263 | Missouri InstaGENI | workers2-107 |          0 | up     | 22
+ 45 |     263 | Missouri InstaGENI | workers2-104 |          0 | up     | 24
+ 46 |     263 | Missouri InstaGENI | workers2-105 |          0 | up     | 25
+ 47 |     263 | Missouri InstaGENI | workers2-102 |          0 | up     | 20
+ 48 |     263 | Missouri InstaGENI | workers2-103 |          0 | up     | 26
+ 49 |     263 | Missouri InstaGENI | nfs-2        |          0 | up     | 
+ 50 |     263 | Missouri InstaGENI | workers2-100 |          0 | up     | 21
+ 51 |     263 | Missouri InstaGENI | workers2-101 |          0 | up     | 23
+ 52 |     292 | UCDAVIS            | ucdavis      |          0 | up     | 
+ 58 |     259 | UFL                | ufl          |          0 | up     | 
+ 59 |     276 | TAMU               | tamu         |          0 | up     | 
+ 60 |     248 | WVNET              | wvnet        |          0 | up     | 
+ 61 |     296 | FIU                | fiu          |          0 | up     | 
+ 62 |     299 | PSC                | psc          |          0 | up     | 
+
+
+insert into shakedown_link (from_id, to_id, link_id) values (52, 3, 'ucdavis-ucla-link');
+insert into shakedown_link (from_id, to_id, link_id) values (3, 31, 'ucla-utahddc-link');
+insert into shakedown_link (from_id, to_id, link_id) values (3, 49, 'ucla-missouri-link');
+insert into shakedown_link (from_id, to_id, link_id) values (3, 49, 'ucla-missouri-link');
+insert into shakedown_link (from_id, to_id, link_id) values (49, 19, 'missouri-nysernet-link');
+insert into shakedown_link (from_id, to_id, link_id) values (19, 40, 'nysernet-max-link');
+insert into shakedown_link (from_id, to_id, link_id) values (52, 58, 'ucdavis-ufl-link');
+insert into shakedown_link (from_id, to_id, link_id) values (52, 59, 'ucdavis-tamu-link');
+insert into shakedown_link (from_id, to_id, link_id) values (52, 60, 'ucdavis-wvnet-link');
+insert into shakedown_link (from_id, to_id, link_id) values (52, 61, 'ucdavis-fiu-link');
+insert into shakedown_link (from_id, to_id, link_id) values (52, 62, 'ucdavis-psc-link');
+
+update shakedown_link set status = 'up', from_if_name = 'eth1', to_if_name = 'eth1';
+
+http://155.99.144.115/html/table.php?base_name=shakedown&lat=35&lon=-98&zoom=5&data_type1=cpu&senders1=3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43&data_type2=network&senders2=3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43&data_type3=network&senders3=3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43&ifcs3=eth2
+
+http://155.99.144.115/html/table.php?base_name=shakedown&lat=35&lon=-98&zoom=5&data_type1=cpu&senders1=3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43&data_type2=network&senders2=3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,14,14,15,15,16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,43,43&ifcs2=eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2,eth1,eth2
 
