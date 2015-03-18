@@ -1,0 +1,43 @@
+Design to keep data tables trimmed (only last 24 hours).
+
+Here are the tables with user data and number of lines as of 3-17-2015:
+
+bvermeulen_sdx
+msb_metrics
+nmetrics_cpu
+nmetrics_memory
+nmetrics_network
+nriganikytopo2
+starlight_metrics
+
+select count(*) from bvermeulen_sdx; => 0
+select count(*) from msb_metrics; => 209
+select count(*) from nmetrics_cpu; => 3557396
+select count(*) from nmetrics_memory; => 201564
+select count(*) from nmetrics_network; => 3671062
+select count(*) from nriganikytopo2; => 88596
+select count(*) from starlight_metrics; => 0
+
+We want to create a table that holds timestamps and max id's per tablename
+create table table_history (
+    timestamp integer,
+    max_id    integer,
+    tablename varchar
+);
+
+We want to do this every N minutes (say 60)
+Begin transaction
+For each table TBL in a list
+1. Create an empty clone of TBL if doesn't exist (TBL_COPY)
+2. Insert a record into table history
+     insert into table_history (timestamp, max_id, tablename) values
+         (now, (select max(id) from TBL), TBL);
+3. Copy all rows from TBL to TBL where id < (select max(max_id) from table_history
+          where timestamp < now - 86400)
+4. Delete all rows from tbl where id < (select (max(max_id) from table_history where
+          timestamp < now - 86400);
+commit transaction
+
+
+
+

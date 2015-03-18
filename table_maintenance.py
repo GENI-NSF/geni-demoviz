@@ -31,13 +31,13 @@ import time
 
 # The tables maintained by this script
 maintained_tables = [
-#    {'tablename' : 'bvermeulen_sdx', 'id_column' : 'id'},
-    {'tablename' : 'msb_metrics', 'id_column' : 'id'}
-#    {'tablename' : 'nriganikytopo2', 'id_column' : 'id'},
-#    {'tablename' : 'starlight_metrics', 'id_column' : 'id'},
-#    {'tablename' : 'nmetrics_cpu', 'id_column' : 'oml_tuple_id'},
-#    {'tablename' : 'nmetrics_memory', 'id_column' : 'oml_tuple_id'},
-#    {'tablename' : 'nmetrics_network', 'id_column' : 'oml_tuple_id'}
+    {'tablename' : 'bvermeulen_sdx', 'id_column' : 'id'},
+    {'tablename' : 'msb_metrics', 'id_column' : 'id'},
+    {'tablename' : 'nriganikytopo2', 'id_column' : 'id'},
+    {'tablename' : 'starlight_metrics', 'id_column' : 'id'},
+    {'tablename' : 'nmetrics_cpu', 'id_column' : 'oml_tuple_id'},
+    {'tablename' : 'nmetrics_memory', 'id_column' : 'oml_tuple_id'},
+    {'tablename' : 'nmetrics_network', 'id_column' : 'oml_tuple_id'}
                      ]
 
 class TableMaintainer():
