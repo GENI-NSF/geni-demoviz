@@ -483,9 +483,16 @@ gec.maps.Site.prototype.chartSendersAndInterfaces = function(node,
     
     if (chart === gec.maps.chartTypeCPU || chart == gec.maps.chartTypeMemory) {
         if (node === gec.maps.chartOptionAll) {
-            $.each(this.nodes, function(i, n) { senders.push(n); });
+            $.each(this.nodes, function(i, n) {
+                if (n.sender) {
+                    senders.push(n.sender);
+                }
+            });
         } else {
-            senders.push(gec.maps.getNode(node).sender);
+            var n = gec.maps.getNode(node);
+            if (n && n.sender) {
+                senders.push(gec.maps.getNode(node).sender);
+            }
         }
         return;
     }
@@ -497,6 +504,7 @@ gec.maps.Site.prototype.chartSendersAndInterfaces = function(node,
         nodes.push(gec.maps.getNode(node));
     }
     $.each(nodes, function(i, n) {
+        if (! n.sender) return;
         if (iface === gec.maps.chartOptionAll) {
             $.each(n.interfaces, function(idx, ifc) {
                 senders.push(n.sender);
