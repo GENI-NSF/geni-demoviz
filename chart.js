@@ -24,6 +24,27 @@
 // Strict mode - error undeclared variables
 "use strict";
 
+// Establish the geni namespace
+var gec;
+gec = gec || {};
+
+// Establish the charts sub-namespace
+gec.charts = {
+
+    allCharts: {},
+
+    getChart: function(id) {
+        return this.allCharts[id];
+    },
+
+    addChart: function(chart, id) {
+        this.allCharts[id] = chart;
+        return chart;
+    },
+
+};
+
+
 function initCase(lowerstring) {
     return lowerstring.charAt(0).toUpperCase() + lowerstring.slice(1);
 }
@@ -506,7 +527,12 @@ function computeDeltas(rows, metric_data, compute_rate) {
 
     var container = document.getElementById(chartdiv);
     if (container) {
-        var chart = new google.visualization.LineChart(container);
+        var chart = gec.charts.getChart(chartdiv);
+        if (! chart) {
+            // Avoid a memory leak by caching the chart instance.
+            chart = new google.visualization.LineChart(container);
+            gec.charts.addChart(chart, chartdiv);
+        }
         chart.draw(data, options);
         // Refresh every N (default = 5) seconds
         setTimeout(function() {
