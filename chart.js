@@ -407,7 +407,7 @@ function computeDeltas(rows, metric_data, compute_rate) {
 
     if (rows.length > 0) {
 	//	interpolateRows(rows);
-	standardizeTmestamps(rows);
+	standardizeTimestamps(rows);
 	if (data_type ==  'network')
 	    computeDeltas(rows, metric_data, true);
 	else if (data_type == 'cpu')
