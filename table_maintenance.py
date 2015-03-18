@@ -120,11 +120,11 @@ class TableMaintainer():
             sql_file.write(copy_stmt + ";\n");
 
             # Delete all rows with ID more than 24 hours old from data table
-            delete_template = "delete from %s where id < (select max(max_id) from table_history " + \
+            delete_template = "delete from %s where %s < (select max(max_id) from table_history " + \
                 "where tablename = '%s' and timestamp = (select max(timestamp) " + \
                 "from table_history where tablename = '%s' and timestamp < %d))"
             delete_stmt = delete_template % \
-                (tablename, tablename, tablename, (timestamp-window))
+                (tablename, id_column, tablename, tablename, (timestamp-window))
             sql_file.write(delete_stmt + ";\n");
 
         # Commit transaction
