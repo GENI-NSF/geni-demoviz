@@ -46,7 +46,11 @@ gec.charts = {
 
 
 function initCase(lowerstring) {
-    return lowerstring.charAt(0).toUpperCase() + lowerstring.slice(1);
+    if (lowerstring) {
+	return lowerstring.charAt(0).toUpperCase() + lowerstring.slice(1);
+    } else {
+	return lowerstring;
+    }
 }
 
 // Is the given metric enabled?
@@ -113,10 +117,8 @@ function addMetricColumn(data, num_senders, num_metrics, metric, unique_sender, 
 }
 
 // Add columns to the table based on which metrics are selected
-function addColumns(data_type, data, unique_sender, senders, selected_metrics, interfaceName)
+function addColumns(data_type, data, unique_sender, num_senders, selected_metrics, interfaceName)
 {
-    var split_senders = senders.split(',');
-    var num_senders = split_senders.length;
     var split_metrics = selected_metrics.split(',');
     var num_metrics = split_metrics.length;
     // For column names:
@@ -323,22 +325,52 @@ function computeDeltas(rows, metric_data, compute_rate) {
 // adding the columns and then adding the rows
     function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle, interfaceNames, refreshSeconds)
 {
-    var unique_senders_assoc = {}
-    var num_unique_senders = 0;
-    var sender = null;
+    var unique_senders_assoc = {}; // key by sender name to # of unique senders. Sender name concats real name and ifc for network
+    var num_unique_senders = 0; // counting as 2 1 sender with 2 ifcs
+    var unique_senders_ids = {}; // key by sender to OML sender ID. This is just the short sender name.
+    var unique_senders_idxs = {}; // key by sender to index in senders string. This is just the short sender name.
+    var split_senders = senders.split(',');
+    var num_senders = split_senders.length;
+    var split_ifcs = interfaceNames.split(',');
+    var num_ifcs = split_ifcs.length;
+    // sender is a name
+    // oml_sender_id should be first thing in metric_data
     for(var i = 0; i < metric_data.length; i++) {
         var metric = metric_data[i];
 	var sender = metric.sender;
-	if (!(sender in unique_senders_assoc)) {
-	    unique_senders_assoc[sender] = num_unique_senders;
+	var name = metric.name;
+	var senderfull = sender;
+	if (data_type == 'network') {
+	    senderfull = sender + ":" + name;
+	}
+	if (!(senderfull in unique_senders_assoc)) {
+	    var idxs = unique_senders_idxs[sender] || [];
+	    var foundIfc = false;
+	    for (var j = 0; j < num_senders; j++) {
+		if (metric.oml_sender_id == split_senders[j]) {
+		    if (name == split_ifcs[j]) {
+			foundIfc = true;
+			idxs.push(j);
+			break;
+		    }
+		}
+	    }
+	    if (! foundIfc) {
+		// The sender/interface in this row of data is not a combination we asked for
+		// Therefore, don't count it as one of the unique senders
+		continue;
+	    }
+	    unique_senders_ids[sender] = metric.oml_sender_id;
+	    unique_senders_idxs[sender] = idxs;
+	    unique_senders_assoc[senderfull] = num_unique_senders;
 	    num_unique_senders = num_unique_senders + 1;
         }
     }
 
     // In case of data_type = generic
     // Add any senders that don't have any data, so they appear in legend but with no line
+    // for generics, the sender in senders is a name; for non generics it is an ID (#)
     if (data_type == 'generic') {
-	var split_senders = senders.split(',');
 	for(var i = 0; i < split_senders.length; i++) {
 	    var sender = split_senders[i];
 	    if(!(sender in unique_senders_assoc)) {
@@ -348,17 +380,13 @@ function computeDeltas(rows, metric_data, compute_rate) {
 	}
     }
 
-    var unique_senders = [];
+    var unique_senders = []; // List of sender names
     for(var sender in unique_senders_assoc) unique_senders.push(sender);
     unique_senders.sort(); // We want a list of unique, sorted senders
 
     var data = new google.visualization.DataTable();
     data.addColumn('number', 'TS');
 
-    var split_ifcs = interfaceNames.split(',');
-    var num_ifcs = split_ifcs.length;
-    var split_senders = senders.split(',');
-    var num_senders = split_senders.length;
 //    if (num_senders != num_unique_senders) {
 //	console.log("Data returned " + num_unique_senders + " unique senders but arg specified " + num_senders);
 //    }
@@ -383,9 +411,16 @@ function computeDeltas(rows, metric_data, compute_rate) {
 
     for(var i = 0; i < unique_senders.length; i++) {
 	var unique_sender = unique_senders[i];
-	var sender_index = unique_senders_assoc[unique_sender];
-	var interfaceName = split_ifcs[sender_index];
-        addColumns(data_type, data, unique_sender, senders, selected_metrics, interfaceName);
+
+	// pull out the proper interfaceName
+	var interfaceName = null;
+	if (data_type == 'network') {
+	    var senderps = unique_sender.split(':');
+	    unique_sender = senderps[0];
+	    interfaceName = senderps[1];
+	}
+	
+        addColumns(data_type, data, unique_sender, num_unique_senders, selected_metrics, interfaceName);
     }
 
     var rows = [];
@@ -393,15 +428,30 @@ function computeDeltas(rows, metric_data, compute_rate) {
         var metric = metric_data[i];
 	var ts = parseFloat(metric.ts);
 	var sender = metric.sender;
-	var sender_index = unique_senders_assoc[sender];
+	var sender_index = unique_senders_assoc[sender]; // count in list of unique senders (counting diff ifcs)
 	var row = [ts];
+	// Add 1 null in the row per sender/ifc combo per metric
 	for(var j = 0; j < num_unique_senders; j++) {
 	    for(var k = 0; k < numDataColumns(data_type, selected_metrics); k++)
 		row.push(null); // Place holders for entries from the appropriate sender
         }
-	var interfaceName = split_ifcs[sender_index];
-	if (fillRow(data_type, row, metric, sender_index, selected_metrics, interfaceName)) {
-	    rows.push(row);
+
+	// Fill in the data in the row
+	var interfaceName = null;
+	if (data_type == 'network') {
+	    // For network data, we call fillRow once per interface requested for this sender
+	    // but the row is only filled if the data is for the requested interface
+	    var idxs = unique_senders_idxs[sender];
+	    for (var j = 0; j < idxs.length; j++) {
+		interfaceName = split_ifcs[idxs[j]];
+		if (fillRow(data_type, row, metric, sender_index, selected_metrics, interfaceName)) {
+		    rows.push(row);
+		}
+	    }
+	} else {
+	    if (fillRow(data_type, row, metric, sender_index, selected_metrics, interfaceName)) {
+		rows.push(row);
+	    }
 	}
     }
 
@@ -438,11 +488,9 @@ function computeDeltas(rows, metric_data, compute_rate) {
     if (data_type == 'cpu') {
 	title_type = 'CPU';
     }
-    var title_sender = initCase(sender);
-    if (data_type == 'network') {
-	var sender_index = unique_senders_assoc[sender];
-	var interfaceName = split_ifcs[sender_index];
-	title_sender = title_sender + ":" + interfaceName;
+    var title_sender = '';
+    if (unique_senders && unique_senders.length > 0) {
+	title_sender = initCase(unique_senders[0]);
     }
     var title_metric = initCase(selected_metrics);
     if (num_metrics == 1 && data_type == 'network') {
