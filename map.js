@@ -607,7 +607,7 @@ function initialize() {
     // Orig
     //    logosDiv.innerHTML = '<image style="height: 30px; width: 30px" src="/common/geni.png"/>&nbsp;<image style="height: 30px; width: 30px" src="/common/nsf1.gif"/><image style="height: 30px; width: 110px" src="https://us-ignite-org.s3.amazonaws.com/static/v1/img/furniture/logo-small.png"/>';
     // From Niky
-    logosDiv.innerHTML = '<image style="height: 30px; width: 30px" src="http://www.gpolab.bbn.com/experiment-support/logos/left.png"/>&nbsp;<image style="height: 30px; width: 30px" src="http://www.gpolab.bbn.com/experiment-support/logos/middle.png"/><image style="height: 30px; width: 64px" src="http://www.gpolab.bbn.com/experiment-support/logos/right.png"/>';
+    logosDiv.innerHTML = '<image style="height: 100px" src="http://www.gpolab.bbn.com/experiment-support/logos/left.png"/>&nbsp;<image style="height: 100px" src="http://www.gpolab.bbn.com/experiment-support/logos/middle.png"/><image style="height: 100px" src="http://www.gpolab.bbn.com/experiment-support/logos/right.png"/>';
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(logosDiv);
 
     var base_name = url_params.base_name || 'lwtesting_stitchtest';
