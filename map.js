@@ -601,7 +601,7 @@ function initialize() {
     // Show the GENI, NSF and US Ignite logos
     var logosDiv = document.createElement('div-logos');
     logosDiv.innerHTML = '<image style="height: 30px; width: 30px" src="/common/geni.png"/>&nbsp;<image style="height: 30px; width: 30px" src="/common/nsf1.gif"/><image style="height: 30px; width: 110px" src="https://us-ignite-org.s3.amazonaws.com/static/v1/img/furniture/logo-small.png"/>';
-    map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(logosDiv);
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(logosDiv);
 
     var base_name = url_params.base_name || 'lwtesting_stitchtest';
     // Let the map show up, then paint the experiment data
