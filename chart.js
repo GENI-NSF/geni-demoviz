@@ -525,6 +525,30 @@ function computeDeltas(rows, metric_data, compute_rate) {
 	options.vAxis.maxValue = 100;
     }
 
+    var basename = getURLParameters().base_name;
+    if (basename == 'shakedown') { // Special bounds for Paul Ruth's demo
+	if (data_type == 'cpu') {
+	    options.vAxis.maxValue = 4000;
+            options.vAxis.ticks = [
+                {v: 1000, f: '1'},
+                {v: 2000, f: '2'},
+                {v: 3000, f: '3'},
+                {v: 4000, f: '4'}
+            ];
+	} else if (data_type == 'network') {
+	    options.vAxis.maxValue = 10000000000;
+            options.vAxis.ticks = [
+                {v: 2000000000, f: '2GB'},
+                {v: 4000000000, f: '4GB'},
+                {v: 6000000000, f: '6GB'},
+                {v: 8000000000, f: '8GB'},
+                {v: 10000000000, f: '10GB'}
+            ];
+        }
+	else if (data_type == 'memory')
+	    options.vAxis.maxValue = 100;
+    }
+
     var container = document.getElementById(chartdiv);
     if (container) {
         var chart = gec.charts.getChart(chartdiv);
