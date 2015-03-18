@@ -325,9 +325,9 @@ function computeDeltas(rows, metric_data, compute_rate) {
     var num_ifcs = split_ifcs.length;
     var split_senders = senders.split(',');
     var num_senders = split_senders.length;
-    if (num_senders != num_unique_senders) {
-	console.log("Data returned " + num_unique_senders + " unique senders but arg specified " + num_senders);
-    }
+//    if (num_senders != num_unique_senders) {
+//	console.log("Data returned " + num_unique_senders + " unique senders but arg specified " + num_senders);
+//    }
     if (data_type == 'network' && num_ifcs != num_senders) {
 	console.log("Sender/IFC count mismatch: " + senders + ", " + interfaceNames);
 	if (data_type == 'network' && num_ifcs == num_unique_senders) {
@@ -434,6 +434,10 @@ function computeDeltas(rows, metric_data, compute_rate) {
 	showLegend = 'right';
     }
 
+    if (num_unique_senders > 5) {
+	showLegend = 'none';
+    }
+    
     if (typeof chartTitle !== 'undefined' && chartTitle != '' && chartTitle != null) {
 	title = chartTitle;
     }
