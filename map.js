@@ -36,9 +36,6 @@ gec.maps = {
     // How many seconds between topology refreshes
     refreshSeconds: 5,
 
-    // How many millis between chart refreshes
-    chartRefreshMillis: 5000,
-
     chartTypeCPU: "CPU",
     chartTypeMemory: "Memory",
     chartTypeNetwork: "Network",
@@ -483,9 +480,16 @@ gec.maps.Site.prototype.chartSendersAndInterfaces = function(node,
     
     if (chart === gec.maps.chartTypeCPU || chart == gec.maps.chartTypeMemory) {
         if (node === gec.maps.chartOptionAll) {
-            $.each(this.nodes, function(i, n) { senders.push(n); });
+            $.each(this.nodes, function(i, n) {
+                if (n.sender) {
+                    senders.push(n.sender);
+                }
+            });
         } else {
-            senders.push(gec.maps.getNode(node).sender);
+            var n = gec.maps.getNode(node);
+            if (n && n.sender) {
+                senders.push(gec.maps.getNode(node).sender);
+            }
         }
         return;
     }
@@ -497,6 +501,7 @@ gec.maps.Site.prototype.chartSendersAndInterfaces = function(node,
         nodes.push(gec.maps.getNode(node));
     }
     $.each(nodes, function(i, n) {
+        if (! n.sender) return;
         if (iface === gec.maps.chartOptionAll) {
             $.each(n.interfaces, function(idx, ifc) {
                 senders.push(n.sender);
@@ -592,15 +597,17 @@ function initialize() {
     var zoom = Number(url_params.zoom) || 4;
     gec.maps.refreshSeconds = (Number(url_params.refresh)
                                || gec.maps.refreshSeconds);
-    gec.maps.chartRefreshMillis = (Number(url_params.frequency)
-                                    || gec.maps.chartRefreshMillis);
     var map = initMap(zoom, center_lat, center_lon);
     // Make the map available globally
     window.map = map;
 
     // Show the GENI, NSF and US Ignite logos
     var logosDiv = document.createElement('div-logos');
-    logosDiv.innerHTML = '<image style="height: 30px; width: 30px" src="/common/geni.png"/>&nbsp;<image style="height: 30px; width: 30px" src="/common/nsf1.gif"/><image style="height: 30px; width: 110px" src="https://us-ignite-org.s3.amazonaws.com/static/v1/img/furniture/logo-small.png"/>';
+    // 
+    // Orig
+    //    logosDiv.innerHTML = '<image style="height: 30px; width: 30px" src="/common/geni.png"/>&nbsp;<image style="height: 30px; width: 30px" src="/common/nsf1.gif"/><image style="height: 30px; width: 110px" src="https://us-ignite-org.s3.amazonaws.com/static/v1/img/furniture/logo-small.png"/>';
+    // From Niky
+    logosDiv.innerHTML = '<image style="height: 30px; width: 30px" src="http://www.gpolab.bbn.com/experiment-support/logos/left.png"/>&nbsp;<image style="height: 30px; width: 30px" src="http://www.gpolab.bbn.com/experiment-support/logos/middle.png"/><image style="height: 30px; width: 64px" src="http://www.gpolab.bbn.com/experiment-support/logos/right.png"/>';
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(logosDiv);
 
     var base_name = url_params.base_name || 'lwtesting_stitchtest';
@@ -712,7 +719,6 @@ function showMapChart(opts) {
                           // chart.js chokes on undefined
                           copts.selectedMetrics || "",
                           chart_id, copts.showXAxis, copts.seconds,
-                          copts.chartTitle, copts.interfaces,
-                          gec.maps.chartRefreshMillis);
+                          copts.chartTitle, copts.interfaces);
     }, 100);
 }

@@ -35,10 +35,13 @@ function metric_enabled(metric, selected_metrics) {
 
 // This is called once the Google chart stuff is loaded. We then grab the data and
 // plot the char
-function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, showXAxis, seconds, chartTitle, interfaceNames, frequency) {
+function drawVisualization(data_type, senders, tablename, selected_metrics, chartdiv, showXAxis, seconds, chartTitle, interfaceNames, refreshSeconds) {
+    var url_params = getURLParameters();
     if (typeof seconds === 'undefined' || seconds === null) {
-	var url_params = getURLParameters();
 	seconds = Number(url_params.seconds) || 120;
+    }
+    if (! refreshSeconds) {
+        refreshSeconds = Number(url_params.chart_refresh || 5);
     }
     // interfaceNames defaults to 1 eth1 per sender
     if (typeof interfaceNames === 'undefined' && typeof senders !== 'undefined') {
@@ -58,7 +61,7 @@ function drawVisualization(data_type, senders, tablename, selected_metrics, char
     $.getJSON(url, 
               function(data) { 
 		  // In the return from the $.getJSON call to grab_metrics_data we plot the data
-		  drawChart(data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle, interfaceNames, frequency); 
+		  drawChart(data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle, interfaceNames, refreshSeconds); 
 	      });
 };
 
@@ -287,7 +290,7 @@ function computeDeltas(rows, metric_data, compute_rate) {
 
 // Draw the chart by grabbing the data, creating the table
 // adding the columns and then adding the rows
-    function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle, interfaceNames, frequency)
+    function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle, interfaceNames, refreshSeconds)
 {
     var unique_senders_assoc = {}
     var num_unique_senders = 0;
@@ -499,8 +502,8 @@ function computeDeltas(rows, metric_data, compute_rate) {
             drawVisualization(data_type, senders, tablename,
                               selected_metrics, chartdiv, showXAxis,
                               seconds, chartTitle, interfaceNames,
-                              frequency);
-        }, frequency);
+                              refreshSeconds);
+        }, refreshSeconds * 1000);
     }
 }
 
