@@ -222,6 +222,16 @@ function fillRow(data_type, row, metric, sender_index, selected_metrics, interfa
     return ret;
 }
 
+// Make timestamps into sequential numbers (timestamps are meaningless)
+function standardizeTimestamps(rows) 
+{
+    var num_rows = rows.length;
+    for(var i = 0; i < num_rows; i++) {
+	// Set TS to sequential count, not actual (meaningless) ts
+	rows[i][0] = i; 
+    }
+}
+
 // Fill in null entries by interpolating between adjacent points
 function interpolateRows(rows) {
     var num_rows = rows.length;
@@ -375,7 +385,8 @@ function computeDeltas(rows, metric_data, compute_rate) {
     }
 
     if (rows.length > 0) {
-	interpolateRows(rows);
+	//	interpolateRows(rows);
+	standardizeTmestamps(rows);
 	if (data_type ==  'network')
 	    computeDeltas(rows, metric_data, true);
 	else if (data_type == 'cpu')
