@@ -321,8 +321,14 @@ gec.maps.Site.prototype.createMarker = function() {
 
 gec.maps.Site.prototype.fillChartTypeSelect = function(chartSelector,
                                                        interfaceSelector) {
-    $.each([gec.maps.chartTypeCPU, gec.maps.chartTypeMemory,
-            gec.maps.chartTypeNetwork],
+    var chartTypes = [gec.maps.chartTypeCPU, gec.maps.chartTypeMemory,
+                      gec.maps.chartTypeNetwork];
+    // Maybe add storage
+    var url_params = getURLParameters();
+    if (gec.maps.storage.storageEnabled(url_params.base_name)) {
+        chartTypes.push(gec.maps.storage.chartTypeStorage);
+    }
+    $.each(chartTypes,
            function(i, t) {
                var chartOption = $("<option/>", {
                    value: t,
@@ -528,12 +534,18 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
     var senders = []
     var interfaces = []
     var selectedMetrics = undefined;
+    var tablename = undefined;
     if (chartType === gec.maps.chartTypeNetwork) {
         selectedMetrics = "tot_bytes";
     }
-    this.chartSendersAndInterfaces(nodeId, chartType, iface, senders,
-                                   interfaces);
-
+    if (chartType === gec.maps.storage.chartTypeStorage) {
+        gec.maps.storage.senders(this, nodeId, senders);
+        tablename = gec.maps.storage.tablename;
+        selectedMetrics = "used_storage";
+    } else {
+        this.chartSendersAndInterfaces(nodeId, chartType, iface, senders,
+                                       interfaces);
+    }
     var nodeName = nodeSelector.children(':selected').text();
     var chartTitle = "";
     if (nodeName === gec.maps.chartOptionAll) {
@@ -541,6 +553,9 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
     } else {
         var ifs = interfaces.join(', ');
         chartTitle = this.name + " " + nodeName + " " + ifs + " " + chartType;
+    }
+    if (chartType === gec.maps.storage.chartTypeStorage) {
+        chartType = "generic";
     }
     var chartOpts = {
         x: event.pageX,
@@ -550,7 +565,7 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
         senders: senders.join(),
         interfaces: interfaces.join(),
         showXAxis: false,
-        tablename: undefined,
+        tablename: tablename,
         selectedMetrics: selectedMetrics,
         seconds: undefined,
         chartType: chartType.toLowerCase(),
@@ -575,6 +590,53 @@ gec.maps.Site.prototype.allInterfaces = function () {
         });
     });
     return interfaces;
+};
+
+/*----------------------------------------------------------------------
+ *
+ * Special for storage data type for sdxsmall
+ *
+ *----------------------------------------------------------------------
+ */
+gec.maps.storage = {
+
+    chartTypeStorage: "Storage",
+
+    storageBasenames: [ "sdxsmall" ],
+
+    tablename: "nriganikytopo2",
+
+    storageSenders: {
+        55: "nriga-nikytopo2-cenic-server",
+        56: "nriga-nikytopo2-max-sdx-comp",
+        57: "nriga-nikytopo2-max-sdx",
+        58: "nriga-nikytopo2-iminds2-sdx",
+        59: "nriga-nikytopo2-iminds-client",
+        60: "nriga-nikytopo2-usclients",
+        61: "nriga-nikytopo2-clabfake",
+        62: "nriga-nikytopo2-iminds2-sdx-comp",
+        64: "nriga-nikytopo2-aws"
+    },
+
+    storageEnabled: function(basename) {
+        return ($.inArray(basename, this.storageBasenames) !== -1);
+    },
+
+    senders: function(site, nodeId, senders) {
+        var nodes = site.nodes;
+        if (nodeId !== gec.maps.chartOptionAll) {
+            nodes = [ gec.maps.getNode(nodeId) ];
+        }
+        var that = this;
+        $.each(nodes, function(i,n) {
+            if (n.sender) {
+                var storageSender = that.storageSenders[n.sender];
+                if (storageSender) {
+                    senders.push(storageSender);
+                }
+            }
+        });
+    }
 };
 
 /*----------------------------------------------------------------------
@@ -607,7 +669,7 @@ function initialize() {
     // Orig
     //    logosDiv.innerHTML = '<image style="height: 30px; width: 30px" src="/common/geni.png"/>&nbsp;<image style="height: 30px; width: 30px" src="/common/nsf1.gif"/><image style="height: 30px; width: 110px" src="https://us-ignite-org.s3.amazonaws.com/static/v1/img/furniture/logo-small.png"/>';
     // From Niky
-    logosDiv.innerHTML = '<image style="height: 30px; width: 30px" src="http://www.gpolab.bbn.com/experiment-support/logos/left.png"/>&nbsp;<image style="height: 30px; width: 30px" src="http://www.gpolab.bbn.com/experiment-support/logos/middle.png"/><image style="height: 30px; width: 64px" src="http://www.gpolab.bbn.com/experiment-support/logos/right.png"/>';
+    logosDiv.innerHTML = '<image style="height: 100px" src="http://www.gpolab.bbn.com/experiment-support/logos/left.png"/>&nbsp;<image style="height: 100px" src="http://www.gpolab.bbn.com/experiment-support/logos/middle.png"/><image style="height: 100px" src="http://www.gpolab.bbn.com/experiment-support/logos/right.png"/>';
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(logosDiv);
 
     var base_name = url_params.base_name || 'lwtesting_stitchtest';
