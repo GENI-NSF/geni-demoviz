@@ -1,26 +1,26 @@
-#!/usr/bin/env python                                                                            
-#----------------------------------------------------------------------                          
-# Copyright (c) 2013-2015 Raytheon BBN Technologies                                              
-#                                                                                                
-# Permission is hereby granted, free of charge, to any person obtaining                          
-# a copy of this software and/or hardware specification (the "Work") to                          
-# deal in the Work without restriction, including without limitation the                         
-# rights to use, copy, modify, merge, publish, distribute, sublicense,                           
-# and/or sell copies of the Work, and to permit persons to whom the Work                         
-# is furnished to do so, subject to the following conditions:                                    
-#                                                                                                
-# The above copyright notice and this permission notice shall be                                 
-# included in all copies or substantial portions of the Work.                                    
-#                                                                                                
-# THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS                            
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                                     
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                                          
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT                                    
-# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,                                   
-# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,                             
-# OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS                             
-# IN THE WORK.                                                                                   
-#----------------------------------------------------------------------                          
+#!/usr/bin/env python
+#----------------------------------------------------------------------
+# Copyright (c) 2013-2015 Raytheon BBN Technologies
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and/or hardware specification (the "Work") to
+# deal in the Work without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Work, and to permit persons to whom the Work
+# is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Work.
+#
+# THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
+# IN THE WORK.
+#----------------------------------------------------------------------
 
 # Script to maintain GEC22 data tables, archiving data older than 24 hours
 
@@ -52,6 +52,7 @@ class TableMaintainer():
         parser.add_option("--dbpass", help="Database password", default="0mlisg00d4u")
         parser.add_option("--dbport", help="Database port", default="5432")
         parser.add_option("--outfile", help="Database script filename")
+        parser.add_option("--dumpdir", help="Database dump directory")
         parser.add_option('--frequency', help="How often to gather metrics in seconds", 
                           default="3600")
         parser.add_option("--window", help="Length of window of data maintained in tables",
@@ -62,6 +63,7 @@ class TableMaintainer():
         required_missing_fields = []
 
         if opts.outfile == None: required_missing_fields.append('outfile')
+        if opts.dumpdir == None: required_missing_fields.append('dumpdir')
 
 	if len(required_missing_fields) > 0:
             raise Exception("Missing required arguments: " +
@@ -75,6 +77,15 @@ class TableMaintainer():
        [opts, args] = parser.parse_args(argv)
        self.check_options(opts)
        return opts
+
+    def dump_database(self, tablename, timestamp):
+        dumpfile = "%s-%s.sql" % (tablename, timestamp)
+        dumpfile = os.path.join(self._opts.dumpdir, dumpfile)
+        cmd = "PGPASSWORD=%s /usr/bin/pg_dump -U %s -h %s -t %s -f %s %s"
+        cmd = cmd % (self._opts.dbpass, self._opts.dbuser, self._opts.dbhost,
+                     tablename, dumpfile, self._opts.dbname)
+        print "Dump command: %s" % (cmd)
+        os.system(cmd)
 
     def run(self):
 
@@ -91,14 +102,17 @@ class TableMaintainer():
             
             tablename = table['tablename']
             id_column = table['id_column']
-            archive_tablename = "%s_ARCHIVE" % tablename
+            # archive_tablename = "%s_ARCHIVE" % tablename
             window = int(self._opts.window)
+
+            print "Backing up table %s" % (tablename)
+            self.dump_database(tablename, timestamp)
 
             print "Maintaining table %s" % tablename
 
             # Make sure there is an empty archive table (copy of table)
-            create_stmt = "create table if not exists %s (like %s)" % (archive_tablename, tablename)
-            sql_file.write(create_stmt + ";\n");
+            # create_stmt = "create table if not exists %s (like %s)" % (archive_tablename, tablename)
+            # sql_file.write(create_stmt + ";\n");
 
             # Insert a record into table history
             insert_stmt = "insert into table_history (timestamp, max_id, tablename) " +\
@@ -111,13 +125,13 @@ class TableMaintainer():
             sql_file.write(insert_stmt + ";\n");
 
             # Copy all rows with ID more than 24 hours old from data table into archive table
-            copy_template = "insert into %s select * from %s where %s < " +\
-                "(select max(max_id) from table_history where tablename = '%s' " + \
-                "and timestamp = (select max(timestamp) from table_history " + \
-                "where tablename = '%s' and timestamp < %d))"
-            copy_stmt = copy_template % \
-                (archive_tablename, tablename, id_column, tablename, tablename, (timestamp-window))
-            sql_file.write(copy_stmt + ";\n");
+            # copy_template = "insert into %s select * from %s where %s < " +\
+            #     "(select max(max_id) from table_history where tablename = '%s' " + \
+            #     "and timestamp = (select max(timestamp) from table_history " + \
+            #     "where tablename = '%s' and timestamp < %d))"
+            # copy_stmt = copy_template % \
+            #     (archive_tablename, tablename, id_column, tablename, tablename, (timestamp-window))
+            # sql_file.write(copy_stmt + ";\n");
 
             # Delete all rows with ID more than 24 hours old from data table
             delete_template = "delete from %s where %s < (select max(max_id) from table_history " + \
@@ -132,7 +146,7 @@ class TableMaintainer():
 
         sql_file.close()
 
-        # Invoke SQL file                                                                        
+        # Invoke SQL file
 	sql_cmd = "PGPASSWORD=%s psql -U %s -h %s %s -f %s" % \
             (self._opts.dbpass, self._opts.dbuser, self._opts.dbhost,
              self._opts.dbname, self._opts.outfile)
