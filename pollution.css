@@ -1,0 +1,7 @@
+#chart_div {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    width: 300px;
+    height: 150px;
+}
