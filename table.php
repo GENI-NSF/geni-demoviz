@@ -40,11 +40,6 @@ if (array_key_exists('zoom', $_GET)) {
    $zoom = intval($_GET['zoom']);
 }
 
-$frequency = 5000;
-if (array_key_exists('frequency', $_GET)) {
-  $frequency = intval($_GET['frequency']);
-}
-
 // Chart params
 
 $data_type1 = 'cpu';
@@ -247,7 +242,7 @@ if (array_key_exists('ifcs5', $_GET)) {
 	<script>
 	  //	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', true, seconds, customTitle);
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', false, null, null, "$ifcs1", $frequency);
+	    drawVisualization("$data_type1", "$senders1", "$tablename1", "$selected_metrics1", 'chart_div_right1', false, null, null, "$ifcs1");
 	  });
 	</script>
 EOF;
@@ -260,7 +255,7 @@ EOF;
 	  print <<< EOF
 	<script>
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type2", "$senders2", "$tablename2", "$selected_metrics2", 'chart_div_right2', false, null, null, "$ifcs2", $frequency);
+	    drawVisualization("$data_type2", "$senders2", "$tablename2", "$selected_metrics2", 'chart_div_right2', false, null, null, "$ifcs2");
 	  });
 	</script>
 EOF;
@@ -273,7 +268,7 @@ EOF;
 	  print <<< EOF
 		<script>
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type3", "$senders3", "$tablename3", "$selected_metrics3", 'chart_div_bottom3', false, null, null, "$ifcs3", $frequency);
+	    drawVisualization("$data_type3", "$senders3", "$tablename3", "$selected_metrics3", 'chart_div_bottom3', false, null, null, "$ifcs3");
 	  });
 	</script>
 EOF;
@@ -286,7 +281,7 @@ EOF;
 	  print <<< EOF
 		<script>
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type4", "$senders4", "$tablename4", "$selected_metrics4", 'chart_div_bottom4', false, null, null, "$ifcs4", $frequency);
+	    drawVisualization("$data_type4", "$senders4", "$tablename4", "$selected_metrics4", 'chart_div_bottom4', false, null, null, "$ifcs4");
 	  });
 	</script>
 EOF;
@@ -299,7 +294,7 @@ EOF;
 	  print <<< EOF
 		<script>
 	google.setOnLoadCallback(function() {
-	    drawVisualization("$data_type5", "$senders5", "$tablename5", "$selected_metrics5", 'chart_div_bottom5', false, null, null, "$ifcs5", $frequency);
+	    drawVisualization("$data_type5", "$senders5", "$tablename5", "$selected_metrics5", 'chart_div_bottom5', false, null, null, "$ifcs5");
 	  });
 	</script>
 EOF;
