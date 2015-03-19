@@ -8,7 +8,7 @@ google.setOnLoadCallback(drawVisualization);
 // Set up static variables
 chart = null; // Initially this is null. We set it once
 // Options for the chart. Title, width, height and y-axis must always start at 0
-options = {'title' : 'GEC22 Pollution Demonstration:\nTotal Time per Server',
+options = {'title' : 'Response Time per Server',
            'width' : 400,
            'height' : 300,
            'vAxis' : { 'minValue' : 0}
