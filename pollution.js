@@ -1,36 +1,80 @@
-// This is a script to load the lively total_time per server data
-// And present it in a dynamic column graph with a red horizontal threshold line
+//----------------------------------------------------------------------
+// Copyright (c) 2012-2015 Raytheon BBN Technologies
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and/or hardware specification (the "Work") to
+// deal in the Work without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Work, and to permit persons to whom the Work
+// is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Work.
+//
+// THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
+// IN THE WORK.
+//----------------------------------------------------------------------
+
+// This is a script to load the lively total_time per server data and
+// present it in a dynamic column graph with a red horizontal
+// threshold line
+
+// Strict mode - error undeclared variables
+"use strict";
 
 // Load the google charts and draw the chart when loaded
 google.load('visualization', '1.0', {'packages':['corechart']});   
 google.setOnLoadCallback(drawVisualization);
 
 // Set up static variables
-chart = null; // Initially this is null. We set it once
-// Options for the chart. Title, width, height and y-axis must always start at 0
-options = {'title' : 'Response Time per Server',
-           'width' : 400,
-           'height' : 300,
-           'vAxis' : { 'minValue' : 0},
-           'legend' : { 'position' : 'none' },
-           'chartArea' : { 'width' : '75%' }
-          };
+var chart = null; // Initially this is null. We set it once
 
-// The lively date comes back keyed by server URL. Map these to friendly labels
-label_map = {
-    "http://uvic.gee-project.net" : "Victoria, Canada",
-    "http://nicta.gee-project.net" : "NICTA, Australia",
-    "http://tamu.gee-project.net" : "Texas A&M, US",
-    "http://stanford.gee-project.net" : "Stanford, US",
-    "http://n091-vm01-2.wall2.ilabt.iminds.be" : "iMinds, Belgium",
-    "http://iminds.gee-project.net" : "GEE, Belgium",
-    "http://gpo.gee-project.net": "GEE, US",
-    "http://localhost": "Localhost",
-    "http://141.89.225.14": "HPI, Germany"
+// Options for the chart. Title, width, height and y-axis must always start at 0
+var options = {
+    'title' : 'Response Time (msec)',
+    'width' : 400,
+    'height' : 300,
+    'vAxis' : { 'minValue' : 0},
+    'legend' : { 'position' : 'none' },
+    'chartArea' : { 'width' : '75%' }
 };
 
+// The lively date comes back keyed by server URL. Map these to friendly labels
+var label_map = [
+    { url: "http://tokyo.gee-project.net",
+      name: "U. Tokyo, Japan",
+      color: "blue" },
+    { url: "http://nicta.gee-project.net",
+      name: "NICTA, Australia",
+      color: "blue" },
+    { url: "http://uvic.gee-project.net",
+      name: "UVic, Canada",
+      color: "blue" },
+    { url: "http://stanford.gee-project.net",
+      name: "Stanford, US",
+      color: "blue" },
+    { url: "http://tamu.gee-project.net",
+      name: "Texas A&M, US",
+      color: "blue" },
+    { url: "http://maxgigapop.gee-project.net",
+      name: "MAX, US",
+      color: "green" },
+    { url: "http://iminds.gee-project.net",
+      name: "iMinds, Belgium",
+      color: "blue" },
+    { url: "http://141.89.225.14",
+      name: "HPI, Germany",
+      color: "blue" },
+];
+
 // The value at which to place the threshold red horizontal line
-threshold_level = 150;
+var threshold_level = 150;
 
 // Add a red threshold line
 // This is added once to the chart, doesn't need to be re-added with new data
@@ -65,30 +109,27 @@ function drawVisualization() {
     var grab_lively_url = "grab_lively_data.php"
     $.getJSON(grab_lively_url, function(json_data) {
         // In the JSON callback, we have the JSON data from server
-        // Create a new data table and rows
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Server');
-        data.addColumn('number', 'Total Time');
-        rows = [];
-        for(var server in json_data) {
-            var total_time = json_data[server]['total_time'];
+        // Create an array data, start with headder line
+        // role:style allows per-bar color changes
+        var rows = [['Server', 'Total Time', { role: 'style' }]];
+        $.each(label_map, function(i, site) {
+            var json_idx = '"' + site.url + '"';
+            var site_data = json_data[json_idx];
+            if (! site_data) return;
+
+            var total_time = site_data['total_time'];
+
 
             // These two lines are just to test animation
             //                 var noise = Math.floor(Math.random() * 200) - 100; // Between -100..100
             //                 total_time = Math.max(0, total_time + noise);
 
-            // The servers come back bounded by quotes: strip on both ends
-            server = server.replace(/"/g, '');
-
-            // Use friendly label if we can
-            var server_label = server;
-            if (server in label_map) server_label = label_map[server];
 
             // Create a row per server
-            row = [server_label, total_time];
+            var row = [site.name, total_time, site.color];
             rows.push(row);
-        }
-        data.addRows(rows);
+        });
+        var data = google.visualization.arrayToDataTable(rows);
         // Redraw the same chart with new data
         chart.draw(data, options);
         setTimeout(drawVisualization, 5000);
