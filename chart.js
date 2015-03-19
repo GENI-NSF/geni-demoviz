@@ -135,9 +135,9 @@ function addColumns(data_type, data, unique_sender, num_senders, selected_metric
 	maybeAddMetricColumn('rx_bytes', selected_metrics, num_senders, num_metrics, data, 'RX', unique_sender, interfaceName);
 	maybeAddMetricColumn('tx_bytes', selected_metrics, num_senders, num_metrics, data, 'TX', unique_sender, interfaceName);
     } else if (data_type == 'cpu') {
-	maybeAddMetricColumn('user', selected_metrics, num_senders, num_metrics, data, 'User %', unique_sender);
-	maybeAddMetricColumn('sys', selected_metrics, num_senders, num_metrics, data, 'Sys %', unique_sender);
-	maybeAddMetricColumn('idle', selected_metrics, num_senders, num_metrics, data, 'Idle %', unique_sender);
+	maybeAddMetricColumn('user', selected_metrics, num_senders, num_metrics, data, 'User', unique_sender);
+	maybeAddMetricColumn('sys', selected_metrics, num_senders, num_metrics, data, 'Sys', unique_sender);
+	maybeAddMetricColumn('idle', selected_metrics, num_senders, num_metrics, data, 'Idle', unique_sender);
     } else { // Memory
 	maybeAddMetricColumn('used', selected_metrics, num_senders, num_metrics, data, 'Used', unique_sender);
 	maybeAddMetricColumn('free', selected_metrics, num_senders, num_metrics, data, 'Free', unique_sender);
@@ -245,19 +245,93 @@ function fillRow(data_type, row, metric, sender_index, selected_metrics, interfa
     return ret;
 }
 
-// Make timestamps into sequential numbers (timestamps are meaningless)
+// Make timestamps into relative offsets from 1st timestamp in dataset
 function standardizeTimestamps(rows) 
 {
     var num_rows = rows.length;
+    var earliest = rows[0][0];
     for(var i = 0; i < num_rows; i++) {
-	// Set TS to sequential count, not actual (meaningless) ts
-	rows[i][0] = i; 
+	rows[i][0] = rows[i][0] - earliest; 
+    }
+}
+
+function interpolateDeltaColumn(rows, col, doDT) {
+    // If doDT then the delta is per unit time
+    var num_rows = rows.length;
+    // Find the filled in values
+    var non_null_indices = [];
+    for(var i = 0; i < num_rows; i++) {
+	if (rows[i][col] != null) {
+	    non_null_indices.push(i);
+	}
+    }
+
+    // for each no null index, starting with 2nd
+    // diff val[nni[i]] - val[nni[i-1]]
+    // networ: ts[nni[i]] - ts[nni[i-1]]
+    // cpu: straight diff
+    // other: no diff (old code
+
+    // FIXME: Handle case where there's only 1 null-null index
+
+    var startIndex = 0;
+    if (non_null_indices.length == 1) {
+	// If we have only 1 data point, assume the usage started at 0? (So the delta is the full thing)
+	// the alternative would be we assume nothing was used before, so the delta should be 0.
+	var i = non_null_indices[0];
+	var delta = rows[i][col];
+	// var delta = 0;
+	if (doDT) {
+	    var DT = rows[i][0];
+	    delta = delta / DT;
+	}
+	for (var j = startIndex; j < i; j++) {
+	    rows[j][col] = delta;
+	}
+	startIndex = non_null_indices[i];
+    } else {    
+	for (var i = 1; i < non_null_indices.length; i++) {
+	    var delta = rows[non_null_indices[i]][col] - rows[non_null_indices[i-1]][col];
+	    if (doDT) {
+		var DT = rows[non_null_indices[i]][0] - rows[non_null_indices[i-1]][0];
+		delta = delta / DT;
+	    }
+	    for (var j = startIndex; j < non_null_indices[i]; j++) {
+		rows[j][col] = delta;
+	    }
+	    startIndex = non_null_indices[i];
+	}
+    }
+    if (startIndex > 0) {
+	for (var i = startIndex; i < num_rows; i++) {
+	    rows[i][col] = rows[(startIndex - 1)][col];
+	}
+    } else {
+	// only non null index was the 1st entry. So how do we project forward?
+	// Either assume all values are same as the 1 non-null, or all values are 0
+	for (var i = 0; i < num_rows; i++) {
+	    rows[i][col] = rows[0][col];
+	}
     }
 }
 
 // Fill in null entryes by interpolating between nearby points
-function interpolateColumn(rows, col)
+function interpolateColumn(rows, col, data_type)
 {
+
+    // if data_type is network:
+    // value in a row is next-this/nextTime-thisTime
+    // if data_type is cpu
+    // value in row is next-this
+
+    if (data_type == 'network') {
+	interpolateDeltaColumn(rows, col, true);
+	return;
+    } else if (data_type == 'cpu') {
+	interpolateDeltaColumn(rows, col, false);
+	return;
+    }
+    
     var num_rows = rows.length;
     // Find the filled in values
     var non_null_indices = [];
@@ -309,13 +383,13 @@ function interpolateColumn(rows, col)
 }
 
 // Fill in null entries by interpolating between adjacent points
-function interpolateColumns(rows, metric_data) {
+function interpolateColumns(rows, metric_data, data_type) {
     var num_rows = rows.length;
     if (num_rows == 0) return;
     var num_cols = rows[0].length;
     // Skip the first 'ts' column
     for(var col = 1; col < num_cols; col++) {
-	interpolateColumn(rows, col);
+	interpolateColumn(rows, col, data_type);
     }
 }
 
@@ -341,9 +415,28 @@ function interpolateColumns_orig(rows, metric_data) {
 // Make the values in slot X = slot(X)-slot(X-1) 
 // Where slot(X-1) is the previous entry for that sender
 // Put Slot(0) = Slot(1)
-function computeDeltas(rows, metric_data, compute_rate) {
-    var num_rows = rows.length;
+function computeDeltas(rows, metric_data, compute_rate, data_type) {
+    return;
 
+    // Old: Now done by interpolate
+    
+    var num_rows = rows.length;
+    if (num_rows < 2) {
+	return;
+    }
+    var num_cols = rows[0].length;
+    for (var j = 1; j < num_cols; j++) {
+	for (var i = 0; i < num_rows-1; i++) {
+	    console.log("before: " + rows[i][j] + "; next: " + rows[i+1][j]);
+	    rows[i][j] = rows[i+1][j] - rows[i][j];
+	    console.log("after: " + rows[i][j]);
+	}
+	rows[num_rows-1][j] = rows[num_rows-2][j];
+    }
+    return;
+
+    // Old
+    
     var current_by_sender = {};
     var predecessors = [];
     predecessors[num_rows-1] = undefined;
@@ -354,6 +447,12 @@ function computeDeltas(rows, metric_data, compute_rate) {
 
     for(var i = 0; i < num_rows; i++) {
 	var sender = metric_data[i].sender;
+	var name = metric_data[i].name;
+	var senderfull = sender;
+	if (data_type == 'network') {
+	    senderfull = sender + ':' + name;
+	}
+	sender = senderfull;
 	if(!(sender in current_by_sender)) {
 	    predecessors[i] = -1;
     	} else {
@@ -549,14 +648,14 @@ function computeDeltas(rows, metric_data, compute_rate) {
     }
 
     if (rows.length > 0) {
-	interpolateColumns(rows, metric_data);
+	interpolateColumns(rows, metric_data, data_type);
 	standardizeTimestamps(rows);
 	// FIXME: Diffing over network needs to be interface-aware!
 	// But by this point, the rows don't have the interface, so how do I diff appropriately?
 	if (data_type ==  'network')
-	    computeDeltas(rows, metric_data, true);
+	    computeDeltas(rows, metric_data, true, data_type);
 	else if (data_type == 'cpu')
-	    computeDeltas(rows, metric_data, false);
+	    computeDeltas(rows, metric_data, false, data_type);
         data.addRows(rows);
     } else {
         var container = document.getElementById(chartdiv);
