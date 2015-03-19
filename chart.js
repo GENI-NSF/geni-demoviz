@@ -397,6 +397,16 @@ function computeDeltas(rows, metric_data, compute_rate) {
     var num_senders = split_senders.length;
     var split_ifcs = interfaceNames.split(',');
     var num_ifcs = split_ifcs.length;
+    var new_ifcs = split_ifcs;
+    if (num_ifcs < num_senders) {
+	for (j = num_ifcs; j < num_senders; j++) {
+	    new_ifcs.push('eth1');
+	}
+	split_ifcs = new_ifcs
+	interfaceNames = split_ifcs.join();
+	num_ifcs = split_ifcs.length;
+    }
+    
     // sender is a name
     // oml_sender_id should be first thing in metric_data
     for(var i = 0; i < metric_data.length; i++) {
