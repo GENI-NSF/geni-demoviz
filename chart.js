@@ -135,9 +135,9 @@ function addColumns(data_type, data, unique_sender, num_senders, selected_metric
 	maybeAddMetricColumn('rx_bytes', selected_metrics, num_senders, num_metrics, data, 'RX', unique_sender, interfaceName);
 	maybeAddMetricColumn('tx_bytes', selected_metrics, num_senders, num_metrics, data, 'TX', unique_sender, interfaceName);
     } else if (data_type == 'cpu') {
-	maybeAddMetricColumn('user', selected_metrics, num_senders, num_metrics, data, 'User', unique_sender);
-	maybeAddMetricColumn('sys', selected_metrics, num_senders, num_metrics, data, 'Sys', unique_sender);
-	maybeAddMetricColumn('idle', selected_metrics, num_senders, num_metrics, data, 'Idle', unique_sender);
+	maybeAddMetricColumn('user', selected_metrics, num_senders, num_metrics, data, 'User %', unique_sender);
+	maybeAddMetricColumn('sys', selected_metrics, num_senders, num_metrics, data, 'Sys %', unique_sender);
+	maybeAddMetricColumn('idle', selected_metrics, num_senders, num_metrics, data, 'Idle %', unique_sender);
     } else { // Memory
 	maybeAddMetricColumn('used', selected_metrics, num_senders, num_metrics, data, 'Used', unique_sender);
 	maybeAddMetricColumn('free', selected_metrics, num_senders, num_metrics, data, 'Free', unique_sender);
@@ -258,25 +258,54 @@ function standardizeTimestamps(rows)
 // Fill in null entryes by interpolating between nearby points
 function interpolateColumn(rows, col)
 {
-    var non_null_indices = [];
     var num_rows = rows.length;
+    // Find the filled in values
+    var non_null_indices = [];
     for(var i = 0; i < num_rows; i++) {
 	if (rows[i][col] != null) {
 	    non_null_indices.push(i);
 	}
     }
 
-    var prev_index = 0;
-    // Fill backwards from index to previous index
-    for(var i in non_null_indices) {
-	var curr_index = non_null_indices[i];
-	for(var j = prev_index+1; j < curr_index; j++) 
-	    rows[j][col] = rows[curr_index][col];
-	prev_index = curr_index;
+//    console.log("Col: " + col);
+//    var vals = []
+//    for (var i = 0; i < rows.length; i++)
+//	vals.push(rows[i][col]);
+//    console.log(vals);
+
+    for (var i = 0; i < non_null_indices.length; i++) {
+	if (i == 0) {
+	    // copy this value backwards
+	    var firstNonNullIndex = non_null_indices[i];
+	    for (var j = 0; j < firstNonNullIndex; j++) {
+		rows[j][col] = rows[firstNonNullIndex][col];
+	    }
+	} else if (i == non_null_indices.length - 1) {
+	    // copy this value forwards
+	    var lastNonNullIndex = non_null_indices[i];
+	    for (var j = lastNonNullIndex+1; j < num_rows; j++) {
+		rows[j][col] = rows[lastNonNullIndex][col];
+	    }
+	}
+	// Copy forward
+	if (i > 0) {
+	    var startRange = non_null_indices[i-1];
+	    var endRange = non_null_indices[i];
+	    var startValue = rows[startRange][col];
+	    var endValue = rows[endRange][col];
+	    var toAdd = (endValue-startValue) / (endRange - startRange);
+	    var baseValue = startValue;
+	    for (var j=startRange+1; j < endRange; j++) {
+		rows[j][col] = baseValue + toAdd;
+		baseValue = rows[j][col];
+	    }
+	}
     }
-    // Work forwards to end of column
-    for(var j = prev_index+1; j < num_rows; j++)
-	rows[j][col] = rows[prev_index][col];
+//    console.log("Col: " + col);
+//    vals = []
+//    for (var i = 0; i < rows.length; i++)
+//	vals.push(rows[i][col]);
+//    console.log(vals);
 }
 
 // Fill in null entries by interpolating between adjacent points
@@ -402,6 +431,11 @@ function computeDeltas(rows, metric_data, compute_rate) {
         }
     }
 
+    var split_senders = senders.split(',');
+
+    //console.log("NUS = " + num_unique_senders);
+    //console.log("SPLIT_SENDERS = " + split_senders.length);
+
     // In case of data_type = generic
     // Add any senders that don't have any data, so they appear in legend but with no line
     // for generics, the sender in senders is a name; for non generics it is an ID (#)
@@ -418,6 +452,12 @@ function computeDeltas(rows, metric_data, compute_rate) {
     var unique_senders = []; // List of sender names
     for(var sender in unique_senders_assoc) unique_senders.push(sender);
     unique_senders.sort(); // We want a list of unique, sorted senders
+
+    unique_senders_assoc = {};
+    for(var i in unique_senders) {
+	var sender = unique_senders[i];
+	unique_senders_assoc[sender] = i;
+    }
 
     var data = new google.visualization.DataTable();
     data.addColumn('number', 'TS');
@@ -469,7 +509,7 @@ function computeDeltas(rows, metric_data, compute_rate) {
 	}
 	var sender_index = unique_senders_assoc[senderful]; // count in list of unique senders (counting diff ifcs)
 	if (typeof sender_index === 'undefined') {
-	    // the sender/ifc name isn't in the array - skip this row
+	    // the sender/ifc name isn't in the array - skip this row (didnt ask for this interface)
 	    continue;
 	}
 	var row = [ts];
