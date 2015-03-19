@@ -175,6 +175,8 @@ gec.maps.Link.prototype.color = function() {
         return "green";
     case "down":
         return "gray";
+    case "internet":
+        return "blue";
     default:
         return "yellow";
     }
