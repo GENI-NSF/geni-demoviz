@@ -175,6 +175,8 @@ gec.maps.Link.prototype.color = function() {
         return "green";
     case "down":
         return "gray";
+    case "internet":
+        return "blue";
     default:
         return "yellow";
     }
@@ -545,6 +547,16 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
     } else {
         this.chartSendersAndInterfaces(nodeId, chartType, iface, senders,
                                        interfaces);
+    }
+    if (senders.length === 0) {
+        var msg = "No " + chartType.toLowerCase() + " data available for";
+        if (nodeId === gec.maps.chartOptionAll) {
+            msg += " site " + this.name + "."
+        } else {
+            msg += " node " + node.name + ".";
+        }
+        alert(msg);
+        return;
     }
     var nodeName = nodeSelector.children(':selected').text();
     var chartTitle = "";
