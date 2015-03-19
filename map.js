@@ -172,6 +172,7 @@ gec.maps.Link = function(data, map, lineWidth) {
 gec.maps.Link.prototype.color = function() {
     switch (this.status) {
     case "up":
+        //return "limegreen";
         return "green";
     case "down":
         return "gray";
@@ -179,6 +180,17 @@ gec.maps.Link.prototype.color = function() {
         return "blue";
     default:
         return "yellow";
+    }
+};
+
+gec.maps.Link.prototype.opacity = function() {
+    switch (this.status) {
+    case "down":
+        return 0.4;
+    case "up":
+    case "internet":
+    default:
+        return 1.0;
     }
 };
 
@@ -191,7 +203,7 @@ gec.maps.Link.prototype.makeMarker = function () {
         path: pathCoords,
         geodesic: true,
         strokeColor : this.color(),
-        strokeOpacity: 1.0,
+        strokeOpacity: this.opacity(),
         strokeWeight : this.lineWidth
     });
     var that = this;
