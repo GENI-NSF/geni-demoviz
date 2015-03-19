@@ -172,8 +172,8 @@ gec.maps.Link = function(data, map, lineWidth) {
 gec.maps.Link.prototype.color = function() {
     switch (this.status) {
     case "up":
-        //return "limegreen";
-        return "green";
+        return "limegreen";
+        //return "green";
     case "down":
         return "gray";
     case "internet":
