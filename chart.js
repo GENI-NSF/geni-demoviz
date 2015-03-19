@@ -348,7 +348,7 @@ function computeDeltas(rows, metric_data, compute_rate) {
 	    var foundIfc = false;
 	    for (var j = 0; j < num_senders; j++) {
 		if (metric.oml_sender_id == split_senders[j]) {
-		    if (name == split_ifcs[j]) {
+		    if (data_type != 'network' || name == split_ifcs[j]) {
 			foundIfc = true;
 			idxs.push(j);
 			break;
@@ -428,7 +428,15 @@ function computeDeltas(rows, metric_data, compute_rate) {
         var metric = metric_data[i];
 	var ts = parseFloat(metric.ts);
 	var sender = metric.sender;
-	var sender_index = unique_senders_assoc[sender]; // count in list of unique senders (counting diff ifcs)
+	var senderful = sender;
+	if (data_type == 'network') {
+	    senderful = sender + ':' + metric.name;
+	}
+	var sender_index = unique_senders_assoc[senderful]; // count in list of unique senders (counting diff ifcs)
+	if (typeof sender_index === 'undefined') {
+	    // the sender/ifc name isn't in the array - skip this row
+	    continue;
+	}
 	var row = [ts];
 	// Add 1 null in the row per sender/ifc combo per metric
 	for(var j = 0; j < num_unique_senders; j++) {
@@ -458,6 +466,8 @@ function computeDeltas(rows, metric_data, compute_rate) {
     if (rows.length > 0) {
 	//	interpolateRows(rows);
 	standardizeTimestamps(rows);
+	// FIXME: Diffing over network needs to be interface-aware!
+	// But by this point, the rows don't have the interface, so how do I diff appropriately?
 	if (data_type ==  'network')
 	    computeDeltas(rows, metric_data, true);
 	else if (data_type == 'cpu')
@@ -520,7 +530,7 @@ function computeDeltas(rows, metric_data, compute_rate) {
     if (num_unique_senders > 5) {
 	showLegend = 'none';
     }
-    
+
     if (typeof chartTitle !== 'undefined' && chartTitle != '' && chartTitle != null) {
 	title = chartTitle;
     }
