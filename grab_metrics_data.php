@@ -100,6 +100,8 @@ function get_metrics_data($fields, $tablename, $seconds=null)
    "$fields from $tablename as c, _senders as s where $timespan_clause and c.oml_sender_id = s.id";
    if ($senders_clause != "")
       $query = $query . " AND $senders_clause";
+    $order_clause = "order by c.oml_ts_client";
+    $query = $query . " " . $order_clause;
    return get_rows_for_query($query);
 }
 
