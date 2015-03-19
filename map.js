@@ -546,6 +546,16 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
         this.chartSendersAndInterfaces(nodeId, chartType, iface, senders,
                                        interfaces);
     }
+    if (senders.length === 0) {
+        var msg = "No " + chartType.toLowerCase() + " data available for";
+        if (nodeId === gec.maps.chartOptionAll) {
+            msg += " site " + this.name + "."
+        } else {
+            msg += " node " + node.name + ".";
+        }
+        alert(msg);
+        return;
+    }
     var nodeName = nodeSelector.children(':selected').text();
     var chartTitle = "";
     if (nodeName === gec.maps.chartOptionAll) {
