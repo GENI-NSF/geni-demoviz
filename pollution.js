@@ -18,13 +18,15 @@ options = {'title' : 'Response Time per Server',
 
 // The lively date comes back keyed by server URL. Map these to friendly labels
 label_map = {
-    "http://uvic.gee-project.net" : "Canada",
-    "http://nicta.gee-project.net" : "Australia",
-    "http://tamu.gee-project.net" : "Texas A&M",
-    "http://stanford.gee-project.net" : "Stanford",
-    "http://n091-vm01-2.wall2.ilabt.iminds.be" : "Belgium",
-    "http://iminds.gee-project.net" : "Belgium"
-
+    "http://uvic.gee-project.net" : "Victoria, Canada",
+    "http://nicta.gee-project.net" : "NICTA, Australia",
+    "http://tamu.gee-project.net" : "Texas A&M, US",
+    "http://stanford.gee-project.net" : "Stanford, US",
+    "http://n091-vm01-2.wall2.ilabt.iminds.be" : "iMinds, Belgium",
+    "http://iminds.gee-project.net" : "GEE, Belgium",
+    "http://gpo.gee-project.net": "GEE, US",
+    "http://localhost": "Localhost",
+    "http://141.89.225.14": "HPI, Germany"
 };
 
 // The value at which to place the threshold red horizontal line
