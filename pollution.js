@@ -11,7 +11,9 @@ chart = null; // Initially this is null. We set it once
 options = {'title' : 'Response Time per Server',
            'width' : 400,
            'height' : 300,
-           'vAxis' : { 'minValue' : 0}
+           'vAxis' : { 'minValue' : 0},
+           'legend' : { 'position' : 'none' },
+           'chartArea' : { 'width' : '75%' }
           };
 
 // The lively date comes back keyed by server URL. Map these to friendly labels
