@@ -253,8 +253,43 @@ function standardizeTimestamps(rows)
     }
 }
 
+// Fill in null entryes by interpolating between nearby points
+function interpolateColumn(rows, col)
+{
+    var non_null_indices = [];
+    var num_rows = rows.length;
+    for(var i = 0; i < num_rows; i++) {
+	if (rows[i][col] != null) {
+	    non_null_indices.push(i);
+	}
+    }
+
+    var prev_index = 0;
+    // Fill backwards from index to previous index
+    for(var i in non_null_indices) {
+	var curr_index = non_null_indices[i];
+	for(var j = prev_index+1; j < curr_index; j++) 
+	    rows[j][col] = rows[curr_index][col];
+	prev_index = curr_index;
+    }
+    // Work forwards to end of column
+    for(var j = prev_index+1; j < num_rows; j++)
+	rows[j][col] = rows[prev_index][col];
+}
+
 // Fill in null entries by interpolating between adjacent points
-function interpolateRows(rows) {
+function interpolateColumns(rows, metric_data) {
+    var num_rows = rows.length;
+    if (num_rows == 0) return;
+    var num_cols = rows[0].length;
+    // Skip the first 'ts' column
+    for(var col = 1; col < num_cols; col++) {
+	interpolateColumn(rows, col);
+    }
+}
+
+// Fill in null entries by interpolating between adjacent points
+function interpolateColumns_orig(rows, metric_data) {
     var num_rows = rows.length;
     if (num_rows == 0) return;
     var num_cols = rows[0].length;
@@ -406,7 +441,7 @@ function computeDeltas(rows, metric_data, compute_rate) {
     }
 
     if (rows.length > 0) {
-	//	interpolateRows(rows);
+	interpolateColumns(rows, metric_data);
 	standardizeTimestamps(rows);
 	if (data_type ==  'network')
 	    computeDeltas(rows, metric_data, true);
