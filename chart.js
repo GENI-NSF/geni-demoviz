@@ -759,14 +759,17 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
                 {v: 400, f: '4'}
             ];
 	} else if (data_type == 'network') {
-	    options.vAxis.maxValue = 10000000000;
+	    options.vAxis.maxValue = 1250000000;
+//	    options.vAxis.maxValue = 250000000;
             options.vAxis.ticks = [
-                {v: 2000000000, f: '2GB'},
-                {v: 4000000000, f: '4GB'},
-                {v: 6000000000, f: '6GB'},
-                {v: 8000000000, f: '8GB'},
-                {v: 10000000000, f: '10GB'}
+                {v: 250000000, f: '2Gb'},
+                {v: 500000000, f: '4Gb'},
+                {v: 750000000, f: '6Gb'},
+                {v: 1000000000, f: '8Gb'},
+                {v: 1250000000, f: '10Gb'}
             ];
+	    var title = options.title;
+	    options.title = title.replace('Bytes', 'Bits');
         }
 	else if (data_type == 'memory')
 	    options.vAxis.maxValue = 100;
