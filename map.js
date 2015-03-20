@@ -344,6 +344,9 @@ gec.maps.Site.prototype.fillChartTypeSelect = function(chartSelector,
     if (gec.maps.storage.storageEnabled(url_params.base_name)) {
         chartTypes.push(gec.maps.storage.chartTypeStorage);
     }
+    if (gec.maps.thruput.thruputEnabled(url_params.base_name)) {
+        chartTypes.push(gec.maps.thruput.chartTypeThruput);
+    }
     $.each(chartTypes,
            function(i, t) {
                var chartOption = $("<option/>", {
@@ -558,6 +561,10 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
         gec.maps.storage.senders(this, nodeId, senders);
         tablename = gec.maps.storage.tablename;
         selectedMetrics = "used_storage";
+    } else if (chartType === gec.maps.thruput.chartTypeThruput) {
+        gec.maps.thruput.senders(this, nodeId, senders);
+        tablename = gec.maps.thruput.tablename;
+        selectedMetrics = "thruput_mbps";
     } else {
         this.chartSendersAndInterfaces(nodeId, chartType, iface, senders,
                                        interfaces);
@@ -580,7 +587,7 @@ gec.maps.Site.prototype.showChart = function(event, nodeSelector,
         var ifs = interfaces.join(', ');
         chartTitle = this.name + " " + nodeName + " " + ifs + " " + chartType;
     }
-    if (chartType === gec.maps.storage.chartTypeStorage) {
+    if (chartType === gec.maps.storage.chartTypeStorage || chartType === gec.maps.thruput.chartTypeThruput) {
         chartType = "generic";
     }
     var chartOpts = {
@@ -662,6 +669,50 @@ gec.maps.storage = {
                 }
             }
         });
+    }
+};
+
+/*----------------------------------------------------------------------
+ *
+ * Special for thruput data type for starlight
+ *
+ *----------------------------------------------------------------------
+ */
+gec.maps.thruput = {
+
+    chartTypeThruput: "Thruput",
+
+    thruputBasenames: [ "starlight" ],
+
+    tablename: "starlight_metrics",
+
+    // node_id => sender
+    thruputSenders: {
+	7 : "ebi",
+	8 : "canarie",
+	9 : "nih",
+	10 : "chicago",
+	11 : "starlight",
+	13 : "oicr"
+    },
+
+    thruputEnabled: function(basename) {
+        return ($.inArray(basename, this.thruputBasenames) !== -1);
+    },
+
+    senders: function(site, nodeId, senders) {
+        var nodes = site.nodes;
+        if (nodeId !== gec.maps.chartOptionAll) {
+            nodes = [ gec.maps.getNode(nodeId) ];
+        }
+        var that = this;
+	var thatNodeId = nodeId;
+        $.each(nodes, function(i,n) {
+		if (thatNodeId in that.thruputSenders) {
+		    var thruputSender = that.thruputSenders[thatNodeId];
+                    senders.push(thruputSender);
+                }
+            });
     }
 };
 
