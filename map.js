@@ -248,7 +248,7 @@ gec.maps.Link.prototype.showChart = function (event) {
     var chartType = gec.maps.chartTypeNetwork;
     var senders = [];
     var interfaces = [];
-    var chartTitle = this.name + " total bytes";
+    var chartTitle = this.name + " total bytes / sec";
     if (this.toNode.sender) {
         senders.push(this.toNode.sender);
         interfaces.push(this.toInterface);
