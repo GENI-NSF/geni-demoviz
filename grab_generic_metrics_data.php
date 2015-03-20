@@ -100,6 +100,8 @@ function get_metrics_data($tablename, $metrics, $senders_clause, $seconds=null)
    if ($senders_clause != "")
       $query = $query . " AND $senders_clause";
    //   error_log("Q = $query");
+   $order_clause = "order by ts";
+   $query = $query . " " . $order_clause;
    return get_rows_for_query($query);
 }
 
