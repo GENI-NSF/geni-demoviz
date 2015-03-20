@@ -251,7 +251,7 @@ function standardizeTimestamps(rows)
     var num_rows = rows.length;
     var earliest = rows[0][0];
     for(var i = 0; i < num_rows; i++) {
-	rows[i][0] = rows[i][0] - earliest; 
+	rows[i][0] = Math.round(rows[i][0] - earliest); 
     }
 }
 
