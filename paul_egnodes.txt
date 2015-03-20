@@ -1,0 +1,152 @@
+Notes on adding paul's EG nodes to shakedown experiment
+
+EG workers:
+ workers102-3                     |  65
+ workers102-7                     |  66
+ workers103-2                     |  67
+ workers102-6                     |  68
+ workers102-8                     |  69
+ workers102-1                     |  70
+ workers102-5                     |  71
+ workers104-1                     |  72
+ workers103-3                     |  73
+ workers100-4                     |  74
+ workers104-5                     |  75
+ workers104-4                     |  76
+ workers100-5                     |  77
+ workers103-1                     |  78
+ workers103-8                     |  79
+ workers103-7                     |  80
+ workers103-6                     |  81
+ workers101-2                     |  82
+ workers104-6                     |  83
+ workers103-5                     |  84
+ workers103-4                     |  85
+ workers100-7                     |  86
+ workers104-3                     |  87
+ workers104-8                     |  88
+ workers104-7                     |  89
+ workers100-8                     |  90
+ workers104-2                     |  91
+ workers100-3                     |  92
+ workers100-1                     |  93
+ workers101-4                     |  94
+ workers100-6                     |  95
+ workers100-2                     |  96
+ workers101-6                     |  97
+ workers101-8                     |  98
+ workers101-1                     |  99
+ workers101-3                     | 100
+ workers102-2                     | 101
+ workers101-5                     | 102
+ workers102-4                     | 103
+ workers101-7                     | 104
+
+
+TAMU 276 workers104-0
+TAMU 276 workers104-1
+TAMU 276 workers104-2
+TAMU 276 workers104-3
+TAMU 276 workers104-4
+TAMU 276 workers104-5
+TAMU 276 workers104-6
+TAMU 276 workers104-7
+TAMU 276 workers104-8
+
+FIU 296 workers102-0
+FIU 296 workers102-1
+FIU 296 workers102-2
+FIU 296 workers102-3
+FIU 296 workers102-4
+FIU 296 workers102-5
+FIU 296 workers102-6
+FIU 296 workers102-7
+FIU 296 workers102-8
+
+UFL 259 workers100-0
+UFL 259 workers100-1
+UFL 259 workers100-2
+UFL 259 workers100-3
+UFL 259 workers100-4
+UFL 259 workers100-5
+UFL 259 workers100-6
+UFL 259 workers100-7
+UFL 259 workers100-8
+
+WVNET 248 workers103-0
+WVNET 248 workers103-1
+WVNET 248 workers103-2
+WVNET 248 workers103-3
+WVNET 248 workers103-4
+WVNET 248 workers103-5
+WVNET 248 workers103-6
+WVNET 248 workers103-7
+WVNET 248 workers103-8
+
+PSC 299 workers101-0
+PSC 299 workers101-1
+PSC 299 workers101-2
+PSC 299 workers101-3
+PSC 299 workers101-4
+PSC 299 workers101-5
+PSC 299 workers101-6
+PSC 299 workers101-7
+PSC 299 workers101-8
+
+
+
+
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (276, 'TAMU',  'workers104-0', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (276, 'TAMU',  'workers104-1', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (276, 'TAMU',  'workers104-2', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (276, 'TAMU',  'workers104-3', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (276, 'TAMU',  'workers104-4', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (276, 'TAMU',  'workers104-5', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (276, 'TAMU',  'workers104-6', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (276, 'TAMU',  'workers104-7', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (276, 'TAMU',  'workers104-8', 0, 'up');
+
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (296, 'FIU',  'workers102-0', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (296, 'FIU',  'workers102-1', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (296, 'FIU',  'workers102-2', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (296, 'FIU',  'workers102-3', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (296, 'FIU',  'workers102-4', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (296, 'FIU',  'workers102-5', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (296, 'FIU',  'workers102-6', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (296, 'FIU',  'workers102-7', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (296, 'FIU',  'workers102-8', 0, 'up');
+
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (259, 'UFL',  'workers100-0', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (259, 'UFL',  'workers100-1', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (259, 'UFL',  'workers100-2', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (259, 'UFL',  'workers100-3', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (259, 'UFL',  'workers100-4', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (259, 'UFL',  'workers100-5', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (259, 'UFL',  'workers100-6', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (259, 'UFL',  'workers100-7', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (259, 'UFL',  'workers100-8', 0, 'up');
+
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (248, 'WVNET',  'workers103-0', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (248, 'WVNET',  'workers103-1', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (248, 'WVNET',  'workers103-2', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (248, 'WVNET',  'workers103-3', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (248, 'WVNET',  'workers103-4', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (248, 'WVNET',  'workers103-5', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (248, 'WVNET',  'workers103-6', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (248, 'WVNET',  'workers103-7', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (248, 'WVNET',  'workers103-8', 0, 'up');
+
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (299, 'PSC',  'workers101-0', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (299, 'PSC',  'workers101-1', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (299, 'PSC',  'workers101-2', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (299, 'PSC',  'workers101-3', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (299, 'PSC',  'workers101-4', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (299, 'PSC',  'workers101-5', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (299, 'PSC',  'workers101-6', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (299, 'PSC',  'workers101-7', 0, 'up');
+insert into shakedown_node (site_id, name, client_id, zoom_level, status) values (299, 'PSC',  'workers101-8', 0, 'up');
+
+update  shakedown_node set sender = (select id from _senders where name = client_id) where id > 63;
+
+
+
