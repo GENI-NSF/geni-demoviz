@@ -80,7 +80,7 @@ function drawVisualization(data_type, senders, tablename, selected_metrics, char
     }
     var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders + '&seconds=' + seconds;
     if (data_type == 'generic') {
-        url = 'grab_generic_metrics_data.php?tablename=' + tablename + '&senders=' + senders + '&metrics=' + selected_metrics
+        url = 'grab_generic_metrics_data.php?tablename=' + tablename + '&senders=' + senders + '&metrics=' + selected_metrics + '&seconds=' + seconds
     }
     $.getJSON(url, 
               function(data) { 
@@ -722,6 +722,10 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	    position: showLegend
 	    // alignment
 	    // textStyle: {color, fontName, fontSize, bold, italic}
+	},
+	explorer: {
+	    keepInBounds: true,
+//	    actions: ['dragToZoom', 'rightClickToReset']
 	},
 	// interpolateNulls = false; set true and remove our interpolation function?
 	hAxis: {
