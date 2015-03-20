@@ -87,7 +87,7 @@ function get_timespan_clause($tablename, $seconds=null)
     }
     $qualifier = "";
     if ($senders_clause != "") $qualifier = " WHERE $senders_clause";
-    return "(oml_ts_client + 120) > (select max(oml_ts_client) from $tablename $qualifier)";
+    return "(oml_ts_client + $seconds) > (select max(oml_ts_client) from $tablename $qualifier)";
 }
 
 // Get all the data for the given query 
