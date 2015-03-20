@@ -770,12 +770,12 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
     var basename = getURLParameters().base_name;
     if (basename == 'shakedown') { // Special bounds for Paul Ruth's demo
 	if (data_type == 'cpu') {
-	    options.vAxis.maxValue = 4000;
+	    options.vAxis.maxValue = 400;
             options.vAxis.ticks = [
-                {v: 1000, f: '1'},
-                {v: 2000, f: '2'},
-                {v: 3000, f: '3'},
-                {v: 4000, f: '4'}
+                {v: 100, f: '1'},
+                {v: 200, f: '2'},
+                {v: 300, f: '3'},
+                {v: 400, f: '4'}
             ];
 	} else if (data_type == 'network') {
 	    options.vAxis.maxValue = 10000000000;
