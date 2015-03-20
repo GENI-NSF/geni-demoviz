@@ -44,7 +44,6 @@ gec.charts = {
 
 };
 
-
 function initCase(lowerstring) {
     if (lowerstring) {
 	return lowerstring.charAt(0).toUpperCase() + lowerstring.slice(1);
@@ -81,7 +80,7 @@ function drawVisualization(data_type, senders, tablename, selected_metrics, char
     }
     var url = 'grab_metrics_data.php?data_type=' + data_type + '&senders=' + senders + '&seconds=' + seconds;
     if (data_type == 'generic') {
-        url = 'grab_generic_metrics_data.php?tablename=' + tablename + '&senders=' + senders + '&metrics=' + selected_metrics
+        url = 'grab_generic_metrics_data.php?tablename=' + tablename + '&senders=' + senders + '&metrics=' + selected_metrics + '&seconds=' + seconds
     }
     $.getJSON(url, 
               function(data) { 
@@ -147,6 +146,7 @@ function addColumns(data_type, data, unique_sender, num_senders, selected_metric
 }
 
 // How many columns are there for this data type? Depends on which are enabled
+// Used to calculate the column # where a given metric will be stored for a given sender
 function numDataColumns(data_type, selected_metrics) {
     var num_columns = 0;
     if(data_type == "generic") {
@@ -171,9 +171,15 @@ function numDataColumns(data_type, selected_metrics) {
 }
 
 // Fill in row of data for given type based on selected metrics
+// Column# carefully calculated: # of metrics * sender index + metric count
+// senders are alphabetically ordered and indexed
+// So if 2 metrics and 2 senders, sender with index 1 starts in column 2. For second metric,
+// metric_index will be 2, so it goes in column index 4
+// (column index 0 is the TS)
 function fillRow(data_type, row, metric, sender_index, selected_metrics, interfaceName) {
+    // num_columns is # metrics
     var num_columns = numDataColumns(data_type, selected_metrics);
-    var metric_index = 1;
+    var metric_index = 1; // starting at 1 leaves room for the TS column
     var ret = true;
     if (data_type == 'generic' ) {
         var split_metrics  = selected_metrics.split(',');
@@ -181,6 +187,10 @@ function fillRow(data_type, row, metric, sender_index, selected_metrics, interfa
 	for(var i = 0; i < num_metrics; i++) {
 	    var metric_name = split_metrics[i];
 	    var value = parseFloat(metric[metric_name]);
+	    // data goes in the column whose index is the sender index
+	    // (remember senders are ordered and indexed)
+	    // * the # metrics (so leaving room for earlier columns)
+	    // plus the metric index - count of columns we've added so far basically
 	    row[num_columns*sender_index+metric_index] = value;
 	    metric_index = metric_index + 1;
         }
@@ -191,6 +201,7 @@ function fillRow(data_type, row, metric, sender_index, selected_metrics, interfa
 	var tot_bytes = rx_bytes + tx_bytes;
 	var ifc = metric.name;
 	if (interfaceName == ifc) {
+	    // If this raw metric data object has data for the requested interface, add a row
             if (metric_enabled('tot_bytes', selected_metrics)) {
 		row[num_columns*sender_index+metric_index] = tot_bytes;
 		metric_index = metric_index + 1;
@@ -248,6 +259,8 @@ function fillRow(data_type, row, metric, sender_index, selected_metrics, interfa
 // Make timestamps into relative offsets from 1st timestamp in dataset
 function standardizeTimestamps(rows) 
 {
+    // FIXME: If we kept the first DataTable instance it might make sense
+    // to save the first TS such that when we refresh the data, we kept the original baseline, so TSes could continue going up.
     var num_rows = rows.length;
     var earliest = rows[0][0];
     for(var i = 0; i < num_rows; i++) {
@@ -255,6 +268,8 @@ function standardizeTimestamps(rows)
     }
 }
 
+// Fill in null values for data types that require
+// computing the delta between values (raw data is cumulative)
 function interpolateDeltaColumn(rows, col, doDT) {
     // If doDT then the delta is per unit time
     var num_rows = rows.length;
@@ -272,9 +287,7 @@ function interpolateDeltaColumn(rows, col, doDT) {
     // cpu: straight diff
     // other: no diff (old code
 
-    // FIXME: Handle case where there's only 1 null-null index
-
-    var startIndex = 0;
+    var startIndex = 0; // first row that needs a new value filled in
     if (non_null_indices.length == 1) {
 	// If we have only 1 data point, assume the usage started at 0? (So the delta is the full thing)
 	// the alternative would be we assume nothing was used before, so the delta should be 0.
@@ -282,27 +295,37 @@ function interpolateDeltaColumn(rows, col, doDT) {
 	var delta = rows[i][col];
 	// var delta = 0;
 	if (doDT) {
+	    // network data should be per second, so divide by time
 	    var DT = rows[i][0];
 	    delta = delta / DT;
 	}
 	for (var j = startIndex; j < i; j++) {
+	    // fill in all the leading nulls with this new delta
 	    rows[j][col] = delta;
 	}
+	// new startIndex is the non-null row. That row still has the cumulative value.
 	startIndex = non_null_indices[i];
-    } else {    
+    } else {
+	// More than 1 non-null row
+	// Start with the 2nd non-null row
 	for (var i = 1; i < non_null_indices.length; i++) {
+	    // Find the delta between the 2 non-null rows
 	    var delta = rows[non_null_indices[i]][col] - rows[non_null_indices[i-1]][col];
 	    if (doDT) {
+		// network data should be per second, so divide by time
 		var DT = rows[non_null_indices[i]][0] - rows[non_null_indices[i-1]][0];
 		delta = delta / DT;
 	    }
 	    for (var j = startIndex; j < non_null_indices[i]; j++) {
+		// fill in all the leading nulls with this new delta
 		rows[j][col] = delta;
 	    }
+	    // new startIndex is the current non-null row. That row still has the cumulative value.
 	    startIndex = non_null_indices[i];
 	}
     }
     if (startIndex > 0) {
+	// For all trailing null rows, fill in the value from the last non-null row
 	for (var i = startIndex; i < num_rows; i++) {
 	    rows[i][col] = rows[(startIndex - 1)][col];
 	}
@@ -315,7 +338,9 @@ function interpolateDeltaColumn(rows, col, doDT) {
     }
 }
 
-// Fill in null entryes by interpolating between nearby points
+// Fill in null entries by interpolating between nearby points
+// Note that google charts have an 'interpolateNulls' option (default false)
+// which might do what we want here.
 function interpolateColumn(rows, col, data_type)
 {
 
@@ -331,6 +356,8 @@ function interpolateColumn(rows, col, data_type)
 	interpolateDeltaColumn(rows, col, false);
 	return;
     }
+
+    // For generic and memory, the #s do not need to be delta'ed
     
     var num_rows = rows.length;
     // Find the filled in values
@@ -349,19 +376,20 @@ function interpolateColumn(rows, col, data_type)
 
     for (var i = 0; i < non_null_indices.length; i++) {
 	if (i == 0) {
-	    // copy this value backwards
+	    // copy first non-null value backwards to beginning
 	    var firstNonNullIndex = non_null_indices[i];
 	    for (var j = 0; j < firstNonNullIndex; j++) {
 		rows[j][col] = rows[firstNonNullIndex][col];
 	    }
 	} else if (i == non_null_indices.length - 1) {
-	    // copy this value forwards
+	    // copy last non-null value forwards to end
 	    var lastNonNullIndex = non_null_indices[i];
 	    for (var j = lastNonNullIndex+1; j < num_rows; j++) {
 		rows[j][col] = rows[lastNonNullIndex][col];
 	    }
 	}
-	// Copy forward
+	// Compute diff between last non-null and this non-null value
+	// spread that evenly over the nulls between the last non-null and this
 	if (i > 0) {
 	    var startRange = non_null_indices[i-1];
 	    var endRange = non_null_indices[i];
@@ -393,100 +421,9 @@ function interpolateColumns(rows, metric_data, data_type) {
     }
 }
 
-// Fill in null entries by interpolating between adjacent points
-function interpolateColumns_orig(rows, metric_data) {
-    var num_rows = rows.length;
-    if (num_rows == 0) return;
-    var num_cols = rows[0].length;
-    // Skip the first 'ts' column
-    for(var col = 1; col < num_cols; col++) {
-	for(var i = 0; i < num_rows; i++) {
-            if(rows[i][col] == null) {
-		if (i > 0 && rows[i-1][col] != null)
-	            rows[i][col] = rows[i-1][col];
-		else if (i < num_rows-1 && rows[i+1][col] != null)
-	            rows[i][col] = rows[i+1][col];
-            }
-	    rows[i][0] = i; // Set TS to sequential count, not actual (meaningless) TS
-	}
-    }
-}
-
-// Make the values in slot X = slot(X)-slot(X-1) 
-// Where slot(X-1) is the previous entry for that sender
-// Put Slot(0) = Slot(1)
-function computeDeltas(rows, metric_data, compute_rate, data_type) {
-    return;
-
-    // Old: Now done by interpolate
-    
-    var num_rows = rows.length;
-    if (num_rows < 2) {
-	return;
-    }
-    var num_cols = rows[0].length;
-    for (var j = 1; j < num_cols; j++) {
-	for (var i = 0; i < num_rows-1; i++) {
-	    console.log("before: " + rows[i][j] + "; next: " + rows[i+1][j]);
-	    rows[i][j] = rows[i+1][j] - rows[i][j];
-	    console.log("after: " + rows[i][j]);
-	}
-	rows[num_rows-1][j] = rows[num_rows-2][j];
-    }
-    return;
-
-    // Old
-    
-    var current_by_sender = {};
-    var predecessors = [];
-    predecessors[num_rows-1] = undefined;
-    var successors = [];
-    successors[num_rows-1] = undefined;
-
-    var indices_by_sender = {};
-
-    for(var i = 0; i < num_rows; i++) {
-	var sender = metric_data[i].sender;
-	var name = metric_data[i].name;
-	var senderfull = sender;
-	if (data_type == 'network') {
-	    senderfull = sender + ':' + name;
-	}
-	sender = senderfull;
-	if(!(sender in current_by_sender)) {
-	    predecessors[i] = -1;
-    	} else {
-	    var prev = current_by_sender[sender];
-	    predecessors[i] = prev;
-	    if (predecessors[prev] == -1)
-		successors[prev] = i;
-	}
-	current_by_sender[sender] = i;
-    }
-    var num_cols = rows[0].length;
-    // Skip the first 'ts' column
-    for(var col = 1; col < num_cols; col++) {
-	for(var row = num_rows-1; row >= 0; row--) {
-	    var pred_index = predecessors[row];
-	    if (pred_index > -1) {
-		rows[row][col] = rows[row][col] - rows[pred_index][col];
-		if (compute_rate){
-		    var delta_t = rows[row][0] - rows[pred_index][0];
-		    rows[row][col] = rows[row][col]/delta_t;
-		}
-	    } else {
-		var succ_index = successors[row];
-		if (succ_index != undefined)
-		    rows[row][col] = rows[succ_index][col];
-	    }
-        }
-	rows[0][col] = rows[1][col];
-    }
-}
-
 // Draw the chart by grabbing the data, creating the table
 // adding the columns and then adding the rows
-    function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle, interfaceNames, refreshSeconds)
+function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle, interfaceNames, refreshSeconds)
 {
     var unique_senders_assoc = {}; // key by sender name to # of unique senders. Sender name concats real name and ifc for network
     var num_unique_senders = 0; // counting as 2 1 sender with 2 ifcs
@@ -514,6 +451,7 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
 	var name = metric.name;
 	var senderfull = sender;
 	if (data_type == 'network') {
+	    // sender name will include the interface name, so 2 ifcs on same sender_id are different senders
 	    senderfull = sender + ":" + name;
 	}
 	if (!(senderfull in unique_senders_assoc)) {
@@ -523,7 +461,7 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
 		if (metric.oml_sender_id == split_senders[j]) {
 		    if (data_type != 'network' || name == split_ifcs[j]) {
 			foundIfc = true;
-			idxs.push(j);
+			idxs.push(j); // collect index in interfaceNames of this interface
 			break;
 		    }
 		}
@@ -539,8 +477,6 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
 	    num_unique_senders = num_unique_senders + 1;
         }
     }
-
-    var split_senders = senders.split(',');
 
     //console.log("NUS = " + num_unique_senders);
     //console.log("SPLIT_SENDERS = " + split_senders.length);
@@ -562,6 +498,7 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
     for(var sender in unique_senders_assoc) unique_senders.push(sender);
     unique_senders.sort(); // We want a list of unique, sorted senders
 
+    // Redo the array of sender to count so the correct senders data is in the correct column
     unique_senders_assoc = {};
     for(var i in unique_senders) {
 	var sender = unique_senders[i];
@@ -569,6 +506,7 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
     }
 
     var data = new google.visualization.DataTable();
+    // First column has the timestamps
     data.addColumn('number', 'TS');
 
 //    if (num_senders != num_unique_senders) {
@@ -593,6 +531,7 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
 	}
     }
 
+    // Fill in the columns in the chart
     for(var i = 0; i < unique_senders.length; i++) {
 	var unique_sender = unique_senders[i];
 
@@ -603,10 +542,10 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
 	    unique_sender = senderps[0];
 	    interfaceName = senderps[1];
 	}
-	
         addColumns(data_type, data, unique_sender, num_unique_senders, selected_metrics, interfaceName);
     }
 
+    // Fill in the rows in the chart
     var rows = [];
     for(var i = 0; i < metric_data.length; i++) {
         var metric = metric_data[i];
@@ -648,19 +587,19 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
     }
 
     if (rows.length > 0) {
+	// Fill in null values by interpolation. Also convert network and CPU from cumulative
+	// values into deltas
 	interpolateColumns(rows, metric_data, data_type);
+
+	// Ensure timestamps always start at 0
 	standardizeTimestamps(rows);
-	// FIXME: Diffing over network needs to be interface-aware!
-	// But by this point, the rows don't have the interface, so how do I diff appropriately?
-	if (data_type ==  'network')
-	    computeDeltas(rows, metric_data, true, data_type);
-	else if (data_type == 'cpu')
-	    computeDeltas(rows, metric_data, false, data_type);
+
+	// Now add the rows to the data table
         data.addRows(rows);
     } else {
         var container = document.getElementById(chartdiv);
         if (container) {
-            $(container).empty(); // Remove the current map
+            $(container).empty(); // Remove the current chart
             $(container).append("<i>No data found</i>");
         }
         return;
@@ -689,11 +628,11 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
     var title_metric = initCase(selected_metrics);
     if (num_metrics == 1 && data_type == 'network') {
 	if (selected_metrics == 'tot_bytes') {
-	    title_metric = 'Total Bytes';
+	    title_metric = 'Total Bytes / Sec';
 	} else if (selected_metrics == 'rx_bytes') {
-	    title_metric = 'RX Bytes';
+	    title_metric = 'RX Bytes / Sec';
 	} else {
-	    title_metric = 'TX Bytes';
+	    title_metric = 'TX Bytes / Sec';
 	}
     }
     if (num_unique_senders == 1 && num_metrics == 1) {
@@ -719,47 +658,89 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
 	title = chartTitle;
     }
 
+    // Set chart options
+
     var xAxisDisplay = 'none';
     var height = '75%';
     if (typeof showXAxis !== 'undefined' && showXAxis !== false) {
+	// If showing the X axis, make chart itself shorter
 	xAxisDisplay = 'out';
 	height = '65%';
     }
 
     var width = '60%';
     if (showLegend === 'none') {
+	// If not showing a legend, make chart itself wider
 	width = '85%';
     }
 
-    // axisTitlesPosition
+    // axisTitlesPosition: default 'out', others: 'in', 'none'
     // vAxis.textPosition
+    // backgroundColor = 'red' or '#00cc00'
+    // Customize chart border:
+    // backgroundColor.stroke = '#666'
+    // backgroundColor.strokeWidth = 0 (pixels)
+    // backgroundColor.fill = 'white' (chart fill color)
+    // colors: array of colors (strings) to use fro chart elements
+    // exlorer: null (set to {} to allow pan&zoom)
+    // explorer.keepInBounds = false; set true to keep users from panning beyond data
+    // fontSize in pixels (ind elements over-ride this)
+    // fontName
     var options = {
 	titleTextStyle: {
 	    fontSize: 16
+	    // color, fontName, bold, italic
 	},
 	vAxis: {
 	    textStyle: {
 		fontSize: 10
+		// color, fontName, bold, italic
 	    },
 	    minValue: 0,
 	    viewWindow: {
 		min: 0
 	    }
+	    // baseline, baselineColor, format
+	    // gridlines: {color, count}
+	    // textPosition = 'out' ('in', 'none')
+	    // title
+	    // titleTextStyle: {color, fontName, fontSize, bold, italic}
 	},
 	title: title,
         chart: {
 	    title: title,
 	},
 	chartArea: {
+	    // Can also supply left, top
+	    // left = 'auto' (or #: dist from left border)
+	    // top = 'auto' (or #: dist from top border)
+	    // backgroundColor = 'white' or {stroke='white', strokeWidth=5 (px)}
 	    height: height,
 	    width: width
 	},
 	legend: {
 	    position: showLegend
+	    // alignment
+	    // textStyle: {color, fontName, fontSize, bold, italic}
 	},
+	explorer: {
+	    keepInBounds: true,
+//	    actions: ['dragToZoom', 'rightClickToReset']
+	},
+	// interpolateNulls = false; set true and remove our interpolation function?
 	hAxis: {
 	    textPosition: xAxisDisplay
+	    // baselineColor to change color of baseline
+	    // format i.e. '#,###%' to write numers as a % with comma for 1000s
+	    // gridlines {color, count, units}
+	    // textStyle: {color, fontName, fontSize, bold, italic}
+	    // title
+	    // titleTextStyle
+	    // viewWindow {max, min}
 	}
+	// lineWidth = 2 (pixels)
+	// pointSize = 0 (pixels)
+	// tooltip: {showColorCode, textStyle: {color, fontName, fontSize, bold, italic}
     };
 
     // To force a graph type to extend up to a particular number (rounded up to next tick mark):
@@ -778,14 +759,17 @@ function computeDeltas(rows, metric_data, compute_rate, data_type) {
                 {v: 400, f: '4'}
             ];
 	} else if (data_type == 'network') {
-	    options.vAxis.maxValue = 10000000000;
+	    options.vAxis.maxValue = 1250000000;
+//	    options.vAxis.maxValue = 250000000;
             options.vAxis.ticks = [
-                {v: 2000000000, f: '2GB'},
-                {v: 4000000000, f: '4GB'},
-                {v: 6000000000, f: '6GB'},
-                {v: 8000000000, f: '8GB'},
-                {v: 10000000000, f: '10GB'}
+                {v: 250000000, f: '2Gb'},
+                {v: 500000000, f: '4Gb'},
+                {v: 750000000, f: '6Gb'},
+                {v: 1000000000, f: '8Gb'},
+                {v: 1250000000, f: '10Gb'}
             ];
+	    var title = options.title;
+	    options.title = title.replace('Bytes', 'Bits');
         }
 	else if (data_type == 'memory')
 	    options.vAxis.maxValue = 100;
