@@ -759,14 +759,20 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
                 {v: 400, f: '4'}
             ];
 	} else if (data_type == 'network') {
-	    options.vAxis.maxValue = 1250000000;
+	    options.vAxis.maxValue = 150000000;
 //	    options.vAxis.maxValue = 250000000;
             options.vAxis.ticks = [
-                {v: 250000000, f: '2Gb'},
-                {v: 500000000, f: '4Gb'},
-                {v: 750000000, f: '6Gb'},
-                {v: 1000000000, f: '8Gb'},
-                {v: 1250000000, f: '10Gb'}
+                {v: 25000000, f: '200Mb'},
+                {v: 50000000, f: '400Mb'},
+                {v: 75000000, f: '600Mb'},
+                {v: 100000000, f: '800Mb'},
+                {v: 125000000, f: '1Gb'},
+                {v: 150000000, f: '1.2Gb'}
+//                {v: 250000000, f: '2Gb'},
+///                {v: 500000000, f: '4Gb'},
+//                {v: 750000000, f: '6Gb'},
+//                {v: 1000000000, f: '8Gb'},
+//                {v: 1250000000, f: '10Gb'}
             ];
 	    var title = options.title;
 	    options.title = title.replace('Bytes', 'Bits');
