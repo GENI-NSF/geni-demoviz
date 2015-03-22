@@ -40,7 +40,8 @@ var options = {
     'title' : 'Response Time (msec)',
     'width' : 400,
     'height' : 300,
-    'vAxis' : { 'minValue' : 0},
+    'vAxis' : { 'viewWindow': {'min' : 0, 'max' : 450 },
+              },
     'legend' : { 'position' : 'none' },
     'chartArea' : { 'width' : '75%' }
 };
