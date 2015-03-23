@@ -47,6 +47,9 @@ function get_rows_for_query($query)
       $pg_error = pg_last_error($dbconn);
        error_log("Failure on query: $query");
        error_log("ERROR = $pg_error");
+       // Better to signal an error to the caller and let it decide
+       // what the right response should be.
+       header('HTTP/1.1 404 Not Found');
        exit;
     }
     while($row = pg_fetch_assoc($result)) {
