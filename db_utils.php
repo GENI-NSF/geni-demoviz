@@ -44,8 +44,9 @@ function get_rows_for_query($query)
     $dbconn = get_connection();
     $result = pg_query($dbconn, $query);
     if (!$result) {
+      $pg_error = pg_last_error($dbconn);
        error_log("Failure on query: $query");
-       error_log("RESULT = " . print_r($result, true));
+       error_log("ERROR = $pg_error");
        exit;
     }
     while($row = pg_fetch_assoc($result)) {
