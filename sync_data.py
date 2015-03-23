@@ -31,7 +31,7 @@ import os
 import sys
 
 # Names of hosts for which there will be files                                                   
-hosts = ['canarie', 'chicago', 'ebi', 'nih', 'starlight'];
+hosts = ['canarie', 'chicago', 'ebi', 'nih', 'starlight', 'oicr'];
 
 # Class to synchronize data                                                                      
 class DataSynchronizer:
