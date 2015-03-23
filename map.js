@@ -117,12 +117,22 @@ gec.maps = {
     },
 
     makeUpdateFunction: function(map, base_name, params) {
+        var that = this;
         return function() {
             $.getJSON('grab_visualization_data.php?base_name=' + base_name,
                       function(data) {
                           gec.maps.updateData(data, map, base_name, params);
                       })
-        };
+                .fail(function( jqxhr, textStatus, error ) {
+                    // Log the error and queue up another data pull in
+                    // the future.  This combats the occasional issue
+                    // retrieving data.
+                    var err = textStatus + ", " + error;
+                    console.log( "Topology update request Failed: " + err )
+                    setTimeout(that.makeUpdateFunction(map, base_name, params),
+                               that.refreshSeconds * 1000);
+                });
+            };
     }
 };
 
@@ -762,6 +772,15 @@ function makeInitFunction(map, base_name, params) {
                   function(data) {
                       gec.maps.initData(data, map, base_name, params);
                   })
+            .fail(function( jqxhr, textStatus, error ) {
+                // Log the error and queue up another data pull in
+                // the future.  This combats the occasional issue
+                // retrieving data.
+                var err = textStatus + ", " + error;
+                console.log( "Topology init request Failed: " + err )
+                setTimeout(makeInitFunction(map, base_name, params),
+                           gec.maps.refreshSeconds * 1000);
+            });
     };
 }
 

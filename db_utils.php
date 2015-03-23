@@ -44,8 +44,12 @@ function get_rows_for_query($query)
     $dbconn = get_connection();
     $result = pg_query($dbconn, $query);
     if (!$result) {
+      $pg_error = pg_last_error($dbconn);
        error_log("Failure on query: $query");
-       error_log("RESULT = " . print_r($result, true));
+       error_log("ERROR = $pg_error");
+       // Better to signal an error to the caller and let it decide
+       // what the right response should be.
+       header('HTTP/1.1 404 Not Found');
        exit;
     }
     while($row = pg_fetch_assoc($result)) {

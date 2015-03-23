@@ -84,9 +84,24 @@ function drawVisualization(data_type, senders, tablename, selected_metrics, char
     }
     $.getJSON(url, 
               function(data) { 
-		  // In the return from the $.getJSON call to grab_metrics_data we plot the data
-		  drawChart(data, senders, selected_metrics, chartdiv, data_type, tablename, showXAxis, seconds, chartTitle, interfaceNames, refreshSeconds); 
-	      });
+		  // In the return from the $.getJSON call to
+		  // grab_metrics_data we plot the data
+		  drawChart(data, senders, selected_metrics, chartdiv,
+                            data_type, tablename, showXAxis, seconds,
+                            chartTitle, interfaceNames, refreshSeconds);
+	      })
+        .fail(function( jqxhr, textStatus, error ) {
+            // Log the error and queue up another data pull in the future.
+            // This combats the occasional issue retrieving data.
+            var err = textStatus + ", " + error;
+            console.log( "Request Failed: " + err )
+            setTimeout(function() {
+                drawVisualization(data_type, senders, tablename,
+                                  selected_metrics, chartdiv, showXAxis,
+                                  seconds, chartTitle, interfaceNames,
+                                  refreshSeconds);
+            }, refreshSeconds * 1000);
+        });
 };
 
 // Add a column for this metric if it is selected
