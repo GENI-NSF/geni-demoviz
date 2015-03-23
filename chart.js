@@ -775,7 +775,7 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 //                {v: 1250000000, f: '10Gb'}
             ];
 	    var title = options.title;
-	    options.title = title.replace('Bytes', 'Bits');
+	    options.title = title.replace('Bytes', 'GBits');
         }
 	else if (data_type == 'memory')
 	    options.vAxis.maxValue = 100;
