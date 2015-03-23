@@ -51,18 +51,18 @@ var label_map = [
     { url: "http://tokyo.gee-project.net",
       name: "U. Tokyo, Japan",
       color: "blue" },
-    { url: "http://nicta.gee-project.net",
-      name: "NICTA, Australia",
-      color: "blue" },
+    //    { url: "http://nicta.gee-project.net",
+    //      name: "NICTA, Australia",
+    //      color: "blue" },
     { url: "http://uvic.gee-project.net",
       name: "UVic, Canada",
       color: "blue" },
     { url: "http://stanford.gee-project.net",
       name: "Stanford, US",
       color: "blue" },
-    { url: "http://tamu.gee-project.net",
-      name: "Texas A&M, US",
-      color: "blue" },
+    //    { url: "http://tamu.gee-project.net",
+    //      name: "Texas A&M, US",
+    //      color: "blue" },
     { url: "http://maxgigapop.gee-project.net",
       name: "MAX, US",
       color: "green" },
@@ -133,7 +133,7 @@ function drawVisualization() {
         var data = google.visualization.arrayToDataTable(rows);
         // Redraw the same chart with new data
         chart.draw(data, options);
-        setTimeout(drawVisualization, 5000);
+        setTimeout(drawVisualization, 20000);
         
     });
 
