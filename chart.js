@@ -794,7 +794,36 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
         }
 	else if (data_type == 'memory')
 	    options.vAxis.maxValue = 100;
+    } else if (basename == 'science_dmz') { // Special bounds for Ilya
+	if (data_type == 'network') {
+	    var title = options.title;
+	    title = title.replace('Network', 'GBits/Sec');
+	    title = title.replace('bytes / sec', 'GBits/Sec')
+	    title = title.replace(/eth.(, eth.)+/g, '');
+	    options.title = title;
+//	    var vaxis = options.vAxis;
+//	    vaxis.title = 'bps';
+//	    vaxis.textPosition = 'in';
+//	    options.vAxis = vaxis;
+	    options.vAxis.maxValue = 375000000;
+//	    options.vAxis.maxValue = 250000000;
+            options.vAxis.ticks = [
+                {v: 62500000, f: '0.5'},
+                {v: 125000000, f: '1Gb'},
+                {v: 187500000, f: '1.5'},
+                {v: 250000000, f: '2Gb'},
+                {v: 312500000, f: '2.5'},
+                {v: 375000000, f: '3Gb'}
+	    ];
+	    options.legend = {
+		position: 'in',
+		alignment: 'center'
+		// alignment
+	    };
+	    options.chartArea.width = '85%';
+	}
     }
+
 
     var container = document.getElementById(chartdiv);
     if (container) {
