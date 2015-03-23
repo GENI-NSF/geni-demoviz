@@ -797,8 +797,8 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
     } else if (basename == 'science_dmz') { // Special bounds for Ilya
 	if (data_type == 'network') {
 	    var title = options.title;
-	    title = title.replace('Network', 'GBits/Sec');
-	    title = title.replace('bytes / sec', 'GBits/Sec')
+	    title = title.replace('Network', 'Gbits/Sec');
+	    title = title.replace('bytes / sec', 'Gbits/Sec')
 	    title = title.replace(/eth.(, eth.)+/g, '');
 	    options.title = title;
 //	    var vaxis = options.vAxis;
