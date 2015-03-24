@@ -798,6 +798,7 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 	if (data_type == 'network') {
 	    var title = options.title;
 	    title = title.replace('Network', 'Gbits/Sec');
+	    title = title.replace('total', 'Total');
 	    title = title.replace('bytes / sec', 'Gbits/Sec')
 	    title = title.replace(/eth.(, eth.)+/g, '');
 	    options.title = title;
@@ -806,7 +807,6 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
 //	    vaxis.textPosition = 'in';
 //	    options.vAxis = vaxis;
 	    options.vAxis.maxValue = 375000000;
-//	    options.vAxis.maxValue = 250000000;
             options.vAxis.ticks = [
                 {v: 62500000, f: '0.5'},
                 {v: 125000000, f: '1Gb'},
@@ -815,15 +815,15 @@ function drawChart(metric_data, senders, selected_metrics, chartdiv, data_type, 
                 {v: 312500000, f: '2.5'},
                 {v: 375000000, f: '3Gb'}
 	    ];
-	    options.legend = {
-		position: 'in',
-		alignment: 'center'
-		// alignment
-	    };
+	    if (showLegend !== 'none') {
+		options.legend = {
+		    position: 'in',
+		    alignment: 'center'
+		};
+	    }
 	    options.chartArea.width = '85%';
 	}
     }
-
 
     var container = document.getElementById(chartdiv);
     if (container) {
