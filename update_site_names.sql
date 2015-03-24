@@ -31,7 +31,7 @@ id  |                                    am_urn                                 
  280 | urn:publicid:IDN+instageni.northwestern.edu+authority+cm                     | Northwestern InstaGENI                   |    -87.62 |     41.9 | 
  281 | urn:publicid:IDN+utah.geniracks.net+authority+cm                             | Utah InstaGENI                           |   -111.85 |    40.77 | 
  286 | urn:publicid:IDN+instageni.rutgers.edu+authority+cm                          | Rutgers InstaGENI                        |    -74.45 |    40.47 | 
- 317 |                                                                              | EMBL-European Biometrics Institude       |     0.186 |    52.08 | /common/dataset_ebi.png
+ 317 |                                                                              | EMBL-European Bioinformatics Institute   |     0.186 |    52.08 | /common/dataset_ebi.png
  239 | urn:publicid:IDN+utah.cloudlab.us+authority+cm                               | Utah CloudLab                            |   -111.89 |    40.75 | /common/Cloudlab-small-logo.jpeg
  248 | urn:publicid:IDN+exogeni.net:wvnvmsite+authority+am                          | WVNET ExoGENI                            |    -78.68 |    35.77 | /common/wvnet-logo.jpg
  291 | urn:publicid:IDN+instageni.nps.edu+authority+cm                              | NPS InstaGENI                            |   -121.87 |     36.6 | 

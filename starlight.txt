@@ -1,5 +1,5 @@
 insert into allsites (am_urn, am_name, longitude, latitude)
-       values ('', 'EMBL-European Biometrics Institude', 0.186, 52.08); -- 317
+       values ('', 'EMBL-European Bioinformatics Institute', 0.186, 52.08); -- 317
 insert into allsites (am_urn, am_name, longitude, latitude)
        values ('', 'CANARIE', -75.69, 45.42); -- 318
 insert into allsites (am_urn, am_name, longitude, latitude)
