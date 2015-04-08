@@ -86,3 +86,20 @@ Add this line after [postgreSQL]
 extension=php_pgsql.dll
 
 sudo service apache2 restart
+
+
+-------
+
+MISCELLANEOUS Notes
+
+1. Absolute and relative times.
+
+The times in the oml_client_ts and oml_server_ts are all relative times
+to the start of the oml instance (the whole database).
+
+To get that start time (Unix seconds since 1970), do the following query:
+
+select value from _experiment_metadata where key ='start_time';
+
+And then add that to all times to get the absolute (Unix) time.
+
